@@ -97,7 +97,11 @@ const initChart = () => {
 const updateData = () => {
   if (!candlestickSeries || !ma5Series || !ma20Series) return;
 
-  candlestickSeries.setData(store.candlestickData as any);
+  // Check if we have data
+  const data = store.candlestickData;
+  if (!data || data.length === 0) return;
+
+  candlestickSeries.setData(data as any);
   ma5Series.setData(store.ma5Data as any);
   ma20Series.setData(store.ma20Data as any);
 
@@ -110,10 +114,12 @@ const updateData = () => {
 // Watch for data changes
 watch(
   () => store.candlestickData,
-  () => {
-    updateData();
+  (newData) => {
+    if (newData && newData.length > 0) {
+      updateData();
+    }
   },
-  { deep: true }
+  { deep: true, immediate: true }
 );
 
 onMounted(() => {

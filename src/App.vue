@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import type { IChartApi, MouseEventParams } from 'lightweight-charts';
 import { useStockStore } from './stores/stockStore';
 import { useChartSync } from './composables/useChartSync';
@@ -7,9 +7,11 @@ import SearchBar from './components/SearchBar.vue';
 import KLineChart from './components/KLineChart.vue';
 import VolumeChart from './components/VolumeChart.vue';
 import KDChart from './components/KDChart.vue';
+import AlphaPickPanel from './components/AlphaPickPanel.vue';
 
 const store = useStockStore();
 const { addChart, syncCrosshair } = useChartSync();
+const showAlphaPick = ref(false);
 
 // Computed for latest stock data
 const latestData = computed(() => {
@@ -64,6 +66,27 @@ onMounted(() => {
       </div>
 
       <div class="flex items-center gap-4">
+        <!-- API Source Toggle -->
+        <select 
+          v-model="store.apiSource" 
+          @change="store.fetchStockData(store.stockId)"
+          class="bg-[#333] text-white text-xs px-2 py-1 rounded border border-[#444]"
+        >
+          <option value="darvish">DarvishSignal</option>
+          <option value="finmind">FinMind</option>
+        </select>
+        
+        <!-- Alpha Pick Toggle -->
+        <button 
+          @click="showAlphaPick = !showAlphaPick"
+          :class="[
+            'px-3 py-1 text-xs rounded transition-colors',
+            showAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
+          ]"
+        >
+          🎯 Alpha Pick
+        </button>
+        
         <!-- Current Stock Info -->
         <div v-if="latestData" class="flex items-center gap-2 text-sm">
           <span class="text-[#3b82f6] font-medium">{{ store.stockId }}</span>
@@ -84,7 +107,17 @@ onMounted(() => {
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col overflow-hidden">
+    <main class="flex-1 flex overflow-hidden">
+      <!-- Alpha Pick Panel (Left Sidebar) -->
+      <div 
+        v-if="showAlphaPick" 
+        class="w-80 border-r border-[#333] overflow-y-auto"
+      >
+        <AlphaPickPanel />
+      </div>
+
+      <!-- Charts Area -->
+      <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Error Message -->
       <div
         v-if="store.error"
@@ -148,6 +181,7 @@ onMounted(() => {
             :on-crosshair-move="handleCrosshairMove"
           />
         </div>
+      </div>
       </div>
     </main>
   </div>
