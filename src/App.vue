@@ -7,6 +7,9 @@ import SearchBar from './components/SearchBar.vue';
 import KLineChart from './components/KLineChart.vue';
 import VolumeChart from './components/VolumeChart.vue';
 import KDChart from './components/KDChart.vue';
+import RSIChart from './components/RSIChart.vue';
+import MACDChart from './components/MACDChart.vue';
+import BollingerChart from './components/BollingerChart.vue';
 import AlphaPickPanel from './components/AlphaPickPanel.vue';
 
 const store = useStockStore();
@@ -37,9 +40,9 @@ const priceChange = computed(() => {
   };
 });
 
-// Handle chart ready events
-const handleChartReady = (chart: IChartApi) => {
-  addChart(chart);
+// Handle chart ready events - pass both chart and main series for crosshair sync
+const handleChartReady = (chart: IChartApi, series?: any) => {
+  addChart(chart, series);
 };
 
 // Handle crosshair move
@@ -70,7 +73,7 @@ onMounted(() => {
         <button
           @click="showAlphaPick = !showAlphaPick"
           :class="[
-            'px-3 py-1 text-xs rounded transition-colors',
+            'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
             showAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
           ]"
         >
@@ -147,26 +150,50 @@ onMounted(() => {
       </div>
 
       <!-- Charts Container -->
-      <div v-else class="flex-1 flex flex-col p-4 gap-1">
-        <!-- K-Line Chart (50%) -->
-        <div class="h-[50%] border border-[#333] rounded-lg overflow-hidden">
+      <div v-else class="flex-1 flex flex-col p-4 gap-1 overflow-y-auto">
+        <!-- K-Line Chart (main chart) -->
+        <div class="min-h-[280px] h-[35%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
           <KLineChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
           />
         </div>
 
-        <!-- Volume Chart (25%) -->
-        <div class="h-[25%] border border-[#333] rounded-lg overflow-hidden">
+        <!-- Volume Chart -->
+        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
           <VolumeChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
           />
         </div>
 
-        <!-- KD Chart (25%) -->
-        <div class="h-[25%] border border-[#333] rounded-lg overflow-hidden">
+        <!-- MACD Chart -->
+        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+          <MACDChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+          />
+        </div>
+
+        <!-- KD Chart -->
+        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
           <KDChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+          />
+        </div>
+
+        <!-- RSI Chart -->
+        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+          <RSIChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+          />
+        </div>
+
+        <!-- Bollinger %B Chart -->
+        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+          <BollingerChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
           />

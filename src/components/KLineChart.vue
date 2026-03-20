@@ -5,13 +5,26 @@ import type { IChartApi, ISeriesApi } from 'lightweight-charts';
 import { useStockStore } from '../stores/stockStore';
 
 const props = defineProps<{
-  onChartReady?: (chart: IChartApi) => void;
+  onChartReady?: (chart: IChartApi, series: any) => void;
   onCrosshairMove?: (chart: IChartApi, param: any) => void;
 }>();
 
 const store = useStockStore();
 const chartContainer = ref<HTMLElement | null>(null);
 let chart: IChartApi | null = null;
+
+// Crosshair tooltip
+const tooltipVisible = ref(false);
+const tooltipX = ref(0);
+const tooltipY = ref(0);
+const hoverData = ref<{
+  open: number | null;
+  high: number | null;
+  low: number | null;
+  close: number | null;
+  ma5: number | null;
+  ma20: number | null;
+} | null>(null);
 let candlestickSeries: ISeriesApi<'Candlestick'> | null = null;
 let ma5Series: ISeriesApi<'Line'> | null = null;
 let ma20Series: ISeriesApi<'Line'> | null = null;
@@ -31,16 +44,32 @@ const initChart = () => {
       horzLines: { color: '#1a1a1a' }
     },
     crosshair: {
-      mode: CrosshairMode.Normal
+      mode: CrosshairMode.Normal,
+      vertLine: {
+        width: 1,
+        color: '#505050',
+        style: 0, // Solid line
+        labelVisible: false,
+        labelBackgroundColor: '#3b82f6'
+      },
+      horzLine: {
+        width: 1,
+        color: '#505050',
+        style: 0,
+        labelVisible: true,
+        labelBackgroundColor: '#3b82f6'
+      }
     },
     rightPriceScale: {
       borderColor: '#333',
-      minimumWidth: 60 // 設定右側價格軸最小寬度，以解決對齊問題
+      minimumWidth: 80 // 設定較大的最小寬度以確保所有圖表對齊
     },
     timeScale: {
       borderColor: '#333',
       timeVisible: true,
-      secondsVisible: false
+      secondsVisible: false,
+      barSpacing: 8,
+      minBarSpacing: 4
     }
   });
 
@@ -71,10 +100,32 @@ const initChart = () => {
     if (props.onCrosshairMove && chart) {
       props.onCrosshairMove(chart, param);
     }
+    // Update hover data and tooltip position
+    if (param.time && param.point && candlestickSeries && ma5Series && ma20Series) {
+      const ohlc = param.seriesData.get(candlestickSeries) as any;
+      const ma5Val = param.seriesData.get(ma5Series) as any;
+      const ma20Val = param.seriesData.get(ma20Series) as any;
+      if (ohlc) {
+        hoverData.value = {
+          open: ohlc.open ?? null,
+          high: ohlc.high ?? null,
+          low: ohlc.low ?? null,
+          close: ohlc.close ?? null,
+          ma5: ma5Val?.value ?? null,
+          ma20: ma20Val?.value ?? null
+        };
+        tooltipVisible.value = true;
+        tooltipX.value = param.point.x;
+        tooltipY.value = param.point.y;
+      }
+    } else {
+      hoverData.value = null;
+      tooltipVisible.value = false;
+    }
   });
 
-  if (props.onChartReady) {
-    props.onChartReady(chart);
+  if (props.onChartReady && candlestickSeries) {
+    props.onChartReady(chart, candlestickSeries);
   }
 
   const resizeObserver = new ResizeObserver(() => {
@@ -155,15 +206,39 @@ defineExpose({
 </script>
 
 <template>
-  <div class="relative w-full h-full">
+  <div class="relative w-full h-full overflow-hidden">
     <div ref="chartContainer" class="w-full h-full"></div>
-    <!-- Legend -->
-    <div class="absolute top-2 left-2 flex gap-4 text-xs">
+
+    <!-- Fixed Title -->
+    <div class="absolute top-1 left-1 z-10 flex items-center gap-2 text-xs bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded">
+      <span class="text-white font-bold">K線圖</span>
       <span class="text-[#f59e0b]">MA5</span>
       <span class="text-[#8b5cf6]">MA20</span>
-      <span class="text-[#FFD700]">▲ 買入</span>
-      <span class="text-[#E040FB]">▼ 賣出</span>
-      <span v-if="store.isLoadingMarkers" class="text-[#666]">載入訊號中...</span>
+      <span class="text-[#FFD700]">▲買</span>
+      <span class="text-[#E040FB]">▼賣</span>
+      <span v-if="store.isLoadingMarkers" class="text-[#666]">載入中...</span>
+    </div>
+
+    <!-- Floating Tooltip -->
+    <div
+      v-if="tooltipVisible && hoverData"
+      class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-2 py-1 text-xs z-50 whitespace-nowrap"
+      :style="{ left: tooltipX + 15 + 'px', top: tooltipY + 15 + 'px' }"
+    >
+      <div class="flex flex-col gap-0.5">
+        <div class="flex gap-2">
+          <span class="text-[#888]">開</span><span class="text-white">{{ hoverData.open?.toFixed(2) }}</span>
+          <span class="text-[#888]">高</span><span class="text-[#26a69a]">{{ hoverData.high?.toFixed(2) }}</span>
+        </div>
+        <div class="flex gap-2">
+          <span class="text-[#888]">低</span><span class="text-[#ef5350]">{{ hoverData.low?.toFixed(2) }}</span>
+          <span class="text-[#888]">收</span><span class="text-white">{{ hoverData.close?.toFixed(2) }}</span>
+        </div>
+        <div class="flex gap-2 border-t border-[#333] pt-0.5 mt-0.5">
+          <span class="text-[#f59e0b]">MA5 {{ hoverData.ma5?.toFixed(2) ?? '-' }}</span>
+          <span class="text-[#8b5cf6]">MA20 {{ hoverData.ma20?.toFixed(2) ?? '-' }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>

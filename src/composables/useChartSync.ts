@@ -9,7 +9,7 @@ interface ChartWithSeries {
 /**
  * Composable for synchronizing multiple charts
  * - Time scale sync: zoom and pan
- * - Crosshair sync: hover position
+ * - Crosshair sync: hover position (vertical line alignment)
  */
 export function useChartSync() {
   const chartData = ref<ChartWithSeries[]>([]);
@@ -20,6 +20,14 @@ export function useChartSync() {
     if (!exists) {
       chartData.value.push({ chart, series: series ?? null });
       setupTimeScaleSync(chart);
+    }
+  };
+
+  // Update series for existing chart (needed for crosshair sync)
+  const updateChartSeries = (chart: IChartApi, series: ISeriesApi<SeriesType>) => {
+    const chartEntry = chartData.value.find(cd => cd.chart === chart);
+    if (chartEntry) {
+      chartEntry.series = series;
     }
   };
 
@@ -56,7 +64,8 @@ export function useChartSync() {
     chartData.value.forEach((cd) => {
       if (cd.chart !== sourceChart) {
         if (param.time && cd.series) {
-          cd.chart.setCrosshairPosition(param.point?.x ?? 0, param.time, cd.series);
+          // Use setCrosshairPosition with price=0 to just show vertical line
+          cd.chart.setCrosshairPosition(0, param.time, cd.series);
         } else {
           cd.chart.clearCrosshairPosition();
         }
@@ -79,6 +88,7 @@ export function useChartSync() {
   return {
     charts: chartData,
     addChart,
+    updateChartSeries,
     removeChart,
     syncCrosshair,
     clearAllCrosshairs

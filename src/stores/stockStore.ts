@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData } from '../types';
+import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
 import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock } from '../api/stockApi';
 
@@ -84,6 +84,11 @@ export const useStockStore = defineStore('stock', () => {
     return indicators.value?.kd ?? [];
   });
 
+  // API-provided indicators (computed from raw stockData with API fields)
+  const rsiData = ref<RSIData[]>([]);
+  const macdData = ref<MACDData[]>([]);
+  const bollingerData = ref<BollingerData[]>([]);
+
   // Actions
   const fetchStockData = async (id: string, startDate?: string) => {
     isLoading.value = true;
@@ -105,6 +110,29 @@ export const useStockStore = defineStore('stock', () => {
         }));
         stockId.value = id;
         indicators.value = computeIndicators(stockData.value);
+
+        // Extract API-provided indicators
+        rsiData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          rsi9: item.rsi_9 ?? null,
+          rsi14: item.rsi_14 ?? null
+        }));
+
+        macdData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          macd: item.macd ?? null,
+          signal: item.macd_signal ?? null,
+          histogram: item.macd_hist ?? null
+        }));
+
+        bollingerData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          upper: item.bb_upper ?? null,
+          middle: item.bb_middle ?? null,
+          lower: item.bb_lower ?? null,
+          percentB: item.bb_percent_b ?? null
+        }));
+
         // Fetch signal markers in background
         fetchSignalMarkers(id);
       } catch (err) {
@@ -268,6 +296,9 @@ export const useStockStore = defineStore('stock', () => {
     ma5Data,
     ma20Data,
     kdData,
+    rsiData,
+    macdData,
+    bollingerData,
     // Actions
     fetchStockData,
     searchStock,

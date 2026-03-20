@@ -56,7 +56,7 @@ const handleKeydown = (e: KeyboardEvent) => {
       :disabled="store.isLoading"
       class="px-4 py-2 bg-[#3b82f6] hover:bg-[#2563eb] disabled:bg-[#1e40af] disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
     >
-      Search
+      搜尋
     </button>
   </div>
 </template>

@@ -21,6 +21,27 @@ export interface KDData {
   d: number;
 }
 
+export interface RSIData {
+  time: string;
+  rsi9: number | null;
+  rsi14: number | null;
+}
+
+export interface MACDData {
+  time: string;
+  macd: number | null;
+  signal: number | null;
+  histogram: number | null;
+}
+
+export interface BollingerData {
+  time: string;
+  upper: number | null;
+  middle: number | null;
+  lower: number | null;
+  percentB: number | null;
+}
+
 // FinMind API response
 export interface FinMindResponse {
   msg: string;

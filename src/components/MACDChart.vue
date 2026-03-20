@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { createChart, LineSeries, CrosshairMode } from 'lightweight-charts';
+import { createChart, LineSeries, HistogramSeries, CrosshairMode } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi } from 'lightweight-charts';
 import { useStockStore } from '../stores/stockStore';
 
@@ -12,15 +12,17 @@ const props = defineProps<{
 const store = useStockStore();
 const chartContainer = ref<HTMLElement | null>(null);
 let chart: IChartApi | null = null;
-let kSeries: ISeriesApi<'Line'> | null = null;
-let dSeries: ISeriesApi<'Line'> | null = null;
+let macdSeries: ISeriesApi<'Line'> | null = null;
+let signalSeries: ISeriesApi<'Line'> | null = null;
+let histogramSeries: ISeriesApi<'Histogram'> | null = null;
 
 // Crosshair tooltip
 const tooltipVisible = ref(false);
 const tooltipX = ref(0);
 const tooltipY = ref(0);
-const hoverK = ref<number | null>(null);
-const hoverD = ref<number | null>(null);
+const hoverMacd = ref<number | null>(null);
+const hoverSignal = ref<number | null>(null);
+const hoverHist = ref<number | null>(null);
 
 const initChart = () => {
   if (!chartContainer.value) return;
@@ -68,49 +70,55 @@ const initChart = () => {
     }
   });
 
-  // Add K line series
-  kSeries = chart.addSeries(LineSeries, {
+  // MACD histogram (bars)
+  histogramSeries = chart.addSeries(HistogramSeries, {
+    priceLineVisible: false,
+    lastValueVisible: false
+  });
+
+  // MACD line
+  macdSeries = chart.addSeries(LineSeries, {
     color: '#3b82f6',
     lineWidth: 1,
     priceLineVisible: false,
     lastValueVisible: false
   });
 
-  // Add D line series
-  dSeries = chart.addSeries(LineSeries, {
+  // Signal line
+  signalSeries = chart.addSeries(LineSeries, {
     color: '#f59e0b',
     lineWidth: 1,
     priceLineVisible: false,
     lastValueVisible: false
   });
 
-  // Subscribe to crosshair move
   chart.subscribeCrosshairMove((param) => {
     if (props.onCrosshairMove && chart) {
       props.onCrosshairMove(chart, param);
     }
     // Update hover values and tooltip position
-    if (param.time && param.point && kSeries && dSeries) {
-      const kVal = param.seriesData.get(kSeries) as any;
-      const dVal = param.seriesData.get(dSeries) as any;
-      hoverK.value = kVal?.value ?? null;
-      hoverD.value = dVal?.value ?? null;
+    if (param.time && param.point && macdSeries && signalSeries && histogramSeries) {
+      const macdVal = param.seriesData.get(macdSeries) as any;
+      const signalVal = param.seriesData.get(signalSeries) as any;
+      const histVal = param.seriesData.get(histogramSeries) as any;
+      hoverMacd.value = macdVal?.value ?? null;
+      hoverSignal.value = signalVal?.value ?? null;
+      hoverHist.value = histVal?.value ?? null;
       tooltipVisible.value = true;
       tooltipX.value = param.point.x;
       tooltipY.value = param.point.y;
     } else {
-      hoverK.value = null;
-      hoverD.value = null;
+      hoverMacd.value = null;
+      hoverSignal.value = null;
+      hoverHist.value = null;
       tooltipVisible.value = false;
     }
   });
 
-  // Notify parent that chart is ready with series for crosshair sync
-  if (props.onChartReady && kSeries) {
-    props.onChartReady(chart, kSeries);
+  if (props.onChartReady && macdSeries) {
+    props.onChartReady(chart, macdSeries);
   }
 
-  // Handle resize
   const resizeObserver = new ResizeObserver(() => {
     if (chart && chartContainer.value) {
       chart.applyOptions({
@@ -121,23 +129,35 @@ const initChart = () => {
   });
   resizeObserver.observe(chartContainer.value);
 
-  // Load initial data
   updateData();
 };
 
 const updateData = () => {
-  if (!kSeries || !dSeries) return;
+  if (!macdSeries || !signalSeries || !histogramSeries) return;
 
-  const kData = store.kdData.map((d) => ({ time: d.time, value: d.k }));
-  const dData = store.kdData.map((d) => ({ time: d.time, value: d.d }));
+  const macdLineData = store.macdData
+    .filter((d) => d.macd !== null)
+    .map((d) => ({ time: d.time, value: d.macd as number }));
 
-  kSeries.setData(kData as any);
-  dSeries.setData(dData as any);
+  const signalLineData = store.macdData
+    .filter((d) => d.signal !== null)
+    .map((d) => ({ time: d.time, value: d.signal as number }));
+
+  const histData = store.macdData
+    .filter((d) => d.histogram !== null)
+    .map((d) => ({
+      time: d.time,
+      value: d.histogram as number,
+      color: (d.histogram as number) >= 0 ? '#26a69a' : '#ef5350'
+    }));
+
+  macdSeries.setData(macdLineData as any);
+  signalSeries.setData(signalLineData as any);
+  histogramSeries.setData(histData as any);
 };
 
-// Watch for data changes
 watch(
-  () => store.kdData,
+  () => store.macdData,
   () => {
     updateData();
   },
@@ -155,7 +175,6 @@ onUnmounted(() => {
   }
 });
 
-// Expose chart for external access
 defineExpose({
   getChart: () => chart
 });
@@ -167,19 +186,23 @@ defineExpose({
 
     <!-- Fixed Title -->
     <div class="absolute top-1 left-1 z-10 flex items-center gap-2 text-xs bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded">
-      <span class="text-white font-bold">KD</span>
-      <span class="text-[#3b82f6]">K</span>
-      <span class="text-[#f59e0b]">D</span>
+      <span class="text-white font-bold">MACD</span>
+      <span class="text-[#3b82f6]">DIF</span>
+      <span class="text-[#f59e0b]">DEA</span>
+      <span class="text-[#888]">柱</span>
     </div>
 
     <!-- Floating Tooltip -->
     <div
-      v-if="tooltipVisible && (hoverK !== null || hoverD !== null)"
+      v-if="tooltipVisible && (hoverMacd !== null || hoverSignal !== null)"
       class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-2 py-1 text-xs z-50"
       :style="{ left: tooltipX + 15 + 'px', top: tooltipY + 15 + 'px' }"
     >
-      <span class="text-[#3b82f6]">K {{ hoverK?.toFixed(2) ?? '-' }}</span>
-      <span class="text-[#f59e0b] ml-2">D {{ hoverD?.toFixed(2) ?? '-' }}</span>
+      <span class="text-[#3b82f6]">DIF {{ hoverMacd?.toFixed(2) ?? '-' }}</span>
+      <span class="text-[#f59e0b] ml-2">DEA {{ hoverSignal?.toFixed(2) ?? '-' }}</span>
+      <span :class="hoverHist !== null && hoverHist >= 0 ? 'text-[#26a69a]' : 'text-[#ef5350]'" class="ml-2">
+        柱 {{ hoverHist?.toFixed(2) ?? '-' }}
+      </span>
     </div>
   </div>
 </template>

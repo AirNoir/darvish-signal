@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { createChart, HistogramSeries, CrosshairMode } from 'lightweight-charts';
+import { createChart, LineSeries, CrosshairMode } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi } from 'lightweight-charts';
 import { useStockStore } from '../stores/stockStore';
 
@@ -12,17 +12,13 @@ const props = defineProps<{
 const store = useStockStore();
 const chartContainer = ref<HTMLElement | null>(null);
 let chart: IChartApi | null = null;
-let volumeSeries: ISeriesApi<'Histogram'> | null = null;
+let percentBSeries: ISeriesApi<'Line'> | null = null;
 
 // Crosshair tooltip
 const tooltipVisible = ref(false);
 const tooltipX = ref(0);
 const tooltipY = ref(0);
-const hoverVolume = ref<number | null>(null);
-
-const formatVolume = (vol: number) => {
-  return vol.toLocaleString();
-};
+const hoverPercentB = ref<number | null>(null);
 
 const initChart = () => {
   if (!chartContainer.value) return;
@@ -57,50 +53,48 @@ const initChart = () => {
       borderColor: '#333',
       scaleMargins: {
         top: 0.1,
-        bottom: 0
+        bottom: 0.1
       },
       minimumWidth: 80 // 設定較大的最小寬度以確保所有圖表對齊
     },
     timeScale: {
       borderColor: '#333',
-      visible: true,
+      timeVisible: true,
+      secondsVisible: false,
       barSpacing: 8,
       minBarSpacing: 4
     }
   });
 
-  // Add volume histogram series
-  volumeSeries = chart.addSeries(HistogramSeries, {
-    priceFormat: {
-      type: 'volume'
-    },
-    priceScaleId: 'right'
+  // Bollinger %B line
+  percentBSeries = chart.addSeries(LineSeries, {
+    color: '#a855f7',
+    lineWidth: 1,
+    priceLineVisible: false,
+    lastValueVisible: false
   });
 
-  // Subscribe to crosshair move
   chart.subscribeCrosshairMove((param) => {
     if (props.onCrosshairMove && chart) {
       props.onCrosshairMove(chart, param);
     }
     // Update hover value and tooltip position
-    if (param.time && param.point && volumeSeries) {
-      const volData = param.seriesData.get(volumeSeries) as any;
-      hoverVolume.value = volData?.value ?? null;
+    if (param.time && param.point && percentBSeries) {
+      const val = param.seriesData.get(percentBSeries) as any;
+      hoverPercentB.value = val?.value ?? null;
       tooltipVisible.value = true;
       tooltipX.value = param.point.x;
       tooltipY.value = param.point.y;
     } else {
-      hoverVolume.value = null;
+      hoverPercentB.value = null;
       tooltipVisible.value = false;
     }
   });
 
-  // Notify parent that chart is ready with series for crosshair sync
-  if (props.onChartReady && volumeSeries) {
-    props.onChartReady(chart, volumeSeries);
+  if (props.onChartReady && percentBSeries) {
+    props.onChartReady(chart, percentBSeries);
   }
 
-  // Handle resize
   const resizeObserver = new ResizeObserver(() => {
     if (chart && chartContainer.value) {
       chart.applyOptions({
@@ -111,18 +105,21 @@ const initChart = () => {
   });
   resizeObserver.observe(chartContainer.value);
 
-  // Load initial data
   updateData();
 };
 
 const updateData = () => {
-  if (!volumeSeries) return;
-  volumeSeries.setData(store.volumeData as any);
+  if (!percentBSeries) return;
+
+  const percentBData = store.bollingerData
+    .filter((d) => d.percentB !== null)
+    .map((d) => ({ time: d.time, value: d.percentB as number }));
+
+  percentBSeries.setData(percentBData as any);
 };
 
-// Watch for data changes
 watch(
-  () => store.volumeData,
+  () => store.bollingerData,
   () => {
     updateData();
   },
@@ -140,7 +137,6 @@ onUnmounted(() => {
   }
 });
 
-// Expose chart for external access
 defineExpose({
   getChart: () => chart
 });
@@ -151,17 +147,18 @@ defineExpose({
     <div ref="chartContainer" class="w-full h-full"></div>
 
     <!-- Fixed Title -->
-    <div class="absolute top-1 left-1 z-10 text-xs bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded">
-      <span class="text-white font-bold">成交量</span>
+    <div class="absolute top-1 left-1 z-10 flex items-center gap-2 text-xs bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded">
+      <span class="text-white font-bold">BOLL</span>
+      <span class="text-[#a855f7]">%B</span>
     </div>
 
     <!-- Floating Tooltip -->
     <div
-      v-if="tooltipVisible && hoverVolume !== null"
+      v-if="tooltipVisible && hoverPercentB !== null"
       class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-2 py-1 text-xs z-50"
       :style="{ left: tooltipX + 15 + 'px', top: tooltipY + 15 + 'px' }"
     >
-      <span class="text-[#26a69a]">{{ formatVolume(hoverVolume) }}</span>
+      <span class="text-[#a855f7]">%B {{ hoverPercentB.toFixed(2) }}</span>
     </div>
   </div>
 </template>
