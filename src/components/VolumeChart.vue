@@ -34,11 +34,12 @@ const initChart = () => {
       scaleMargins: {
         top: 0.1,
         bottom: 0
-      }
+      },
+      minimumWidth: 60 // 設定右側價格軸最小寬度，以解決對齊問題
     },
     timeScale: {
       borderColor: '#333',
-      visible: false // Hide time scale since it syncs with main chart
+      visible: true // 讓時間軸可見以幫助同步
     }
   });
 

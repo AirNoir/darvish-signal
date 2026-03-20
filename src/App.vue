@@ -66,25 +66,15 @@ onMounted(() => {
       </div>
 
       <div class="flex items-center gap-4">
-        <!-- API Source Toggle -->
-        <select 
-          v-model="store.apiSource" 
-          @change="store.fetchStockData(store.stockId)"
-          class="bg-[#333] text-white text-xs px-2 py-1 rounded border border-[#444]"
-        >
-          <option value="darvish">DarvishSignal</option>
-          <option value="finmind">FinMind</option>
-        </select>
-        
-        <!-- Alpha Pick Toggle -->
-        <button 
+        <!-- Alpha Signal Toggle -->
+        <button
           @click="showAlphaPick = !showAlphaPick"
           :class="[
             'px-3 py-1 text-xs rounded transition-colors',
             showAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
           ]"
         >
-          🎯 Alpha Pick
+          📊 Alpha 訊號
         </button>
         
         <!-- Current Stock Info -->

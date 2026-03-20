@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { createChart, CandlestickSeries, LineSeries, CrosshairMode } from 'lightweight-charts';
+import { createChart, CandlestickSeries, LineSeries, CrosshairMode, createSeriesMarkers } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi } from 'lightweight-charts';
 import { useStockStore } from '../stores/stockStore';
 
@@ -15,6 +15,8 @@ let chart: IChartApi | null = null;
 let candlestickSeries: ISeriesApi<'Candlestick'> | null = null;
 let ma5Series: ISeriesApi<'Line'> | null = null;
 let ma20Series: ISeriesApi<'Line'> | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let markersPlugin: any = null;
 
 const initChart = () => {
   if (!chartContainer.value) return;
@@ -32,7 +34,8 @@ const initChart = () => {
       mode: CrosshairMode.Normal
     },
     rightPriceScale: {
-      borderColor: '#333'
+      borderColor: '#333',
+      minimumWidth: 60 // 設定右側價格軸最小寬度，以解決對齊問題
     },
     timeScale: {
       borderColor: '#333',
@@ -41,7 +44,6 @@ const initChart = () => {
     }
   });
 
-  // Add candlestick series
   candlestickSeries = chart.addSeries(CandlestickSeries, {
     upColor: '#26a69a',
     downColor: '#ef5350',
@@ -51,7 +53,6 @@ const initChart = () => {
     wickDownColor: '#ef5350'
   });
 
-  // Add MA5 series
   ma5Series = chart.addSeries(LineSeries, {
     color: '#f59e0b',
     lineWidth: 1,
@@ -59,7 +60,6 @@ const initChart = () => {
     lastValueVisible: false
   });
 
-  // Add MA20 series
   ma20Series = chart.addSeries(LineSeries, {
     color: '#8b5cf6',
     lineWidth: 1,
@@ -67,19 +67,16 @@ const initChart = () => {
     lastValueVisible: false
   });
 
-  // Subscribe to crosshair move
   chart.subscribeCrosshairMove((param) => {
     if (props.onCrosshairMove && chart) {
       props.onCrosshairMove(chart, param);
     }
   });
 
-  // Notify parent that chart is ready
   if (props.onChartReady) {
     props.onChartReady(chart);
   }
 
-  // Handle resize
   const resizeObserver = new ResizeObserver(() => {
     if (chart && chartContainer.value) {
       chart.applyOptions({
@@ -90,36 +87,55 @@ const initChart = () => {
   });
   resizeObserver.observe(chartContainer.value);
 
-  // Load initial data
   updateData();
 };
 
 const updateData = () => {
-  if (!candlestickSeries || !ma5Series || !ma20Series) return;
+  if (!chart || !candlestickSeries || !ma5Series || !ma20Series) return;
 
-  // Check if we have data
   const data = store.candlestickData;
   if (!data || data.length === 0) return;
 
-  candlestickSeries.setData(data as any);
-  ma5Series.setData(store.ma5Data as any);
-  ma20Series.setData(store.ma20Data as any);
+  candlestickSeries.setData(data);
+  ma5Series.setData(store.ma5Data);
+  ma20Series.setData(store.ma20Data);
 
-  // Fit content
-  if (chart) {
-    chart.timeScale().fitContent();
+  chart.timeScale().fitContent();
+  updateMarkers();
+};
+
+const updateMarkers = () => {
+  if (!candlestickSeries) return;
+
+  const markers = store.signalMarkers.map(m => ({
+    time: m.date as string,
+    position: m.type === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
+    color: m.type === 'buy' ? '#FFD700' : '#E040FB',
+    shape: m.type === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
+    text: m.type === 'buy' ? 'B' : 'S',
+  }));
+
+  if (markersPlugin) {
+    markersPlugin.setMarkers(markers);
+  } else if (markers.length > 0 && candlestickSeries) {
+    markersPlugin = createSeriesMarkers(candlestickSeries, markers);
   }
 };
 
-// Watch for data changes
 watch(
   () => store.candlestickData,
-  (newData) => {
-    if (newData && newData.length > 0) {
+  () => {
+    if (store.candlestickData && store.candlestickData.length > 0) {
       updateData();
     }
   },
-  { deep: true, immediate: true }
+  { deep: true }
+);
+
+watch(
+  () => store.signalMarkers,
+  () => updateMarkers(),
+  { deep: true }
 );
 
 onMounted(() => {
@@ -133,7 +149,6 @@ onUnmounted(() => {
   }
 });
 
-// Expose chart for external access
 defineExpose({
   getChart: () => chart
 });
@@ -146,6 +161,9 @@ defineExpose({
     <div class="absolute top-2 left-2 flex gap-4 text-xs">
       <span class="text-[#f59e0b]">MA5</span>
       <span class="text-[#8b5cf6]">MA20</span>
+      <span class="text-[#FFD700]">▲ 買入</span>
+      <span class="text-[#E040FB]">▼ 賣出</span>
+      <span v-if="store.isLoadingMarkers" class="text-[#666]">載入訊號中...</span>
     </div>
   </div>
 </template>

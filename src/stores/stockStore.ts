@@ -3,12 +3,16 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
-import { stockApi, type AlphaPick, type Stock } from '../api/stockApi';
+import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock } from '../api/stockApi';
 
 const FINMIND_API_BASE = 'https://api.finmindtrade.com/api/v4/data';
 
-// API Source toggle
 export type ApiSource = 'finmind' | 'darvish'
+
+export interface SignalMarker {
+  date: string
+  type: 'buy' | 'sell'
+}
 
 export const useStockStore = defineStore('stock', () => {
   // State
@@ -17,17 +21,20 @@ export const useStockStore = defineStore('stock', () => {
   const isLoading = ref<boolean>(false);
   const error = ref<string | null>(null);
   const indicators = ref<TechnicalIndicators | null>(null);
-  
+
   // API Source
   const apiSource = ref<ApiSource>('darvish');
-  
+
   // DarvishSignal API State
   const stockList = ref<Stock[]>([]);
-  const alphaPicks = ref<AlphaPick[]>([]);
+  const alphaPicks = ref<AlphaPickItem[]>([]);
+  const sellAlerts = ref<SellAlertItem[]>([]);
   const availableDates = ref<string[]>([]);
   const selectedDate = ref<string>('');
+  const alphaPickDate = ref<string>('');
+  const signalMarkers = ref<SignalMarker[]>([]);
+  const isLoadingMarkers = ref<boolean>(false);
 
-  // Technical analysis composable
   const { computeIndicators } = useTechnicalAnalysis();
 
   // Computed: Candlestick data for K-line chart
@@ -77,22 +84,19 @@ export const useStockStore = defineStore('stock', () => {
     return indicators.value?.kd ?? [];
   });
 
-  // Computed: Arbitrage opportunities from Alpha Picks
-  const arbitrageOpportunities = computed(() => {
-    return alphaPicks.value.filter(pick => pick.signal === 'BUY');
-  });
-
   // Actions
   const fetchStockData = async (id: string, startDate?: string) => {
     isLoading.value = true;
     error.value = null;
+    signalMarkers.value = [];
 
     if (apiSource.value === 'darvish') {
-      // Use DarvishSignal API
       try {
         const data = await stockApi.getStockHistory(id, 60);
-        stockData.value = data.map((item) => ({
-          time: item.date,
+        // API returns newest-first, reverse to oldest-first for the chart
+        const sorted = [...data].reverse();
+        stockData.value = sorted.map((item) => ({
+          time: item.trade_date,
           open: item.open,
           high: item.high,
           low: item.low,
@@ -101,6 +105,8 @@ export const useStockStore = defineStore('stock', () => {
         }));
         stockId.value = id;
         indicators.value = computeIndicators(stockData.value);
+        // Fetch signal markers in background
+        fetchSignalMarkers(id);
       } catch (err) {
         error.value = err instanceof Error ? err.message : 'Failed to fetch from DarvishSignal API';
         console.error('Error fetching from DarvishSignal:', err);
@@ -149,6 +155,40 @@ export const useStockStore = defineStore('stock', () => {
     await fetchStockData(trimmedId);
   };
 
+  // Fetch buy/sell signal markers for the K-line chart
+  const fetchSignalMarkers = async (symbol: string) => {
+    isLoadingMarkers.value = true;
+    try {
+      const dates = await stockApi.getAlphaPickDates(30);
+
+      // Fetch picks and sells for all dates in parallel
+      const results = await Promise.all(
+        dates.map(async (date) => {
+          const [picksResp, sellsResp] = await Promise.all([
+            stockApi.getAlphaPickByDate(date).catch(() => null),
+            stockApi.getSellByDate(date).catch(() => null),
+          ]);
+          const isBuy = picksResp?.picks.some(p => p.symbol === symbol) ?? false;
+          const isSell = sellsResp?.sells.some(s => s.symbol === symbol) ?? false;
+          return { date, isBuy, isSell };
+        })
+      );
+
+      const markers: SignalMarker[] = [];
+      for (const r of results) {
+        if (r.isBuy) markers.push({ date: r.date, type: 'buy' });
+        else if (r.isSell) markers.push({ date: r.date, type: 'sell' });
+      }
+      // Sort by date ascending for the chart
+      markers.sort((a, b) => a.date.localeCompare(b.date));
+      signalMarkers.value = markers;
+    } catch (err) {
+      console.error('Error fetching signal markers:', err);
+    } finally {
+      isLoadingMarkers.value = false;
+    }
+  };
+
   // DarvishSignal API Actions
   const fetchStockList = async () => {
     try {
@@ -161,11 +201,11 @@ export const useStockStore = defineStore('stock', () => {
   const fetchAlphaPicks = async (date?: string) => {
     isLoading.value = true;
     try {
-      if (date) {
-        alphaPicks.value = await stockApi.getAlphaPickByDate(date);
-      } else {
-        alphaPicks.value = await stockApi.getAlphaPickLatest();
-      }
+      const resp = date
+        ? await stockApi.getAlphaPickByDate(date)
+        : await stockApi.getAlphaPickLatest();
+      alphaPicks.value = resp.picks;
+      alphaPickDate.value = resp.trade_date;
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch Alpha Picks';
       console.error('Error fetching Alpha Picks:', err);
@@ -174,9 +214,20 @@ export const useStockStore = defineStore('stock', () => {
     }
   };
 
+  const fetchSellAlerts = async (date?: string) => {
+    try {
+      const resp = date
+        ? await stockApi.getSellByDate(date)
+        : await stockApi.getSellLatest();
+      sellAlerts.value = resp.sells;
+    } catch (err) {
+      console.error('Error fetching Sell Alerts:', err);
+    }
+  };
+
   const fetchAvailableDates = async () => {
     try {
-      availableDates.value = await stockApi.getAlphaPickDates();
+      availableDates.value = await stockApi.getAlphaPickDates(60);
       if (availableDates.value.length > 0) {
         selectedDate.value = availableDates.value[0] as string;
       }
@@ -189,12 +240,10 @@ export const useStockStore = defineStore('stock', () => {
     apiSource.value = source;
   };
 
-  // Helper function to get default start date (1 year ago)
   const getDefaultStartDate = (): string => {
     const date = new Date();
     date.setFullYear(date.getFullYear() - 1);
-    const isoString = date.toISOString();
-    return isoString.split('T')[0] ?? isoString.substring(0, 10);
+    return date.toISOString().split('T')[0] ?? '';
   };
 
   return {
@@ -202,26 +251,31 @@ export const useStockStore = defineStore('stock', () => {
     stockId,
     stockData,
     isLoading,
+    isLoadingMarkers,
     error,
     indicators,
     apiSource,
     stockList,
     alphaPicks,
+    sellAlerts,
     availableDates,
     selectedDate,
+    alphaPickDate,
+    signalMarkers,
     // Computed
     candlestickData,
     volumeData,
     ma5Data,
     ma20Data,
     kdData,
-    arbitrageOpportunities,
     // Actions
     fetchStockData,
     searchStock,
     fetchStockList,
     fetchAlphaPicks,
+    fetchSellAlerts,
     fetchAvailableDates,
-    setApiSource
+    setApiSource,
+    fetchSignalMarkers,
   };
 });
