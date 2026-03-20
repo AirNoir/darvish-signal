@@ -42,6 +42,13 @@ export interface BollingerData {
   percentB: number | null;
 }
 
+export interface InstitutionalData {
+  time: string;
+  foreign: number;
+  trust: number;
+  dealer: number;
+}
+
 // FinMind API response
 export interface FinMindResponse {
   msg: string;

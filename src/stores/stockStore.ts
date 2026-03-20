@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData } from '../types';
+import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
 import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock } from '../api/stockApi';
 
@@ -88,6 +88,7 @@ export const useStockStore = defineStore('stock', () => {
   const rsiData = ref<RSIData[]>([]);
   const macdData = ref<MACDData[]>([]);
   const bollingerData = ref<BollingerData[]>([]);
+  const institutionalData = ref<InstitutionalData[]>([]);
 
   // Actions
   const fetchStockData = async (id: string, startDate?: string) => {
@@ -131,6 +132,13 @@ export const useStockStore = defineStore('stock', () => {
           middle: item.bb_middle ?? null,
           lower: item.bb_lower ?? null,
           percentB: item.bb_percent_b ?? null
+        }));
+
+        institutionalData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          foreign: item.foreign_net ?? 0,
+          trust: item.trust_net ?? 0,
+          dealer: item.dealer_net ?? 0
         }));
 
         // Fetch signal markers in background
@@ -299,6 +307,7 @@ export const useStockStore = defineStore('stock', () => {
     rsiData,
     macdData,
     bollingerData,
+    institutionalData,
     // Actions
     fetchStockData,
     searchStock,

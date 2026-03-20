@@ -63,8 +63,11 @@ const initChart = () => {
       borderColor: '#333',
       timeVisible: true,
       secondsVisible: false,
-      barSpacing: 8,
-      minBarSpacing: 4
+      barSpacing: 12,
+      minBarSpacing: 4,
+      rightOffset: 5,
+      fixLeftEdge: true,
+      fixRightEdge: true
     }
   });
 

@@ -10,11 +10,29 @@ import KDChart from './components/KDChart.vue';
 import RSIChart from './components/RSIChart.vue';
 import MACDChart from './components/MACDChart.vue';
 import BollingerChart from './components/BollingerChart.vue';
+import InstitutionalChart from './components/InstitutionalChart.vue';
 import AlphaPickPanel from './components/AlphaPickPanel.vue';
+import IndicatorSettings from './components/IndicatorSettings.vue';
 
 const store = useStockStore();
 const { addChart, syncCrosshair } = useChartSync();
 const showAlphaPick = ref(false);
+const showSettings = ref(false);
+
+// Indicator visibility settings
+const indicatorSettings = ref({
+  volume: true,
+  institutional: true,
+  macd: true,
+  kd: true,
+  rsi: true,
+  bollinger: true,
+});
+
+// Count visible indicators for height calculation
+const visibleIndicatorCount = computed(() => {
+  return Object.values(indicatorSettings.value).filter(Boolean).length;
+});
 
 // Computed for latest stock data
 const latestData = computed(() => {
@@ -65,10 +83,24 @@ onMounted(() => {
           <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M17 7H21V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <h1 class="text-lg font-semibold text-white">Taiwan Stock Visualizer</h1>
+        <h1 class="text-lg font-semibold text-white">大筆訊號</h1>
       </div>
 
       <div class="flex items-center gap-4">
+        <!-- Indicator Settings Toggle -->
+        <button
+          @click="showSettings = true"
+          class="px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-[#333] text-[#aaa] hover:bg-[#444]"
+        >
+          <span class="flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            指標設定
+          </span>
+        </button>
+
         <!-- Alpha Signal Toggle -->
         <button
           @click="showAlphaPick = !showAlphaPick"
@@ -77,9 +109,9 @@ onMounted(() => {
             showAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
           ]"
         >
-          📊 Alpha 訊號
+          Alpha 訊號
         </button>
-        
+
         <!-- Current Stock Info -->
         <div v-if="latestData" class="flex items-center gap-2 text-sm">
           <span class="text-[#3b82f6] font-medium">{{ store.stockId }}</span>
@@ -102,8 +134,8 @@ onMounted(() => {
     <!-- Main Content -->
     <main class="flex-1 flex overflow-hidden">
       <!-- Alpha Pick Panel (Left Sidebar) -->
-      <div 
-        v-if="showAlphaPick" 
+      <div
+        v-if="showAlphaPick"
         class="w-80 border-r border-[#333] overflow-y-auto"
       >
         <AlphaPickPanel />
@@ -151,7 +183,7 @@ onMounted(() => {
 
       <!-- Charts Container -->
       <div v-else class="flex-1 flex flex-col p-4 gap-1 overflow-y-auto">
-        <!-- K-Line Chart (main chart) -->
+        <!-- K-Line Chart (main chart) - always visible -->
         <div class="min-h-[280px] h-[35%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
           <KLineChart
             :on-chart-ready="handleChartReady"
@@ -160,15 +192,32 @@ onMounted(() => {
         </div>
 
         <!-- Volume Chart -->
-        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+        <div
+          v-if="indicatorSettings.volume"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
           <VolumeChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
           />
         </div>
 
+        <!-- Institutional Chart (法人買賣) -->
+        <div
+          v-if="indicatorSettings.institutional"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
+          <InstitutionalChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+          />
+        </div>
+
         <!-- MACD Chart -->
-        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+        <div
+          v-if="indicatorSettings.macd"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
           <MACDChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
@@ -176,7 +225,10 @@ onMounted(() => {
         </div>
 
         <!-- KD Chart -->
-        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+        <div
+          v-if="indicatorSettings.kd"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
           <KDChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
@@ -184,7 +236,10 @@ onMounted(() => {
         </div>
 
         <!-- RSI Chart -->
-        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+        <div
+          v-if="indicatorSettings.rsi"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
           <RSIChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
@@ -192,7 +247,10 @@ onMounted(() => {
         </div>
 
         <!-- Bollinger %B Chart -->
-        <div class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+        <div
+          v-if="indicatorSettings.bollinger"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
           <BollingerChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
@@ -201,5 +259,12 @@ onMounted(() => {
       </div>
       </div>
     </main>
+
+    <!-- Indicator Settings Modal -->
+    <IndicatorSettings
+      v-if="showSettings"
+      v-model="indicatorSettings"
+      @close="showSettings = false"
+    />
   </div>
 </template>
