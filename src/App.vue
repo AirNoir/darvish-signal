@@ -29,11 +29,6 @@ const indicatorSettings = ref({
   bollinger: true,
 });
 
-// Count visible indicators for height calculation
-const visibleIndicatorCount = computed(() => {
-  return Object.values(indicatorSettings.value).filter(Boolean).length;
-});
-
 // Computed for latest stock data
 const latestData = computed(() => {
   const len = store.stockData.length;
