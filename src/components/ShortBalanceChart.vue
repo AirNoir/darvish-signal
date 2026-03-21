@@ -103,11 +103,6 @@ defineExpose({ getChart: () => chart });
 <template>
   <div class="relative w-full h-full overflow-hidden">
     <div ref="chartContainer" class="w-full h-full"></div>
-    <div class="absolute top-1 left-1 z-10 flex items-center gap-2 text-xs bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded">
-      <span class="text-white font-bold">融券</span>
-      <span v-if="showBalance !== false" class="text-[#06b6d4]">餘額</span>
-      <span v-if="showChange !== false" class="text-[#888]">增減</span>
-    </div>
     <div
       v-if="tooltipVisible && (hoverBalance !== null || hoverChange !== null)"
       class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-2 py-1 text-xs z-50"

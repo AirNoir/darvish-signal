@@ -153,11 +153,6 @@ defineExpose({
   <div class="relative w-full h-full overflow-hidden">
     <div ref="chartContainer" class="w-full h-full"></div>
 
-    <!-- Fixed Title -->
-    <div class="absolute top-1 left-1 z-10 text-xs bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded">
-      <span class="text-white font-bold">成交量</span>
-    </div>
-
     <!-- Floating Tooltip -->
     <div
       v-if="tooltipVisible && hoverVolume !== null"

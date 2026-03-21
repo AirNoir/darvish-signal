@@ -168,13 +168,6 @@ defineExpose({
   <div class="relative w-full h-full overflow-hidden">
     <div ref="chartContainer" class="w-full h-full"></div>
 
-    <!-- Fixed Title -->
-    <div class="absolute top-1 left-1 z-10 flex items-center gap-2 text-xs bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded">
-      <span class="text-white font-bold">KD</span>
-      <span class="text-[#3b82f6]">K</span>
-      <span class="text-[#f59e0b]">D</span>
-    </div>
-
     <!-- Floating Tooltip -->
     <div
       v-if="tooltipVisible && (hoverK !== null || hoverD !== null)"
