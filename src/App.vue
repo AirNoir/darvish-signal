@@ -136,39 +136,21 @@ onMounted(() => {
         <h1 class="text-lg font-semibold text-white hidden sm:block">達比訊號</h1>
       </div>
 
-      <!-- Center: Current Stock Info + Time Interval -->
-      <div class="flex items-center gap-3">
-        <div v-if="latestData" class="flex items-center gap-2 text-sm">
-          <span class="text-[#3b82f6] font-medium">{{ store.stockId }}</span>
-          <span v-if="store.stockName" class="text-[#888] hidden sm:inline">{{ store.stockName }}</span>
-          <span class="text-white">{{ latestData.close.toFixed(2) }}</span>
-          <span
-            v-if="priceChange"
-            :class="[
-              'text-xs',
-              priceChange.isPositive ? 'text-[#26a69a]' : 'text-[#ef5350]'
-            ]"
-          >
-            {{ priceChange.isPositive ? '+' : '' }}{{ priceChange.value.toFixed(2) }}
-            ({{ priceChange.percent.toFixed(2) }}%)
-          </span>
-        </div>
-        <!-- Time Interval Selector -->
-        <div class="flex items-center bg-[#252525] rounded-lg p-0.5">
-          <button
-            v-for="interval in (['daily', 'weekly', 'monthly'] as const)"
-            :key="interval"
-            @click="store.setTimeInterval(interval)"
-            :class="[
-              'px-2 py-1 text-xs font-medium rounded transition-colors',
-              store.timeInterval === interval
-                ? 'bg-[#3b82f6] text-white'
-                : 'text-[#888] hover:text-white'
-            ]"
-          >
-            {{ interval === 'daily' ? '日' : interval === 'weekly' ? '週' : '月' }}
-          </button>
-        </div>
+      <!-- Center: Current Stock Info -->
+      <div v-if="latestData" class="flex items-center gap-2 text-sm">
+        <span class="text-[#3b82f6] font-medium">{{ store.stockId }}</span>
+        <span v-if="store.stockName" class="text-[#888] hidden sm:inline">{{ store.stockName }}</span>
+        <span class="text-white">{{ latestData.close.toFixed(2) }}</span>
+        <span
+          v-if="priceChange"
+          :class="[
+            'text-xs',
+            priceChange.isPositive ? 'text-[#26a69a]' : 'text-[#ef5350]'
+          ]"
+        >
+          {{ priceChange.isPositive ? '+' : '' }}{{ priceChange.value.toFixed(2) }}
+          ({{ priceChange.percent.toFixed(2) }}%)
+        </span>
       </div>
 
       <!-- Right: Desktop Menu -->
@@ -221,22 +203,6 @@ onMounted(() => {
       class="md:hidden absolute top-14 left-0 right-0 bg-[#1a1a1a] border-b border-[#333] z-50 p-4 flex flex-col gap-3"
     >
       <SearchBar />
-      <!-- Time Interval Selector (Mobile) -->
-      <div class="flex items-center justify-center bg-[#252525] rounded-lg p-1">
-        <button
-          v-for="interval in (['daily', 'weekly', 'monthly'] as const)"
-          :key="interval"
-          @click="store.setTimeInterval(interval); showMobileMenu = false"
-          :class="[
-            'flex-1 px-3 py-2 text-sm font-medium rounded transition-colors',
-            store.timeInterval === interval
-              ? 'bg-[#3b82f6] text-white'
-              : 'text-[#888] hover:text-white'
-          ]"
-        >
-          {{ interval === 'daily' ? '日線' : interval === 'weekly' ? '週線' : '月線' }}
-        </button>
-      </div>
       <button
         @click="showSettings = true; showMobileMenu = false"
         class="w-full px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-[#333] text-[#aaa] hover:bg-[#444] text-left"
