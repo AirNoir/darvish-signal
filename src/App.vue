@@ -20,11 +20,13 @@ import ShortBalanceChart from './components/ShortBalanceChart.vue';
 import ShortMarginRatioChart from './components/ShortMarginRatioChart.vue';
 import AlphaPickPanel from './components/AlphaPickPanel.vue';
 import IndicatorSettingsModal from './components/IndicatorSettings.vue';
+import CollapsibleChart from './components/CollapsibleChart.vue';
 
 const store = useStockStore();
 const { addChart, syncCrosshair } = useChartSync();
 const showAlphaPick = ref(false);
 const showSettings = ref(false);
+const chartsContainer = ref<HTMLElement | null>(null);
 
 // Indicator visibility settings - 預設開啟的指標
 const indicatorSettings = ref<IndicatorSettings>({
@@ -80,6 +82,19 @@ const handleChartReady = (chart: IChartApi, series?: any) => {
 // Handle crosshair move
 const handleCrosshairMove = (chart: IChartApi, param: MouseEventParams) => {
   syncCrosshair(chart, param);
+};
+
+// Scroll functions
+const scrollUp = () => {
+  if (chartsContainer.value) {
+    chartsContainer.value.scrollBy({ top: -150, behavior: 'smooth' });
+  }
+};
+
+const scrollDown = () => {
+  if (chartsContainer.value) {
+    chartsContainer.value.scrollBy({ top: 150, behavior: 'smooth' });
+  }
 };
 
 // Load default stock on mount
@@ -156,183 +171,234 @@ onMounted(() => {
       </div>
 
       <!-- Charts Area -->
-      <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Error Message -->
-      <div
-        v-if="store.error"
-        class="mx-4 mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm"
-      >
-        {{ store.error }}
-      </div>
+      <div class="flex-1 flex flex-col overflow-hidden relative">
+        <!-- Error Message -->
+        <div
+          v-if="store.error"
+          class="mx-4 mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm"
+        >
+          {{ store.error }}
+        </div>
 
-      <!-- Loading State -->
-      <div
-        v-if="store.isLoading && store.stockData.length === 0"
-        class="flex-1 flex items-center justify-center"
-      >
-        <div class="flex flex-col items-center gap-3">
-          <svg
-            class="w-8 h-8 text-[#3b82f6] animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
+        <!-- Loading State -->
+        <div
+          v-if="store.isLoading && store.stockData.length === 0"
+          class="flex-1 flex items-center justify-center"
+        >
+          <div class="flex flex-col items-center gap-3">
+            <svg
+              class="w-8 h-8 text-[#3b82f6] animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span class="text-[#a0a0a0] text-sm">Loading stock data...</span>
+          </div>
+        </div>
+
+        <!-- Charts Container -->
+        <div v-else ref="chartsContainer" class="flex-1 flex flex-col p-4 gap-1 overflow-y-auto">
+          <!-- K-Line Chart (main chart) - always visible, not collapsible -->
+          <div class="min-h-[280px] h-[280px] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <KLineChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </div>
+
+          <!-- 價量指標 -->
+          <CollapsibleChart
+            v-if="indicatorSettings.volume"
+            title="成交量"
           >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          <span class="text-[#a0a0a0] text-sm">Loading stock data...</span>
-        </div>
-      </div>
+            <VolumeChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
 
-      <!-- Charts Container -->
-      <div v-else class="flex-1 flex flex-col p-4 gap-1 overflow-y-auto">
-        <!-- K-Line Chart (main chart) - always visible -->
-        <div class="min-h-[280px] h-[35%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
-          <KLineChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
+          <CollapsibleChart
+            v-if="indicatorSettings.turnoverRate"
+            title="週轉率"
+            :indicators="[{ color: '#8b5cf6', label: '%' }]"
+          >
+            <TurnoverRateChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
+
+          <CollapsibleChart
+            v-if="indicatorSettings.volumeMA"
+            title="成交均量"
+            :indicators="[
+              { color: '#f59e0b', label: '5日' },
+              { color: '#3b82f6', label: '10日' },
+              { color: '#8b5cf6', label: '20日' }
+            ]"
+          >
+            <VolumeMAChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
+
+          <!-- 法人買賣 -->
+          <CollapsibleChart
+            v-if="indicatorSettings.foreignNet"
+            title="外資買賣超"
+          >
+            <ForeignNetChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
+
+          <CollapsibleChart
+            v-if="indicatorSettings.trustNet"
+            title="投信買賣超"
+          >
+            <TrustNetChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
+
+          <!-- 融資融券 -->
+          <CollapsibleChart
+            v-if="indicatorSettings.marginBalance || indicatorSettings.marginChange"
+            title="融資"
+            :indicators="[
+              ...(indicatorSettings.marginBalance ? [{ color: '#f59e0b', label: '餘額' }] : []),
+              ...(indicatorSettings.marginChange ? [{ color: '#888', label: '增減' }] : [])
+            ]"
+          >
+            <MarginBalanceChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+              :show-balance="indicatorSettings.marginBalance"
+              :show-change="indicatorSettings.marginChange"
+            />
+          </CollapsibleChart>
+
+          <CollapsibleChart
+            v-if="indicatorSettings.shortBalance || indicatorSettings.shortChange"
+            title="融券"
+            :indicators="[
+              ...(indicatorSettings.shortBalance ? [{ color: '#06b6d4', label: '餘額' }] : []),
+              ...(indicatorSettings.shortChange ? [{ color: '#888', label: '增減' }] : [])
+            ]"
+          >
+            <ShortBalanceChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+              :show-balance="indicatorSettings.shortBalance"
+              :show-change="indicatorSettings.shortChange"
+            />
+          </CollapsibleChart>
+
+          <CollapsibleChart
+            v-if="indicatorSettings.shortMarginRatio"
+            title="券資比"
+            :indicators="[{ color: '#ec4899', label: '%' }]"
+          >
+            <ShortMarginRatioChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
+
+          <!-- 技術指標 -->
+          <CollapsibleChart
+            v-if="indicatorSettings.macd"
+            title="MACD"
+            :indicators="[
+              { color: '#3b82f6', label: 'DIF' },
+              { color: '#f59e0b', label: 'DEA' },
+              { color: '#888', label: '柱' }
+            ]"
+          >
+            <MACDChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
+
+          <CollapsibleChart
+            v-if="indicatorSettings.kd"
+            title="KD"
+            :indicators="[
+              { color: '#3b82f6', label: 'K' },
+              { color: '#f59e0b', label: 'D' }
+            ]"
+          >
+            <KDChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
+
+          <CollapsibleChart
+            v-if="indicatorSettings.rsi"
+            title="RSI"
+            :indicators="[
+              { color: '#22c55e', label: '9' },
+              { color: '#ef4444', label: '14' }
+            ]"
+          >
+            <RSIChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
+
+          <CollapsibleChart
+            v-if="indicatorSettings.bollinger"
+            title="布林通道"
+            :indicators="[{ color: '#a855f7', label: '%B' }]"
+          >
+            <BollingerChart
+              :on-chart-ready="handleChartReady"
+              :on-crosshair-move="handleCrosshairMove"
+            />
+          </CollapsibleChart>
         </div>
 
-        <!-- 價量指標 -->
-        <div
-          v-if="indicatorSettings.volume"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <VolumeChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
+        <!-- Scroll Buttons -->
+        <div class="absolute right-6 bottom-6 flex flex-col gap-2">
+          <button
+            @click="scrollUp"
+            class="w-10 h-10 rounded-full bg-[#333] hover:bg-[#444] text-white flex items-center justify-center shadow-lg transition-colors"
+            title="向上滾動"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+          <button
+            @click="scrollDown"
+            class="w-10 h-10 rounded-full bg-[#333] hover:bg-[#444] text-white flex items-center justify-center shadow-lg transition-colors"
+            title="向下滾動"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
-
-        <div
-          v-if="indicatorSettings.turnoverRate"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <TurnoverRateChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-
-        <div
-          v-if="indicatorSettings.volumeMA"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <VolumeMAChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-
-        <!-- 法人買賣 -->
-        <div
-          v-if="indicatorSettings.foreignNet"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <ForeignNetChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-
-        <div
-          v-if="indicatorSettings.trustNet"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <TrustNetChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-
-        <!-- 融資融券 -->
-        <div
-          v-if="indicatorSettings.marginBalance || indicatorSettings.marginChange"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <MarginBalanceChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-            :show-balance="indicatorSettings.marginBalance"
-            :show-change="indicatorSettings.marginChange"
-          />
-        </div>
-
-        <div
-          v-if="indicatorSettings.shortBalance || indicatorSettings.shortChange"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <ShortBalanceChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-            :show-balance="indicatorSettings.shortBalance"
-            :show-change="indicatorSettings.shortChange"
-          />
-        </div>
-
-        <div
-          v-if="indicatorSettings.shortMarginRatio"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <ShortMarginRatioChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-
-        <!-- 技術指標 -->
-        <div
-          v-if="indicatorSettings.macd"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <MACDChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-
-        <div
-          v-if="indicatorSettings.kd"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <KDChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-
-        <div
-          v-if="indicatorSettings.rsi"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <RSIChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-
-        <div
-          v-if="indicatorSettings.bollinger"
-          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
-        >
-          <BollingerChart
-            :on-chart-ready="handleChartReady"
-            :on-crosshair-move="handleCrosshairMove"
-          />
-        </div>
-      </div>
       </div>
     </main>
 
