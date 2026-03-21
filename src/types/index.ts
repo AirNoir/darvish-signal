@@ -49,6 +49,58 @@ export interface InstitutionalData {
   dealer: number;
 }
 
+// Additional chart data types
+export interface TurnoverRateData {
+  time: string;
+  value: number | null;
+}
+
+export interface VolumeMAData {
+  time: string;
+  ma5: number | null;
+  ma10: number | null;
+  ma20: number | null;
+}
+
+export interface MarginData {
+  time: string;
+  balance: number | null;
+  change: number | null;
+}
+
+export interface ShortData {
+  time: string;
+  balance: number | null;
+  change: number | null;
+}
+
+export interface ShortMarginRatioData {
+  time: string;
+  value: number | null;
+}
+
+// Indicator settings for visibility control
+export interface IndicatorSettings {
+  // 價量指標
+  volume: boolean;
+  turnoverRate: boolean;
+  volumeMA: boolean;
+  // 法人買賣
+  foreignNet: boolean;
+  trustNet: boolean;
+  // 融資融券
+  marginBalance: boolean;
+  marginChange: boolean;
+  shortBalance: boolean;
+  shortChange: boolean;
+  shortMarginRatio: boolean;
+  // 技術指標
+  rsi: boolean;
+  macd: boolean;
+  bollinger: boolean;
+  kd: boolean;
+}
+
 // FinMind API response
 export interface FinMindResponse {
   msg: string;

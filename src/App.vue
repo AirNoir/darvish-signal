@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue';
 import type { IChartApi, MouseEventParams } from 'lightweight-charts';
+import type { IndicatorSettings } from './types';
 import { useStockStore } from './stores/stockStore';
 import { useChartSync } from './composables/useChartSync';
 import SearchBar from './components/SearchBar.vue';
@@ -10,23 +11,41 @@ import KDChart from './components/KDChart.vue';
 import RSIChart from './components/RSIChart.vue';
 import MACDChart from './components/MACDChart.vue';
 import BollingerChart from './components/BollingerChart.vue';
-import InstitutionalChart from './components/InstitutionalChart.vue';
+import ForeignNetChart from './components/ForeignNetChart.vue';
+import TrustNetChart from './components/TrustNetChart.vue';
+import TurnoverRateChart from './components/TurnoverRateChart.vue';
+import VolumeMAChart from './components/VolumeMAChart.vue';
+import MarginBalanceChart from './components/MarginBalanceChart.vue';
+import ShortBalanceChart from './components/ShortBalanceChart.vue';
+import ShortMarginRatioChart from './components/ShortMarginRatioChart.vue';
 import AlphaPickPanel from './components/AlphaPickPanel.vue';
-import IndicatorSettings from './components/IndicatorSettings.vue';
+import IndicatorSettingsModal from './components/IndicatorSettings.vue';
 
 const store = useStockStore();
 const { addChart, syncCrosshair } = useChartSync();
 const showAlphaPick = ref(false);
 const showSettings = ref(false);
 
-// Indicator visibility settings
-const indicatorSettings = ref({
+// Indicator visibility settings - 預設開啟的指標
+const indicatorSettings = ref<IndicatorSettings>({
+  // 價量指標
   volume: true,
-  institutional: true,
-  macd: true,
-  kd: true,
+  turnoverRate: false,
+  volumeMA: false,
+  // 法人買賣
+  foreignNet: true,
+  trustNet: true,
+  // 融資融券
+  marginBalance: false,
+  marginChange: false,
+  shortBalance: false,
+  shortChange: false,
+  shortMarginRatio: false,
+  // 技術指標
   rsi: true,
+  macd: true,
   bollinger: true,
+  kd: true,
 });
 
 // Computed for latest stock data
@@ -186,7 +205,7 @@ onMounted(() => {
           />
         </div>
 
-        <!-- Volume Chart -->
+        <!-- 價量指標 -->
         <div
           v-if="indicatorSettings.volume"
           class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
@@ -197,18 +216,83 @@ onMounted(() => {
           />
         </div>
 
-        <!-- Institutional Chart (法人買賣) -->
         <div
-          v-if="indicatorSettings.institutional"
+          v-if="indicatorSettings.turnoverRate"
           class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
         >
-          <InstitutionalChart
+          <TurnoverRateChart
             :on-chart-ready="handleChartReady"
             :on-crosshair-move="handleCrosshairMove"
           />
         </div>
 
-        <!-- MACD Chart -->
+        <div
+          v-if="indicatorSettings.volumeMA"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
+          <VolumeMAChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+          />
+        </div>
+
+        <!-- 法人買賣 -->
+        <div
+          v-if="indicatorSettings.foreignNet"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
+          <ForeignNetChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+          />
+        </div>
+
+        <div
+          v-if="indicatorSettings.trustNet"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
+          <TrustNetChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+          />
+        </div>
+
+        <!-- 融資融券 -->
+        <div
+          v-if="indicatorSettings.marginBalance || indicatorSettings.marginChange"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
+          <MarginBalanceChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+            :show-balance="indicatorSettings.marginBalance"
+            :show-change="indicatorSettings.marginChange"
+          />
+        </div>
+
+        <div
+          v-if="indicatorSettings.shortBalance || indicatorSettings.shortChange"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
+          <ShortBalanceChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+            :show-balance="indicatorSettings.shortBalance"
+            :show-change="indicatorSettings.shortChange"
+          />
+        </div>
+
+        <div
+          v-if="indicatorSettings.shortMarginRatio"
+          class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
+        >
+          <ShortMarginRatioChart
+            :on-chart-ready="handleChartReady"
+            :on-crosshair-move="handleCrosshairMove"
+          />
+        </div>
+
+        <!-- 技術指標 -->
         <div
           v-if="indicatorSettings.macd"
           class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
@@ -219,7 +303,6 @@ onMounted(() => {
           />
         </div>
 
-        <!-- KD Chart -->
         <div
           v-if="indicatorSettings.kd"
           class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
@@ -230,7 +313,6 @@ onMounted(() => {
           />
         </div>
 
-        <!-- RSI Chart -->
         <div
           v-if="indicatorSettings.rsi"
           class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
@@ -241,7 +323,6 @@ onMounted(() => {
           />
         </div>
 
-        <!-- Bollinger %B Chart -->
         <div
           v-if="indicatorSettings.bollinger"
           class="min-h-[100px] h-[13%] border border-[#333] rounded-lg overflow-hidden flex-shrink-0"
@@ -256,7 +337,7 @@ onMounted(() => {
     </main>
 
     <!-- Indicator Settings Modal -->
-    <IndicatorSettings
+    <IndicatorSettingsModal
       v-if="showSettings"
       v-model="indicatorSettings"
       @close="showSettings = false"

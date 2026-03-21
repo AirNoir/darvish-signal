@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData } from '../types';
+import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, MarginData, ShortData, ShortMarginRatioData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
 import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock } from '../api/stockApi';
 
@@ -89,6 +89,11 @@ export const useStockStore = defineStore('stock', () => {
   const macdData = ref<MACDData[]>([]);
   const bollingerData = ref<BollingerData[]>([]);
   const institutionalData = ref<InstitutionalData[]>([]);
+  const turnoverRateData = ref<TurnoverRateData[]>([]);
+  const volumeMAData = ref<VolumeMAData[]>([]);
+  const marginData = ref<MarginData[]>([]);
+  const shortData = ref<ShortData[]>([]);
+  const shortMarginRatioData = ref<ShortMarginRatioData[]>([]);
 
   // Actions
   const fetchStockData = async (id: string, startDate?: string) => {
@@ -139,6 +144,35 @@ export const useStockStore = defineStore('stock', () => {
           foreign: item.foreign_net ?? 0,
           trust: item.trust_net ?? 0,
           dealer: item.dealer_net ?? 0
+        }));
+
+        turnoverRateData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          value: item.turnover_rate ?? null
+        }));
+
+        volumeMAData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          ma5: item.vol_ma5 ?? null,
+          ma10: item.vol_ma10 ?? null,
+          ma20: item.vol_ma20 ?? null
+        }));
+
+        marginData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          balance: item.margin_balance ?? null,
+          change: null // API doesn't provide change, would need to calculate
+        }));
+
+        shortData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          balance: item.short_balance ?? null,
+          change: null // API doesn't provide change, would need to calculate
+        }));
+
+        shortMarginRatioData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          value: item.short_margin_ratio ?? null
         }));
 
         // Fetch signal markers in background
@@ -308,6 +342,11 @@ export const useStockStore = defineStore('stock', () => {
     macdData,
     bollingerData,
     institutionalData,
+    turnoverRateData,
+    volumeMAData,
+    marginData,
+    shortData,
+    shortMarginRatioData,
     // Actions
     fetchStockData,
     searchStock,
