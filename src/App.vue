@@ -25,6 +25,7 @@ const store = useStockStore();
 const { addChart, syncCrosshair } = useChartSync();
 const showAlphaPick = ref(false);
 const showSettings = ref(false);
+const showMobileMenu = ref(false);
 const chartsContainer = ref<HTMLElement | null>(null);
 
 // Indicator visibility settings - 預設開啟的指標
@@ -123,18 +124,37 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen bg-[#0f0f0f]">
+  <div class="relative flex flex-col h-screen bg-[#0f0f0f]">
     <!-- Header -->
     <header class="h-14 min-h-[56px] flex items-center justify-between px-4 border-b border-[#333] bg-[#1a1a1a]">
+      <!-- Left: Logo & Title -->
       <div class="flex items-center gap-3">
         <svg class="w-8 h-8 text-[#3b82f6]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M17 7H21V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <h1 class="text-lg font-semibold text-white">達比訊號</h1>
+        <h1 class="text-lg font-semibold text-white hidden sm:block">達比訊號</h1>
       </div>
 
-      <div class="flex items-center gap-4">
+      <!-- Center: Current Stock Info (always visible) -->
+      <div v-if="latestData" class="flex items-center gap-2 text-sm">
+        <span class="text-[#3b82f6] font-medium">{{ store.stockId }}</span>
+        <span v-if="store.stockName" class="text-[#888]">{{ store.stockName }}</span>
+        <span class="text-white">{{ latestData.close.toFixed(2) }}</span>
+        <span
+          v-if="priceChange"
+          :class="[
+            'text-xs',
+            priceChange.isPositive ? 'text-[#26a69a]' : 'text-[#ef5350]'
+          ]"
+        >
+          {{ priceChange.isPositive ? '+' : '' }}{{ priceChange.value.toFixed(2) }}
+          ({{ priceChange.percent.toFixed(2) }}%)
+        </span>
+      </div>
+
+      <!-- Right: Desktop Menu -->
+      <div class="hidden md:flex items-center gap-4">
         <!-- Indicator Settings Toggle -->
         <button
           @click="showSettings = true"
@@ -160,24 +180,51 @@ onMounted(() => {
           Alpha 訊號
         </button>
 
-        <!-- Current Stock Info -->
-        <div v-if="latestData" class="flex items-center gap-2 text-sm">
-          <span class="text-[#3b82f6] font-medium">{{ store.stockId }}</span>
-          <span class="text-white">{{ latestData.close.toFixed(2) }}</span>
-          <span
-            v-if="priceChange"
-            :class="[
-              'text-xs',
-              priceChange.isPositive ? 'text-[#26a69a]' : 'text-[#ef5350]'
-            ]"
-          >
-            {{ priceChange.isPositive ? '+' : '' }}{{ priceChange.value.toFixed(2) }}
-            ({{ priceChange.percent.toFixed(2) }}%)
-          </span>
-        </div>
         <SearchBar />
       </div>
+
+      <!-- Right: Mobile Hamburger -->
+      <button
+        @click="showMobileMenu = !showMobileMenu"
+        class="md:hidden p-2 text-[#aaa] hover:text-white transition-colors"
+      >
+        <svg v-if="!showMobileMenu" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </header>
+
+    <!-- Mobile Menu Dropdown -->
+    <div
+      v-if="showMobileMenu"
+      class="md:hidden absolute top-14 left-0 right-0 bg-[#1a1a1a] border-b border-[#333] z-50 p-4 flex flex-col gap-3"
+    >
+      <SearchBar />
+      <button
+        @click="showSettings = true; showMobileMenu = false"
+        class="w-full px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-[#333] text-[#aaa] hover:bg-[#444] text-left"
+      >
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          指標設定
+        </span>
+      </button>
+      <button
+        @click="showAlphaPick = !showAlphaPick; showMobileMenu = false"
+        :class="[
+          'w-full px-4 py-2 text-sm font-medium rounded-lg transition-colors text-left',
+          showAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
+        ]"
+      >
+        Alpha 訊號
+      </button>
+    </div>
 
     <!-- Main Content -->
     <main class="flex-1 flex overflow-hidden">

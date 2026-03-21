@@ -17,6 +17,7 @@ export interface SignalMarker {
 export const useStockStore = defineStore('stock', () => {
   // State
   const stockId = ref<string>('2330');
+  const stockName = ref<string>('');
   const stockData = ref<StockData[]>([]);
   const isLoading = ref<boolean>(false);
   const error = ref<string | null>(null);
@@ -100,10 +101,19 @@ export const useStockStore = defineStore('stock', () => {
     isLoading.value = true;
     error.value = null;
     signalMarkers.value = [];
+    stockName.value = '';
 
     if (apiSource.value === 'darvish') {
       try {
-        const data = await stockApi.getStockHistory(id, 60);
+        // Fetch stock info and history in parallel
+        const [stockInfo, data] = await Promise.all([
+          stockApi.getStockBySymbol(id).catch(() => null),
+          stockApi.getStockHistory(id, 60)
+        ]);
+
+        if (stockInfo) {
+          stockName.value = stockInfo.name;
+        }
         // API returns newest-first, reverse to oldest-first for the chart
         const sorted = [...data].reverse();
         stockData.value = sorted.map((item) => ({
@@ -319,6 +329,7 @@ export const useStockStore = defineStore('stock', () => {
   return {
     // State
     stockId,
+    stockName,
     stockData,
     isLoading,
     isLoadingMarkers,
