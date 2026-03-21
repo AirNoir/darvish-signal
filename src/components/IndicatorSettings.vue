@@ -109,7 +109,29 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
     <div class="bg-[#1a1a1a] border border-[#333] rounded-lg w-96 max-h-[85vh] overflow-hidden">
       <!-- Header -->
       <div class="flex items-center justify-between px-4 py-3 border-b border-[#333]">
-        <h3 class="text-white font-medium">指標設定</h3>
+        <div class="flex items-center gap-3">
+          <h3 class="text-white font-medium">指標設定</h3>
+          <!-- Global Toggle -->
+          <div
+            @click="toggleAll(!isAllOn)"
+            class="flex items-center gap-1.5 cursor-pointer"
+          >
+            <span class="text-[#888] text-xs">{{ isAllOn ? '全開' : isAllOff ? '全關' : '部分' }}</span>
+            <div
+              :class="[
+                'w-8 h-5 rounded-full transition-colors relative',
+                isAllOn ? 'bg-[#3b82f6]' : !isAllOff ? 'bg-[#3b82f6]/50' : 'bg-[#444]'
+              ]"
+            >
+              <div
+                :class="[
+                  'absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform',
+                  isAllOn ? 'translate-x-3.5' : !isAllOff ? 'translate-x-1.5' : 'translate-x-0.5'
+                ]"
+              />
+            </div>
+          </div>
+        </div>
         <button @click="emit('close')" class="text-[#888] hover:text-white transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -117,30 +139,8 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
         </button>
       </div>
 
-      <!-- Global Toggle -->
-      <div class="px-4 py-3 border-b border-[#333] flex items-center gap-2">
-        <button
-          @click="toggleAll(true)"
-          :class="[
-            'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-            isAllOn ? 'bg-[#3b82f6] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
-          ]"
-        >
-          全開
-        </button>
-        <button
-          @click="toggleAll(false)"
-          :class="[
-            'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-            isAllOff ? 'bg-[#3b82f6] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
-          ]"
-        >
-          全關
-        </button>
-      </div>
-
       <!-- Indicator List -->
-      <div class="p-4 space-y-4 overflow-y-auto max-h-[55vh]">
+      <div class="p-4 space-y-4 overflow-y-auto max-h-[65vh]">
         <div v-for="group in indicatorGroups" :key="group.id">
           <!-- Group Header with Toggle -->
           <div
