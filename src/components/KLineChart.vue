@@ -62,7 +62,7 @@ const initChart = () => {
     },
     rightPriceScale: {
       borderColor: '#333',
-      minimumWidth: 80 // 設定較大的最小寬度以確保所有圖表對齊
+      minimumWidth: 65 // 設定較大的最小寬度以確保所有圖表對齊
     },
     timeScale: {
       borderColor: '#333',

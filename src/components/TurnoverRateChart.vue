@@ -30,7 +30,7 @@ const initChart = () => {
       vertLine: { width: 1, color: '#505050', style: 0, labelVisible: false, labelBackgroundColor: '#3b82f6' },
       horzLine: { width: 1, color: '#505050', style: 0, labelVisible: true, labelBackgroundColor: '#3b82f6' }
     },
-    rightPriceScale: { borderColor: '#333', scaleMargins: { top: 0.1, bottom: 0 }, minimumWidth: 80 },
+    rightPriceScale: { borderColor: '#333', scaleMargins: { top: 0.1, bottom: 0 }, minimumWidth: 65 },
     timeScale: { borderColor: '#333', visible: true, barSpacing: 12, minBarSpacing: 4, rightOffset: 5, fixLeftEdge: true, fixRightEdge: true }
   });
 

@@ -63,7 +63,7 @@ const initChart = () => {
         top: 0.1,
         bottom: 0.1
       },
-      minimumWidth: 80
+      minimumWidth: 65
     },
     timeScale: {
       borderColor: '#333',

@@ -59,7 +59,7 @@ const initChart = () => {
         top: 0.1,
         bottom: 0.1
       },
-      minimumWidth: 80 // 設定較大的最小寬度以確保所有圖表對齊
+      minimumWidth: 65 // 設定較大的最小寬度以確保所有圖表對齊
     },
     timeScale: {
       borderColor: '#333',
