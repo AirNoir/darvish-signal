@@ -24,6 +24,14 @@ const formatVolume = (vol: number) => {
   return vol.toLocaleString();
 };
 
+// Format large numbers with K/M suffix for Y-axis
+const formatLargeNumber = (price: number) => {
+  const abs = Math.abs(price);
+  if (abs >= 1000000) return (price / 1000000).toFixed(1) + 'M';
+  if (abs >= 1000) return (price / 1000).toFixed(0) + 'K';
+  return price.toFixed(0);
+};
+
 const initChart = () => {
   if (!chartContainer.value) return;
 
@@ -31,6 +39,9 @@ const initChart = () => {
     layout: {
       background: { color: '#0f0f0f' },
       textColor: '#a0a0a0'
+    },
+    localization: {
+      priceFormatter: formatLargeNumber
     },
     grid: {
       vertLines: { color: '#1a1a1a' },
