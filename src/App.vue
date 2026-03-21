@@ -97,7 +97,7 @@ onMounted(() => {
           <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M17 7H21V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <h1 class="text-lg font-semibold text-white">大筆訊號</h1>
+        <h1 class="text-lg font-semibold text-white">達比訊號</h1>
       </div>
 
       <div class="flex items-center gap-4">
