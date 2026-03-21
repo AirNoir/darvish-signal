@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, computed, ref, reactive } from 'vue';
 import type { IChartApi, MouseEventParams } from 'lightweight-charts';
 import type { IndicatorSettings } from './types';
 import { useStockStore } from './stores/stockStore';
@@ -20,7 +20,6 @@ import ShortBalanceChart from './components/ShortBalanceChart.vue';
 import ShortMarginRatioChart from './components/ShortMarginRatioChart.vue';
 import AlphaPickPanel from './components/AlphaPickPanel.vue';
 import IndicatorSettingsModal from './components/IndicatorSettings.vue';
-import CollapsibleChart from './components/CollapsibleChart.vue';
 
 const store = useStockStore();
 const { addChart, syncCrosshair } = useChartSync();
@@ -49,6 +48,26 @@ const indicatorSettings = ref<IndicatorSettings>({
   bollinger: true,
   kd: true,
 });
+
+// 圖表摺疊狀態 - 預設全部展開
+const collapsed = reactive<Record<string, boolean>>({
+  volume: false,
+  turnoverRate: false,
+  volumeMA: false,
+  foreignNet: false,
+  trustNet: false,
+  margin: false,
+  short: false,
+  shortMarginRatio: false,
+  macd: false,
+  kd: false,
+  rsi: false,
+  bollinger: false,
+});
+
+const toggleCollapse = (key: string) => {
+  collapsed[key] = !collapsed[key];
+};
 
 // Computed for latest stock data
 const latestData = computed(() => {
@@ -220,162 +239,248 @@ onMounted(() => {
             />
           </div>
 
-          <!-- 價量指標 -->
-          <CollapsibleChart
-            v-if="indicatorSettings.volume"
-            title="成交量"
-          >
-            <VolumeChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- 成交量 -->
+          <div v-if="indicatorSettings.volume" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('volume')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">成交量</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.volume ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.volume" class="h-[120px]">
+              <VolumeChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <CollapsibleChart
-            v-if="indicatorSettings.turnoverRate"
-            title="週轉率"
-            :indicators="[{ color: '#8b5cf6', label: '%' }]"
-          >
-            <TurnoverRateChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- 週轉率 -->
+          <div v-if="indicatorSettings.turnoverRate" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('turnoverRate')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">週轉率</span>
+                <span class="text-[#8b5cf6]">%</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.turnoverRate ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.turnoverRate" class="h-[120px]">
+              <TurnoverRateChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <CollapsibleChart
-            v-if="indicatorSettings.volumeMA"
-            title="成交均量"
-            :indicators="[
-              { color: '#f59e0b', label: '5日' },
-              { color: '#3b82f6', label: '10日' },
-              { color: '#8b5cf6', label: '20日' }
-            ]"
-          >
-            <VolumeMAChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- 成交均量 -->
+          <div v-if="indicatorSettings.volumeMA" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('volumeMA')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">成交均量</span>
+                <span class="text-[#f59e0b]">5日</span>
+                <span class="text-[#3b82f6]">10日</span>
+                <span class="text-[#8b5cf6]">20日</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.volumeMA ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.volumeMA" class="h-[120px]">
+              <VolumeMAChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <!-- 法人買賣 -->
-          <CollapsibleChart
-            v-if="indicatorSettings.foreignNet"
-            title="外資買賣超"
-          >
-            <ForeignNetChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- 外資買賣超 -->
+          <div v-if="indicatorSettings.foreignNet" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('foreignNet')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">外資買賣超</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.foreignNet ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.foreignNet" class="h-[120px]">
+              <ForeignNetChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <CollapsibleChart
-            v-if="indicatorSettings.trustNet"
-            title="投信買賣超"
-          >
-            <TrustNetChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- 投信買賣超 -->
+          <div v-if="indicatorSettings.trustNet" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('trustNet')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">投信買賣超</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.trustNet ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.trustNet" class="h-[120px]">
+              <TrustNetChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <!-- 融資融券 -->
-          <CollapsibleChart
-            v-if="indicatorSettings.marginBalance || indicatorSettings.marginChange"
-            title="融資"
-            :indicators="[
-              ...(indicatorSettings.marginBalance ? [{ color: '#f59e0b', label: '餘額' }] : []),
-              ...(indicatorSettings.marginChange ? [{ color: '#888', label: '增減' }] : [])
-            ]"
-          >
-            <MarginBalanceChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-              :show-balance="indicatorSettings.marginBalance"
-              :show-change="indicatorSettings.marginChange"
-            />
-          </CollapsibleChart>
+          <!-- 融資 -->
+          <div v-if="indicatorSettings.marginBalance || indicatorSettings.marginChange" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('margin')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">融資</span>
+                <span v-if="indicatorSettings.marginBalance" class="text-[#f59e0b]">餘額</span>
+                <span v-if="indicatorSettings.marginChange" class="text-[#888]">增減</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.margin ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.margin" class="h-[120px]">
+              <MarginBalanceChart
+                :on-chart-ready="handleChartReady"
+                :on-crosshair-move="handleCrosshairMove"
+                :show-balance="indicatorSettings.marginBalance"
+                :show-change="indicatorSettings.marginChange"
+              />
+            </div>
+          </div>
 
-          <CollapsibleChart
-            v-if="indicatorSettings.shortBalance || indicatorSettings.shortChange"
-            title="融券"
-            :indicators="[
-              ...(indicatorSettings.shortBalance ? [{ color: '#06b6d4', label: '餘額' }] : []),
-              ...(indicatorSettings.shortChange ? [{ color: '#888', label: '增減' }] : [])
-            ]"
-          >
-            <ShortBalanceChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-              :show-balance="indicatorSettings.shortBalance"
-              :show-change="indicatorSettings.shortChange"
-            />
-          </CollapsibleChart>
+          <!-- 融券 -->
+          <div v-if="indicatorSettings.shortBalance || indicatorSettings.shortChange" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('short')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">融券</span>
+                <span v-if="indicatorSettings.shortBalance" class="text-[#06b6d4]">餘額</span>
+                <span v-if="indicatorSettings.shortChange" class="text-[#888]">增減</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.short ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.short" class="h-[120px]">
+              <ShortBalanceChart
+                :on-chart-ready="handleChartReady"
+                :on-crosshair-move="handleCrosshairMove"
+                :show-balance="indicatorSettings.shortBalance"
+                :show-change="indicatorSettings.shortChange"
+              />
+            </div>
+          </div>
 
-          <CollapsibleChart
-            v-if="indicatorSettings.shortMarginRatio"
-            title="券資比"
-            :indicators="[{ color: '#ec4899', label: '%' }]"
-          >
-            <ShortMarginRatioChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- 券資比 -->
+          <div v-if="indicatorSettings.shortMarginRatio" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('shortMarginRatio')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">券資比</span>
+                <span class="text-[#ec4899]">%</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.shortMarginRatio ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.shortMarginRatio" class="h-[120px]">
+              <ShortMarginRatioChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <!-- 技術指標 -->
-          <CollapsibleChart
-            v-if="indicatorSettings.macd"
-            title="MACD"
-            :indicators="[
-              { color: '#3b82f6', label: 'DIF' },
-              { color: '#f59e0b', label: 'DEA' },
-              { color: '#888', label: '柱' }
-            ]"
-          >
-            <MACDChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- MACD -->
+          <div v-if="indicatorSettings.macd" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('macd')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">MACD</span>
+                <span class="text-[#3b82f6]">DIF</span>
+                <span class="text-[#f59e0b]">DEA</span>
+                <span class="text-[#888]">柱</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.macd ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.macd" class="h-[120px]">
+              <MACDChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <CollapsibleChart
-            v-if="indicatorSettings.kd"
-            title="KD"
-            :indicators="[
-              { color: '#3b82f6', label: 'K' },
-              { color: '#f59e0b', label: 'D' }
-            ]"
-          >
-            <KDChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- KD -->
+          <div v-if="indicatorSettings.kd" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('kd')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">KD</span>
+                <span class="text-[#3b82f6]">K</span>
+                <span class="text-[#f59e0b]">D</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.kd ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.kd" class="h-[120px]">
+              <KDChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <CollapsibleChart
-            v-if="indicatorSettings.rsi"
-            title="RSI"
-            :indicators="[
-              { color: '#22c55e', label: '9' },
-              { color: '#ef4444', label: '14' }
-            ]"
-          >
-            <RSIChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- RSI -->
+          <div v-if="indicatorSettings.rsi" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('rsi')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">RSI</span>
+                <span class="text-[#22c55e]">9</span>
+                <span class="text-[#ef4444]">14</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.rsi ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.rsi" class="h-[120px]">
+              <RSIChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
 
-          <CollapsibleChart
-            v-if="indicatorSettings.bollinger"
-            title="布林通道"
-            :indicators="[{ color: '#a855f7', label: '%B' }]"
-          >
-            <BollingerChart
-              :on-chart-ready="handleChartReady"
-              :on-crosshair-move="handleCrosshairMove"
-            />
-          </CollapsibleChart>
+          <!-- 布林通道 -->
+          <div v-if="indicatorSettings.bollinger" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('bollinger')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">布林通道</span>
+                <span class="text-[#a855f7]">%B</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.bollinger ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.bollinger" class="h-[120px]">
+              <BollingerChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
         </div>
 
         <!-- Scroll Buttons -->
