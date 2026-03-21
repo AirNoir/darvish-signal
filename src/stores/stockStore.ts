@@ -8,23 +8,93 @@ import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock } from '..
 const FINMIND_API_BASE = 'https://api.finmindtrade.com/api/v4/data';
 
 export type ApiSource = 'finmind' | 'darvish'
+export type TimeInterval = 'daily' | 'weekly' | 'monthly'
 
 export interface SignalMarker {
   date: string
   type: 'buy' | 'sell'
 }
 
+// Helper: Get ISO week number
+function getWeekKey(dateStr: string): string {
+  const date = new Date(dateStr);
+  const year = date.getFullYear();
+  const firstDayOfYear = new Date(year, 0, 1);
+  const dayOfYear = Math.floor((date.getTime() - firstDayOfYear.getTime()) / 86400000) + 1;
+  const weekNumber = Math.ceil((dayOfYear + firstDayOfYear.getDay()) / 7);
+  return `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+}
+
+// Helper: Get month key
+function getMonthKey(dateStr: string): string {
+  return dateStr.slice(0, 7); // "2024-03"
+}
+
+// Helper: Aggregate daily data into period data
+function aggregateData<T extends { time: string }>(
+  data: T[],
+  interval: TimeInterval,
+  aggregator: (items: T[], periodKey: string) => T | null
+): T[] {
+  if (interval === 'daily') return data;
+
+  const getKey = interval === 'weekly' ? getWeekKey : getMonthKey;
+  const groups = new Map<string, T[]>();
+
+  for (const item of data) {
+    const key = getKey(item.time);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(item);
+  }
+
+  const result: T[] = [];
+  for (const [key, items] of groups) {
+    const aggregated = aggregator(items, key);
+    if (aggregated) result.push(aggregated);
+  }
+  return result;
+}
+
 export const useStockStore = defineStore('stock', () => {
   // State
   const stockId = ref<string>('2330');
   const stockName = ref<string>('');
-  const stockData = ref<StockData[]>([]);
+  const rawStockData = ref<StockData[]>([]); // Raw daily data from API
   const isLoading = ref<boolean>(false);
   const error = ref<string | null>(null);
   const indicators = ref<TechnicalIndicators | null>(null);
 
+  // Time interval for chart display
+  const timeInterval = ref<TimeInterval>('daily');
+
   // API Source
   const apiSource = ref<ApiSource>('darvish');
+
+  // Get fetch limit based on interval
+  const getFetchLimit = () => {
+    switch (timeInterval.value) {
+      case 'weekly': return 250; // ~1 year of weekly data
+      case 'monthly': return 500; // ~2 years of monthly data
+      default: return 120; // ~6 months of daily data
+    }
+  };
+
+  // Computed: Aggregated stock data based on interval
+  const stockData = computed<StockData[]>(() => {
+    return aggregateData(rawStockData.value, timeInterval.value, (items) => {
+      if (items.length === 0) return null;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      return {
+        time: last.time, // Use last day of period as time
+        open: first.open,
+        high: Math.max(...items.map(d => d.high)),
+        low: Math.min(...items.map(d => d.low)),
+        close: last.close,
+        volume: items.reduce((sum, d) => sum + d.volume, 0)
+      };
+    });
+  });
 
   // DarvishSignal API State
   const stockList = ref<Stock[]>([]);
@@ -105,10 +175,11 @@ export const useStockStore = defineStore('stock', () => {
 
     if (apiSource.value === 'darvish') {
       try {
+        const limit = getFetchLimit();
         // Fetch stock info and history in parallel
         const [stockInfo, data] = await Promise.all([
           stockApi.getStockBySymbol(id).catch(() => null),
-          stockApi.getStockHistory(id, 60)
+          stockApi.getStockHistory(id, limit)
         ]);
 
         if (stockInfo) {
@@ -116,7 +187,7 @@ export const useStockStore = defineStore('stock', () => {
         }
         // API returns newest-first, reverse to oldest-first for the chart
         const sorted = [...data].reverse();
-        stockData.value = sorted.map((item) => ({
+        rawStockData.value = sorted.map((item) => ({
           time: item.trade_date,
           open: item.open,
           high: item.high,
@@ -125,7 +196,7 @@ export const useStockStore = defineStore('stock', () => {
           volume: item.volume
         }));
         stockId.value = id;
-        indicators.value = computeIndicators(stockData.value);
+        indicators.value = computeIndicators(rawStockData.value);
 
         // Extract API-provided indicators
         rsiData.value = sorted.map((item) => ({
@@ -209,7 +280,7 @@ export const useStockStore = defineStore('stock', () => {
           throw new Error(response.data.msg || 'API request failed');
         }
 
-        stockData.value = response.data.data.map((item) => ({
+        rawStockData.value = response.data.data.map((item) => ({
           time: item.date,
           open: item.open,
           high: item.max,
@@ -219,7 +290,7 @@ export const useStockStore = defineStore('stock', () => {
         }));
 
         stockId.value = id;
-        indicators.value = computeIndicators(stockData.value);
+        indicators.value = computeIndicators(rawStockData.value);
       } catch (err) {
         error.value = err instanceof Error ? err.message : 'Failed to fetch stock data';
         console.error('Error fetching stock data:', err);
@@ -320,6 +391,15 @@ export const useStockStore = defineStore('stock', () => {
     apiSource.value = source;
   };
 
+  const setTimeInterval = async (interval: TimeInterval) => {
+    if (timeInterval.value === interval) return;
+    timeInterval.value = interval;
+    // Refetch data with new limit if needed
+    if (stockId.value) {
+      await fetchStockData(stockId.value);
+    }
+  };
+
   const getDefaultStartDate = (): string => {
     const date = new Date();
     date.setFullYear(date.getFullYear() - 1);
@@ -331,6 +411,7 @@ export const useStockStore = defineStore('stock', () => {
     stockId,
     stockName,
     stockData,
+    timeInterval,
     isLoading,
     isLoadingMarkers,
     error,
@@ -366,6 +447,7 @@ export const useStockStore = defineStore('stock', () => {
     fetchSellAlerts,
     fetchAvailableDates,
     setApiSource,
+    setTimeInterval,
     fetchSignalMarkers,
   };
 });
