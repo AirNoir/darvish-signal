@@ -18,6 +18,7 @@ const tooltipVisible = ref(false);
 const tooltipX = ref(0);
 const tooltipY = ref(0);
 const hoverData = ref<{
+  date: string | null;
   open: number | null;
   high: number | null;
   low: number | null;
@@ -110,6 +111,7 @@ const initChart = () => {
       const ma20Val = param.seriesData.get(ma20Series) as any;
       if (ohlc) {
         hoverData.value = {
+          date: param.time as string,
           open: ohlc.open ?? null,
           high: ohlc.high ?? null,
           low: ohlc.low ?? null,
@@ -229,6 +231,7 @@ defineExpose({
       :style="{ left: tooltipX + 15 + 'px', top: tooltipY + 15 + 'px' }"
     >
       <div class="flex flex-col gap-0.5">
+        <div class="text-[#3b82f6] font-medium border-b border-[#333] pb-0.5 mb-0.5">{{ hoverData.date }}</div>
         <div class="flex gap-2">
           <span class="text-[#888]">開</span><span class="text-white">{{ hoverData.open?.toFixed(2) }}</span>
           <span class="text-[#888]">高</span><span class="text-[#26a69a]">{{ hoverData.high?.toFixed(2) }}</span>
