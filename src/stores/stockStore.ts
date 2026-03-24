@@ -39,23 +39,36 @@ export const useStockStore = defineStore('stock', () => {
   const { computeIndicators } = useTechnicalAnalysis();
 
   // Computed: Candlestick data for K-line chart
+  // Filter out records with null/undefined OHLC values to prevent lightweight-charts errors
   const candlestickData = computed<CandlestickData[]>(() => {
-    return stockData.value.map((d) => ({
-      time: d.time,
-      open: d.open,
-      high: d.high,
-      low: d.low,
-      close: d.close
-    }));
+    return stockData.value
+      .filter((d) =>
+        d.open != null && d.high != null && d.low != null && d.close != null &&
+        !isNaN(d.open) && !isNaN(d.high) && !isNaN(d.low) && !isNaN(d.close)
+      )
+      .map((d) => ({
+        time: d.time,
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close
+      }));
   });
 
   // Computed: Volume data with colors
+  // Filter out records with invalid data to stay in sync with candlestickData
   const volumeData = computed<VolumeData[]>(() => {
-    return stockData.value.map((d) => ({
-      time: d.time,
-      value: d.volume,
-      color: d.close >= d.open ? '#26a69a' : '#ef5350'
-    }));
+    return stockData.value
+      .filter((d) =>
+        d.open != null && d.high != null && d.low != null && d.close != null &&
+        !isNaN(d.open) && !isNaN(d.high) && !isNaN(d.low) && !isNaN(d.close) &&
+        d.volume != null && !isNaN(d.volume)
+      )
+      .map((d) => ({
+        time: d.time,
+        value: d.volume,
+        color: d.close >= d.open ? '#26a69a' : '#ef5350'
+      }));
   });
 
   // Computed: MA5 line data
