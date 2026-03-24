@@ -192,6 +192,10 @@ export const stockApi = {
     return apiFetch<AlphaPickSummaryItem[]>(`${API_BASE_URL}/api/alpha/pick/summary`)
   },
 
+  async getAlphaPickByStock(symbol: string): Promise<AlphaPickItem[]> {
+    return apiFetch<AlphaPickItem[]>(`${API_BASE_URL}/api/alpha/pick/stock/${symbol}`)
+  },
+
   // Sell Alerts - SELL signals
   async getSellLatest(): Promise<SellAlertResponse> {
     return apiFetch<SellAlertResponse>(`${API_BASE_URL}/api/alpha/sell/latest`)
@@ -203,6 +207,10 @@ export const stockApi = {
 
   async getSellSummary(): Promise<AlphaPickSummaryItem[]> {
     return apiFetch<AlphaPickSummaryItem[]>(`${API_BASE_URL}/api/alpha/sell/summary`)
+  },
+
+  async getSellByStock(symbol: string): Promise<SellAlertItem[]> {
+    return apiFetch<SellAlertItem[]>(`${API_BASE_URL}/api/alpha/sell/stock/${symbol}`)
   },
 }
 

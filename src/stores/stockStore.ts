@@ -252,26 +252,16 @@ export const useStockStore = defineStore('stock', () => {
   const fetchSignalMarkers = async (symbol: string) => {
     isLoadingMarkers.value = true;
     try {
-      const dates = await stockApi.getAlphaPickDates(30);
+      // Fetch picks and sells for the stock in parallel
+      const [picks, sells] = await Promise.all([
+        stockApi.getAlphaPickByStock(symbol).catch(() => []),
+        stockApi.getSellByStock(symbol).catch(() => []),
+      ]);
 
-      // Fetch picks and sells for all dates in parallel
-      const results = await Promise.all(
-        dates.map(async (date) => {
-          const [picksResp, sellsResp] = await Promise.all([
-            stockApi.getAlphaPickByDate(date).catch(() => null),
-            stockApi.getSellByDate(date).catch(() => null),
-          ]);
-          const isBuy = picksResp?.picks.some(p => p.symbol === symbol) ?? false;
-          const isSell = sellsResp?.sells.some(s => s.symbol === symbol) ?? false;
-          return { date, isBuy, isSell };
-        })
-      );
-
-      const markers: SignalMarker[] = [];
-      for (const r of results) {
-        if (r.isBuy) markers.push({ date: r.date, type: 'buy' });
-        else if (r.isSell) markers.push({ date: r.date, type: 'sell' });
-      }
+      const markers: SignalMarker[] = [
+        ...picks.map((p) => ({ date: p.trade_date, type: 'buy' as const })),
+        ...sells.map((s) => ({ date: s.trade_date, type: 'sell' as const })),
+      ];
       // Sort by date ascending for the chart
       markers.sort((a, b) => a.date.localeCompare(b.date));
       signalMarkers.value = markers;
