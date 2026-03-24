@@ -261,11 +261,18 @@ export const useStockStore = defineStore('stock', () => {
       const picks = picksResp?.records ?? [];
       const sells = sellsResp?.records ?? [];
 
-      const markers: SignalMarker[] = [
-        ...picks.map((p) => ({ date: p.trade_date, type: 'buy' as const })),
-        ...sells.map((s) => ({ date: s.trade_date, type: 'sell' as const })),
-      ];
-      // Sort by date ascending for the chart
+      // Use Map to deduplicate by date (sell takes priority if both exist on same date)
+      const markerMap = new Map<string, SignalMarker>();
+      for (const p of picks) {
+        markerMap.set(p.trade_date, { date: p.trade_date, type: 'buy' });
+      }
+      for (const s of sells) {
+        // Sell overwrites buy if on same date (sell is more urgent)
+        markerMap.set(s.trade_date, { date: s.trade_date, type: 'sell' });
+      }
+
+      // Convert to array and sort by date ascending
+      const markers = Array.from(markerMap.values());
       markers.sort((a, b) => a.date.localeCompare(b.date));
       signalMarkers.value = markers;
     } catch (err) {
