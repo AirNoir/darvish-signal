@@ -253,10 +253,13 @@ export const useStockStore = defineStore('stock', () => {
     isLoadingMarkers.value = true;
     try {
       // Fetch picks and sells for the stock in parallel
-      const [picks, sells] = await Promise.all([
-        stockApi.getAlphaPickByStock(symbol).catch(() => []),
-        stockApi.getSellByStock(symbol).catch(() => []),
+      const [picksResp, sellsResp] = await Promise.all([
+        stockApi.getAlphaPickByStock(symbol).catch(() => null),
+        stockApi.getSellByStock(symbol).catch(() => null),
       ]);
+
+      const picks = picksResp?.records ?? [];
+      const sells = sellsResp?.records ?? [];
 
       const markers: SignalMarker[] = [
         ...picks.map((p) => ({ date: p.trade_date, type: 'buy' as const })),

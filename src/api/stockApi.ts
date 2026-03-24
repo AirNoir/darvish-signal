@@ -141,6 +141,12 @@ export interface SellAlertResponse {
   sells: SellAlertItem[]
 }
 
+export interface StockSignalResponse<T> {
+  symbol: string
+  count: number
+  records: T[]
+}
+
 // --- API Functions ---
 
 async function apiFetch<T>(url: string): Promise<T> {
@@ -192,8 +198,8 @@ export const stockApi = {
     return apiFetch<AlphaPickSummaryItem[]>(`${API_BASE_URL}/api/alpha/pick/summary`)
   },
 
-  async getAlphaPickByStock(symbol: string): Promise<AlphaPickItem[]> {
-    return apiFetch<AlphaPickItem[]>(`${API_BASE_URL}/api/alpha/pick/stock/${symbol}`)
+  async getAlphaPickByStock(symbol: string): Promise<StockSignalResponse<AlphaPickItem>> {
+    return apiFetch<StockSignalResponse<AlphaPickItem>>(`${API_BASE_URL}/api/alpha/pick/stock/${symbol}`)
   },
 
   // Sell Alerts - SELL signals
@@ -209,8 +215,8 @@ export const stockApi = {
     return apiFetch<AlphaPickSummaryItem[]>(`${API_BASE_URL}/api/alpha/sell/summary`)
   },
 
-  async getSellByStock(symbol: string): Promise<SellAlertItem[]> {
-    return apiFetch<SellAlertItem[]>(`${API_BASE_URL}/api/alpha/sell/stock/${symbol}`)
+  async getSellByStock(symbol: string): Promise<StockSignalResponse<SellAlertItem>> {
+    return apiFetch<StockSignalResponse<SellAlertItem>>(`${API_BASE_URL}/api/alpha/sell/stock/${symbol}`)
   },
 }
 
