@@ -28,6 +28,10 @@ export interface DailyDataItem {
   vol_ma5?: number
   vol_ma10?: number
   vol_ma20?: number
+  foreign_net_5d_avg?: number
+  foreign_net_10d_avg?: number
+  foreign_net_15d_avg?: number
+  foreign_net_30d_avg?: number
   rsi_9?: number
   rsi_14?: number
   macd?: number

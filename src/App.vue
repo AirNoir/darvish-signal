@@ -15,6 +15,7 @@ import ForeignNetChart from './components/ForeignNetChart.vue';
 import TrustNetChart from './components/TrustNetChart.vue';
 import TurnoverRateChart from './components/TurnoverRateChart.vue';
 import VolumeMAChart from './components/VolumeMAChart.vue';
+import ForeignNetMAChart from './components/ForeignNetMAChart.vue';
 import MarginBalanceChart from './components/MarginBalanceChart.vue';
 import ShortBalanceChart from './components/ShortBalanceChart.vue';
 import ShortMarginRatioChart from './components/ShortMarginRatioChart.vue';
@@ -36,6 +37,7 @@ const indicatorSettings = ref<IndicatorSettings>({
   volumeMA: false,
   // 法人買賣
   foreignNet: true,
+  foreignNetMA: true,
   trustNet: true,
   // 融資融券
   marginBalance: false,
@@ -56,6 +58,7 @@ const collapsed = reactive<Record<string, boolean>>({
   turnoverRate: false,
   volumeMA: false,
   foreignNet: false,
+  foreignNetMA: false,
   trustNet: false,
   margin: false,
   short: false,
@@ -359,6 +362,28 @@ onMounted(() => {
             </div>
             <div v-show="!collapsed.foreignNet" class="h-[120px]">
               <ForeignNetChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
+            </div>
+          </div>
+
+          <!-- 外資買超均線 -->
+          <div v-if="indicatorSettings.foreignNetMA" class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+              @click="toggleCollapse('foreignNetMA')"
+            >
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-white font-bold">外資買超均線</span>
+                <span class="text-[#f59e0b]">5日</span>
+                <span class="text-[#3b82f6]">10日</span>
+                <span class="text-[#8b5cf6]">15日</span>
+                <span class="text-[#10b981]">30日</span>
+              </div>
+              <svg :class="['w-4 h-4 text-[#666] transition-transform', collapsed.foreignNetMA ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
+            <div v-show="!collapsed.foreignNetMA" class="h-[120px]">
+              <ForeignNetMAChart :on-chart-ready="handleChartReady" :on-crosshair-move="handleCrosshairMove" />
             </div>
           </div>
 

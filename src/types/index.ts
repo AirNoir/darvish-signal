@@ -62,6 +62,14 @@ export interface VolumeMAData {
   ma20: number | null;
 }
 
+export interface ForeignNetMAData {
+  time: string;
+  avg5: number | null;
+  avg10: number | null;
+  avg15: number | null;
+  avg30: number | null;
+}
+
 export interface MarginData {
   time: string;
   balance: number | null;
@@ -87,6 +95,7 @@ export interface IndicatorSettings {
   volumeMA: boolean;
   // 法人買賣
   foreignNet: boolean;
+  foreignNetMA: boolean;
   trustNet: boolean;
   // 融資融券
   marginBalance: boolean;

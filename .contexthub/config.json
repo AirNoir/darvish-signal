@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "description": "ContextHub Library 版本索引。在加入或升級 Library 後，執行 /contexthub-update 更新此檔案。",
+  "libraries": {
+    "react": {
+      "version": "",
+      "notes": "請填入專案使用的版本"
+    },
+    "react-native": {
+      "version": "",
+      "notes": "請填入專案使用的版本"
+    }
+  }
+}

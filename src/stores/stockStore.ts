@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, MarginData, ShortData, ShortMarginRatioData } from '../types';
+import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, ForeignNetMAData, MarginData, ShortData, ShortMarginRatioData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
 import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock } from '../api/stockApi';
 
@@ -105,6 +105,7 @@ export const useStockStore = defineStore('stock', () => {
   const institutionalData = ref<InstitutionalData[]>([]);
   const turnoverRateData = ref<TurnoverRateData[]>([]);
   const volumeMAData = ref<VolumeMAData[]>([]);
+  const foreignNetMAData = ref<ForeignNetMAData[]>([]);
   const marginData = ref<MarginData[]>([]);
   const shortData = ref<ShortData[]>([]);
   const shortMarginRatioData = ref<ShortMarginRatioData[]>([]);
@@ -179,6 +180,14 @@ export const useStockStore = defineStore('stock', () => {
           ma5: item.vol_ma5 ?? null,
           ma10: item.vol_ma10 ?? null,
           ma20: item.vol_ma20 ?? null
+        }));
+
+        foreignNetMAData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          avg5: item.foreign_net_5d_avg ?? null,
+          avg10: item.foreign_net_10d_avg ?? null,
+          avg15: item.foreign_net_15d_avg ?? null,
+          avg30: item.foreign_net_30d_avg ?? null
         }));
 
         marginData.value = sorted.map((item) => ({
@@ -368,6 +377,7 @@ export const useStockStore = defineStore('stock', () => {
     institutionalData,
     turnoverRateData,
     volumeMAData,
+    foreignNetMAData,
     marginData,
     shortData,
     shortMarginRatioData,

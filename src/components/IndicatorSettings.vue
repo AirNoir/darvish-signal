@@ -26,6 +26,7 @@ const indicatorGroups = [
     title: '法人買賣',
     items: [
       { key: 'foreignNet', label: '外資買賣超', description: '外資買賣超張數' },
+      { key: 'foreignNetMA', label: '外資買超均線', description: '外資買超 5/10/15/30 日均線' },
       { key: 'trustNet', label: '投信買賣超', description: '投信買賣超張數' },
     ]
   },
