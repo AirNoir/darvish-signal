@@ -77,9 +77,9 @@ const initChart = () => {
       visible: true,
       barSpacing: 12,
       minBarSpacing: 4,
-      rightOffset: 5,
-      fixLeftEdge: true,
-      fixRightEdge: true
+      rightOffset: 8,
+      fixLeftEdge: false,
+      fixRightEdge: false
     }
   });
 

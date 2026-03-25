@@ -71,9 +71,9 @@ const initChart = () => {
       secondsVisible: false,
       barSpacing: 12,
       minBarSpacing: 4,
-      rightOffset: 5,
-      fixLeftEdge: true,
-      fixRightEdge: true
+      rightOffset: 8,
+      fixLeftEdge: false,
+      fixRightEdge: false
     }
   });
 
@@ -163,13 +163,19 @@ const updateData = () => {
 const updateMarkers = () => {
   if (!candlestickSeries) return;
 
-  const markers = store.signalMarkers.map(m => ({
-    time: m.date as string,
-    position: m.type === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
-    color: m.type === 'buy' ? '#FFD700' : '#E040FB',
-    shape: m.type === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
-    text: m.type === 'buy' ? 'B' : 'S',
-  }));
+  // Get the set of valid dates from candlestick data
+  const validDates = new Set(store.candlestickData.map(d => d.time));
+
+  // Filter markers to only include dates that exist in candlestick data
+  const markers = store.signalMarkers
+    .filter(m => validDates.has(m.date))
+    .map(m => ({
+      time: m.date as string,
+      position: m.type === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
+      color: m.type === 'buy' ? '#FFD700' : '#E040FB',
+      shape: m.type === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
+      text: m.type === 'buy' ? 'B' : 'S',
+    }));
 
   if (markersPlugin) {
     markersPlugin.setMarkers(markers);
