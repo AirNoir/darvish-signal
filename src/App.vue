@@ -131,12 +131,9 @@ onMounted(() => {
     <!-- Header -->
     <header class="h-14 min-h-[56px] flex items-center justify-between px-4 border-b border-[#333] bg-[#1a1a1a]">
       <!-- Left: Logo & Title -->
-      <div class="flex items-center gap-3">
-        <svg class="w-8 h-8 text-[#3b82f6]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M17 7H21V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <h1 class="text-lg font-semibold text-white hidden sm:block">達比訊號</h1>
+      <div class="flex items-center gap-2">
+        <img src="/logo.png" alt="達比 K-Zone" class="w-10 h-10 rounded-full" />
+        <h1 class="text-lg font-semibold text-white hidden sm:block">達比 K-Zone</h1>
       </div>
 
       <!-- Center: Current Stock Info -->
