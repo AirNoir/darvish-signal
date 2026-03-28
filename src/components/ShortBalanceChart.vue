@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { createChart, LineSeries, HistogramSeries, CrosshairMode } from 'lightweight-charts';
-import type { IChartApi, ISeriesApi } from 'lightweight-charts';
+import type { IChartApi, ISeriesApi, Time } from 'lightweight-charts';
 import { useStockStore } from '../stores/stockStore';
 
 const props = defineProps<{
@@ -17,9 +17,7 @@ let chart: IChartApi | null = null;
 let balanceSeries: ISeriesApi<'Line'> | null = null;
 let changeSeries: ISeriesApi<'Histogram'> | null = null;
 
-const tooltipVisible = ref(false);
-const tooltipX = ref(0);
-const tooltipY = ref(0);
+
 const hoverBalance = ref<number | null>(null);
 const hoverChange = ref<number | null>(null);
 
@@ -33,6 +31,29 @@ const formatLargeNumber = (price: number) => {
   return price.toFixed(0);
 };
 
+// 根據同步的時間更新 hover 數據
+const updateHoverDataFromTime = (time: Time | null) => {
+  if (!time) {
+    hoverBalance.value = null;
+    hoverChange.value = null;
+    return;
+  }
+  const data = store.shortData.find(d => d.time === time);
+  if (data) {
+    hoverBalance.value = data.balance;
+    hoverChange.value = data.change;
+  }
+};
+
+// 監聽 store 中同步的 hover 時間變化
+watch(
+  () => store.syncedHoverTime,
+  (newTime) => {
+    updateHoverDataFromTime(newTime);
+  },
+  { immediate: true }
+);
+
 const initChart = () => {
   if (!chartContainer.value) return;
 
@@ -45,8 +66,8 @@ const initChart = () => {
       vertLine: { width: 1, color: '#505050', style: 0, labelVisible: false, labelBackgroundColor: '#3b82f6' },
       horzLine: { width: 1, color: '#505050', style: 0, labelVisible: true, labelBackgroundColor: '#3b82f6' }
     },
-    rightPriceScale: { borderColor: '#333', scaleMargins: { top: 0.1, bottom: 0.1 }, minimumWidth: 70 },
-    timeScale: { borderColor: '#333', visible: true, barSpacing: 12, minBarSpacing: 4, rightOffset: 8, fixLeftEdge: false, fixRightEdge: false }
+    rightPriceScale: { borderColor: '#333', scaleMargins: { top: 0.05, bottom: 0.05 }, minimumWidth: 70 },
+    timeScale: { borderColor: '#333', visible: false, barSpacing: 12, minBarSpacing: 4, rightOffset: 8, fixLeftEdge: false, fixRightEdge: false }
   });
 
   if (props.showChange !== false) {
@@ -59,7 +80,7 @@ const initChart = () => {
 
   chart.subscribeCrosshairMove((param) => {
     if (props.onCrosshairMove && chart) props.onCrosshairMove(chart, param);
-    if (param.time && param.point) {
+    if (param.time) {
       if (balanceSeries) {
         const bVal = param.seriesData.get(balanceSeries) as any;
         hoverBalance.value = bVal?.value ?? null;
@@ -68,13 +89,9 @@ const initChart = () => {
         const cVal = param.seriesData.get(changeSeries) as any;
         hoverChange.value = cVal?.value ?? null;
       }
-      tooltipVisible.value = true;
-      tooltipX.value = param.point.x;
-      tooltipY.value = param.point.y;
     } else {
       hoverBalance.value = null;
       hoverChange.value = null;
-      tooltipVisible.value = false;
     }
   });
 
@@ -110,17 +127,14 @@ defineExpose({ getChart: () => chart });
 </script>
 
 <template>
-  <div class="relative w-full h-full overflow-hidden">
+  <div class="relative w-full h-full overflow-visible">
     <div ref="chartContainer" class="w-full h-full"></div>
-    <div
-      v-if="tooltipVisible && (hoverBalance !== null || hoverChange !== null)"
-      class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-2 py-1 text-xs z-50"
-      :style="{ left: tooltipX + 15 + 'px', top: tooltipY + 15 + 'px' }"
-    >
-      <div class="flex flex-col gap-0.5">
-        <span v-if="hoverBalance !== null" class="text-[#06b6d4]">餘額 {{ formatValue(hoverBalance) }}</span>
-        <span v-if="hoverChange !== null" :class="hoverChange >= 0 ? 'text-[#ef4444]' : 'text-[#22c55e]'">增減 {{ formatValue(hoverChange) }}</span>
-      </div>
+
+    <!-- 左上角 Label -->
+    <div class="absolute top-1 left-1 z-10 flex items-center gap-1 text-[10px] pointer-events-none flex-wrap">
+      <span class="text-white font-bold bg-[#1a1a1a]/80 px-1 rounded">融券</span>
+      <span v-if="hoverBalance !== null && showBalance !== false" class="text-[#06b6d4] bg-[#1a1a1a]/80 px-1 rounded">餘額 {{ formatValue(hoverBalance) }}</span>
+      <span v-if="hoverChange !== null && showChange !== false" :class="hoverChange >= 0 ? 'text-[#ef4444]' : 'text-[#22c55e]'" class="bg-[#1a1a1a]/80 px-1 rounded">增減 {{ formatValue(hoverChange) }}</span>
     </div>
   </div>
 </template>

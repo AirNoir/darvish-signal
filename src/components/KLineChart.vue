@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { createChart, CandlestickSeries, LineSeries, CrosshairMode, createSeriesMarkers } from 'lightweight-charts';
-import type { IChartApi, ISeriesApi } from 'lightweight-charts';
+import type { IChartApi, ISeriesApi, Time } from 'lightweight-charts';
 import { useStockStore } from '../stores/stockStore';
 
 const props = defineProps<{
@@ -13,10 +13,7 @@ const store = useStockStore();
 const chartContainer = ref<HTMLElement | null>(null);
 let chart: IChartApi | null = null;
 
-// Crosshair tooltip
-const tooltipVisible = ref(false);
-const tooltipX = ref(0);
-const tooltipY = ref(0);
+// Hover data for top-left info display
 const hoverData = ref<{
   date: string | null;
   open: number | null;
@@ -26,11 +23,91 @@ const hoverData = ref<{
   ma5: number | null;
   ma20: number | null;
 } | null>(null);
+
+// Tooltip position (relative to container)
+const tooltipVisible = ref(false);
+const tooltipX = ref(0);
+const tooltipY = ref(0);
+
+// 計算 tooltip 位置（避免超出容器邊界）
+const tooltipStyle = computed(() => {
+  const containerWidth = chartContainer.value?.clientWidth ?? 800;
+  const containerHeight = chartContainer.value?.clientHeight ?? 400;
+  const tooltipWidth = 120;
+  const tooltipHeight = 24;
+
+  let left = tooltipX.value + 12;
+  let top = tooltipY.value - 12;
+
+  // 右邊界檢查
+  if (left + tooltipWidth > containerWidth) {
+    left = tooltipX.value - tooltipWidth - 12;
+  }
+  // 上邊界檢查
+  if (top < 0) {
+    top = tooltipY.value + 12;
+  }
+  // 下邊界檢查
+  if (top + tooltipHeight > containerHeight) {
+    top = containerHeight - tooltipHeight - 4;
+  }
+
+  return {
+    left: left + 'px',
+    top: top + 'px'
+  };
+});
+
 let candlestickSeries: ISeriesApi<'Candlestick'> | null = null;
 let ma5Series: ISeriesApi<'Line'> | null = null;
 let ma20Series: ISeriesApi<'Line'> | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let markersPlugin: any = null;
+
+// 根據同步的時間更新 hover 數據
+const updateHoverDataFromTime = (time: Time | null) => {
+  if (!time || !candlestickSeries || !ma5Series || !ma20Series) {
+    hoverData.value = null;
+    tooltipVisible.value = false;
+    return;
+  }
+
+  const candleData = store.candlestickData.find(d => d.time === time);
+  const ma5Data = store.ma5Data.find(d => d.time === time);
+  const ma20Data = store.ma20Data.find(d => d.time === time);
+
+  if (candleData) {
+    hoverData.value = {
+      date: time as string,
+      open: candleData.open,
+      high: candleData.high,
+      low: candleData.low,
+      close: candleData.close,
+      ma5: ma5Data?.value ?? null,
+      ma20: ma20Data?.value ?? null
+    };
+
+    // 計算 tooltip 位置（顯示在收盤價位置）
+    if (chart && candleData.close != null) {
+      const timeCoord = chart.timeScale().timeToCoordinate(time);
+      const priceCoord = candlestickSeries.priceToCoordinate(candleData.close);
+      if (timeCoord !== null && priceCoord !== null) {
+        tooltipX.value = timeCoord;
+        tooltipY.value = priceCoord;
+        tooltipVisible.value = true;
+      }
+    }
+  }
+};
+
+// 監聽 store 中同步的 hover 時間變化
+watch(
+  () => store.syncedHoverTime,
+  (newTime) => {
+    updateHoverDataFromTime(newTime);
+  },
+  { immediate: true }
+);
 
 const initChart = () => {
   if (!chartContainer.value) return;
@@ -49,7 +126,7 @@ const initChart = () => {
       vertLine: {
         width: 1,
         color: '#505050',
-        style: 0, // Solid line
+        style: 0,
         labelVisible: false,
         labelBackgroundColor: '#3b82f6'
       },
@@ -63,7 +140,11 @@ const initChart = () => {
     },
     rightPriceScale: {
       borderColor: '#333',
-      minimumWidth: 70 // 設定較大的最小寬度以確保所有圖表對齊
+      minimumWidth: 70,
+      scaleMargins: {
+        top: 0.02,
+        bottom: 0.02
+      }
     },
     timeScale: {
       borderColor: '#333',
@@ -104,24 +185,33 @@ const initChart = () => {
     if (props.onCrosshairMove && chart) {
       props.onCrosshairMove(chart, param);
     }
-    // Update hover data and tooltip position
-    if (param.time && param.point && candlestickSeries && ma5Series && ma20Series) {
+    // Update hover data
+    if (param.time && candlestickSeries && ma5Series && ma20Series) {
       const ohlc = param.seriesData.get(candlestickSeries) as any;
       const ma5Val = param.seriesData.get(ma5Series) as any;
       const ma20Val = param.seriesData.get(ma20Series) as any;
+      const closePrice = ohlc?.close ?? null;
       if (ohlc) {
         hoverData.value = {
           date: param.time as string,
           open: ohlc.open ?? null,
           high: ohlc.high ?? null,
           low: ohlc.low ?? null,
-          close: ohlc.close ?? null,
+          close: closePrice,
           ma5: ma5Val?.value ?? null,
           ma20: ma20Val?.value ?? null
         };
-        tooltipVisible.value = true;
-        tooltipX.value = param.point.x;
-        tooltipY.value = param.point.y;
+
+        // 計算 tooltip 位置（顯示在收盤價位置）
+        if (closePrice != null) {
+          const timeCoord = chart!.timeScale().timeToCoordinate(param.time);
+          const priceCoord = candlestickSeries!.priceToCoordinate(closePrice);
+          if (timeCoord !== null && priceCoord !== null) {
+            tooltipX.value = timeCoord;
+            tooltipY.value = priceCoord;
+            tooltipVisible.value = true;
+          }
+        }
       }
     } else {
       hoverData.value = null;
@@ -163,10 +253,8 @@ const updateData = () => {
 const updateMarkers = () => {
   if (!candlestickSeries) return;
 
-  // Get the set of valid dates from candlestick data
   const validDates = new Set(store.candlestickData.map(d => d.time));
 
-  // Filter markers to only include dates that exist in candlestick data
   const markers = store.signalMarkers
     .filter(m => validDates.has(m.date))
     .map(m => ({
@@ -220,37 +308,36 @@ defineExpose({
   <div class="relative w-full h-full overflow-hidden">
     <div ref="chartContainer" class="w-full h-full"></div>
 
-    <!-- Fixed Title -->
-    <div class="absolute top-1 left-1 z-10 flex items-center gap-2 text-xs bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded">
-      <span class="text-white font-bold">K線圖</span>
-      <span class="text-[#f59e0b]">MA5</span>
-      <span class="text-[#8b5cf6]">MA20</span>
-      <span class="text-[#FFD700]">▲買</span>
-      <span class="text-[#E040FB]">▼賣</span>
-      <span v-if="store.isLoadingMarkers" class="text-[#666]">載入中...</span>
+    <!-- 左上角固定資訊顯示 -->
+    <div class="absolute top-1 left-1 z-10 flex items-center gap-1 text-[10px] pointer-events-none">
+      <span class="text-white font-bold bg-[#1a1a1a]/80 px-1 rounded">K線</span>
+      <span class="text-[#f59e0b] bg-[#1a1a1a]/80 px-1 rounded">MA5</span>
+      <span class="text-[#8b5cf6] bg-[#1a1a1a]/80 px-1 rounded">MA20</span>
+      <span v-if="store.isLoadingMarkers" class="text-[#666] bg-[#1a1a1a]/80 px-1 rounded">載入中...</span>
     </div>
 
-    <!-- Floating Tooltip -->
+    <!-- Hover 時顯示的詳細資訊 (左上角第二行) -->
+    <div
+      v-if="hoverData"
+      class="absolute top-5 left-1 z-10 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] pointer-events-none bg-[#1a1a1a]/90 px-1.5 py-0.5 rounded border border-[#333]"
+    >
+      <span class="text-[#3b82f6]">{{ hoverData.date }}</span>
+      <span><span class="text-[#888]">開</span> <span class="text-white">{{ hoverData.open?.toFixed(2) }}</span></span>
+      <span><span class="text-[#888]">高</span> <span class="text-[#26a69a]">{{ hoverData.high?.toFixed(2) }}</span></span>
+      <span><span class="text-[#888]">低</span> <span class="text-[#ef5350]">{{ hoverData.low?.toFixed(2) }}</span></span>
+      <span><span class="text-[#888]">收</span> <span class="text-white">{{ hoverData.close?.toFixed(2) }}</span></span>
+      <span class="text-[#f59e0b]">MA5 {{ hoverData.ma5?.toFixed(2) ?? '-' }}</span>
+      <span class="text-[#8b5cf6]">MA20 {{ hoverData.ma20?.toFixed(2) ?? '-' }}</span>
+    </div>
+
+    <!-- Floating Tooltip - 跟隨滑鼠 -->
     <div
       v-if="tooltipVisible && hoverData"
-      class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-2 py-1 text-xs z-50 whitespace-nowrap"
-      :style="{ left: tooltipX + 15 + 'px', top: tooltipY + 15 + 'px' }"
+      class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-1.5 py-0.5 text-[10px] z-50 whitespace-nowrap"
+      :style="tooltipStyle"
     >
-      <div class="flex flex-col gap-0.5">
-        <div class="text-[#3b82f6] font-medium border-b border-[#333] pb-0.5 mb-0.5">{{ hoverData.date }}</div>
-        <div class="flex gap-2">
-          <span class="text-[#888]">開</span><span class="text-white">{{ hoverData.open?.toFixed(2) }}</span>
-          <span class="text-[#888]">高</span><span class="text-[#26a69a]">{{ hoverData.high?.toFixed(2) }}</span>
-        </div>
-        <div class="flex gap-2">
-          <span class="text-[#888]">低</span><span class="text-[#ef5350]">{{ hoverData.low?.toFixed(2) }}</span>
-          <span class="text-[#888]">收</span><span class="text-white">{{ hoverData.close?.toFixed(2) }}</span>
-        </div>
-        <div class="flex gap-2 border-t border-[#333] pt-0.5 mt-0.5">
-          <span class="text-[#f59e0b]">MA5 {{ hoverData.ma5?.toFixed(2) ?? '-' }}</span>
-          <span class="text-[#8b5cf6]">MA20 {{ hoverData.ma20?.toFixed(2) ?? '-' }}</span>
-        </div>
-      </div>
+      <span class="text-[#3b82f6]">{{ hoverData.date }}</span>
+      <span class="text-white ml-1">{{ hoverData.close?.toFixed(2) }}</span>
     </div>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { IndicatorSettings } from '../types';
 
 const props = defineProps<{
@@ -10,6 +10,68 @@ const emit = defineEmits<{
   'update:modelValue': [value: IndicatorSettings];
   close: [];
 }>();
+
+const MAX_INDICATORS = 6;
+const warningMessage = ref<string | null>(null);
+let warningTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const showWarning = (message: string) => {
+  warningMessage.value = message;
+  if (warningTimeout) clearTimeout(warningTimeout);
+  warningTimeout = setTimeout(() => {
+    warningMessage.value = null;
+  }, 3000);
+};
+
+// 計算目前啟用的指標數量（以圖表為單位）
+const enabledChartCount = computed(() => {
+  const v = props.modelValue;
+  let count = 0;
+  if (v.volume) count++;
+  if (v.turnoverRate) count++;
+  if (v.volumeMA) count++;
+  if (v.foreignNet) count++;
+  if (v.foreignNetMA) count++;
+  if (v.trustNet) count++;
+  if (v.marginBalance || v.marginChange) count++;
+  if (v.shortBalance || v.shortChange) count++;
+  if (v.shortMarginRatio) count++;
+  if (v.macd) count++;
+  if (v.kd) count++;
+  if (v.rsi) count++;
+  if (v.bollinger) count++;
+  return count;
+});
+
+// 計算開啟某個指標後會新增多少圖表
+const getChartDelta = (key: string): number => {
+  const v = props.modelValue;
+
+  // 融資：marginBalance 和 marginChange 共用一個圖表
+  if (key === 'marginBalance') {
+    return (!v.marginBalance && !v.marginChange) ? 1 : 0;
+  }
+  if (key === 'marginChange') {
+    return (!v.marginBalance && !v.marginChange) ? 1 : 0;
+  }
+  // 融券：shortBalance 和 shortChange 共用一個圖表
+  if (key === 'shortBalance') {
+    return (!v.shortBalance && !v.shortChange) ? 1 : 0;
+  }
+  if (key === 'shortChange') {
+    return (!v.shortBalance && !v.shortChange) ? 1 : 0;
+  }
+  // 其他指標都是獨立圖表
+  return 1;
+};
+
+// 檢查某個指標是否可以被開啟
+const canEnableIndicator = (key: string): boolean => {
+  const isCurrentlyOn = props.modelValue[key as keyof IndicatorSettings];
+  if (isCurrentlyOn) return true; // 已開啟的可以關閉
+  const delta = getChartDelta(key);
+  return enabledChartCount.value + delta <= MAX_INDICATORS;
+};
 
 const indicatorGroups = [
   {
@@ -78,14 +140,26 @@ const getGroupState = (group: typeof indicatorGroups[0]) => {
 // Toggle single indicator
 const toggleIndicator = (key: string) => {
   const currentValue = props.modelValue[key as keyof IndicatorSettings];
+  const newState = !currentValue;
+
+  // 檢查是否會超過限制
+  if (newState && !canEnableIndicator(key)) {
+    showWarning(`最多只能同時觀看 ${MAX_INDICATORS} 個指標`);
+    return;
+  }
+
   emit('update:modelValue', {
     ...props.modelValue,
-    [key]: !currentValue
+    [key]: newState
   });
 };
 
 // Toggle all indicators
 const toggleAll = (on: boolean) => {
+  if (on) {
+    // 開啟全部時提示限制
+    showWarning(`最多只能同時觀看 ${MAX_INDICATORS} 個指標，將只開啟前 ${MAX_INDICATORS} 個`);
+  }
   const newValue = { ...props.modelValue };
   for (const key of allKeys) {
     (newValue as Record<string, boolean>)[key] = on;
@@ -96,8 +170,23 @@ const toggleAll = (on: boolean) => {
 // Toggle group
 const toggleGroup = (group: typeof indicatorGroups[0]) => {
   const state = getGroupState(group);
-  const newValue = { ...props.modelValue };
   const targetState = state === 'all' ? false : true; // If all on, turn off; otherwise turn on
+
+  // 如果要開啟，計算會新增多少圖表
+  if (targetState) {
+    let addCount = 0;
+    for (const item of group.items) {
+      if (!props.modelValue[item.key as keyof IndicatorSettings]) {
+        addCount += getChartDelta(item.key);
+      }
+    }
+    if (enabledChartCount.value + addCount > MAX_INDICATORS) {
+      showWarning(`最多只能同時觀看 ${MAX_INDICATORS} 個指標`);
+      return;
+    }
+  }
+
+  const newValue = { ...props.modelValue };
   for (const item of group.items) {
     (newValue as Record<string, boolean>)[item.key] = targetState;
   }
@@ -112,6 +201,7 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
       <div class="flex items-center justify-between px-4 py-3 border-b border-[#333]">
         <div class="flex items-center gap-3">
           <h3 class="text-white font-medium">指標設定</h3>
+          <span class="text-[#666] text-xs">({{ enabledChartCount }}/{{ MAX_INDICATORS }})</span>
           <!-- Global Toggle -->
           <div
             @click="toggleAll(!isAllOn)"
@@ -138,6 +228,17 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
+      </div>
+
+      <!-- Warning Message -->
+      <div
+        v-if="warningMessage"
+        class="mx-4 mt-3 p-2 bg-[#f59e0b]/20 border border-[#f59e0b]/50 rounded-lg text-[#f59e0b] text-xs flex items-center gap-2"
+      >
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        {{ warningMessage }}
       </div>
 
       <!-- Indicator List -->
@@ -170,23 +271,33 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
             <div
               v-for="indicator in group.items"
               :key="indicator.key"
-              class="flex items-center justify-between p-3 bg-[#252525] rounded-lg hover:bg-[#2a2a2a] transition-colors cursor-pointer"
+              :class="[
+                'flex items-center justify-between p-3 rounded-lg transition-colors',
+                canEnableIndicator(indicator.key)
+                  ? 'bg-[#252525] hover:bg-[#2a2a2a] cursor-pointer'
+                  : 'bg-[#1f1f1f] cursor-not-allowed opacity-50'
+              ]"
               @click="toggleIndicator(indicator.key)"
             >
               <div>
-                <div class="text-white text-sm font-medium">{{ indicator.label }}</div>
+                <div :class="canEnableIndicator(indicator.key) ? 'text-white' : 'text-[#666]'" class="text-sm font-medium">{{ indicator.label }}</div>
                 <div class="text-[#666] text-xs mt-0.5">{{ indicator.description }}</div>
               </div>
               <div
                 :class="[
                   'w-10 h-6 rounded-full transition-colors relative flex-shrink-0',
-                  modelValue[indicator.key as keyof typeof modelValue] ? 'bg-[#3b82f6]' : 'bg-[#444]'
+                  modelValue[indicator.key as keyof typeof modelValue]
+                    ? 'bg-[#3b82f6]'
+                    : canEnableIndicator(indicator.key)
+                      ? 'bg-[#444]'
+                      : 'bg-[#333]'
                 ]"
               >
                 <div
                   :class="[
-                    'absolute top-1 w-4 h-4 bg-white rounded-full transition-transform',
-                    modelValue[indicator.key as keyof typeof modelValue] ? 'translate-x-5' : 'translate-x-1'
+                    'absolute top-1 w-4 h-4 rounded-full transition-transform',
+                    modelValue[indicator.key as keyof typeof modelValue] ? 'translate-x-5' : 'translate-x-1',
+                    canEnableIndicator(indicator.key) ? 'bg-white' : 'bg-[#555]'
                   ]"
                 />
               </div>

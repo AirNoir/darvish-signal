@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { createChart, LineSeries, CrosshairMode } from 'lightweight-charts';
-import type { IChartApi, ISeriesApi } from 'lightweight-charts';
+import type { IChartApi, ISeriesApi, Time } from 'lightweight-charts';
 import { useStockStore } from '../stores/stockStore';
 
 const props = defineProps<{
@@ -14,148 +14,119 @@ const chartContainer = ref<HTMLElement | null>(null);
 let chart: IChartApi | null = null;
 let percentBSeries: ISeriesApi<'Line'> | null = null;
 
-// Crosshair tooltip
-const tooltipVisible = ref(false);
+
+const hoverPercentB = ref<number | null>(null);
+const showTooltip = ref(false);
 const tooltipX = ref(0);
 const tooltipY = ref(0);
-const hoverPercentB = ref<number | null>(null);
+
+const tooltipStyle = computed(() => {
+  const containerWidth = chartContainer.value?.clientWidth ?? 800;
+  const tooltipWidth = 80;
+  let left = tooltipX.value + 12;
+  let top = tooltipY.value - 12;
+  if (left + tooltipWidth > containerWidth) left = tooltipX.value - tooltipWidth - 12;
+  if (top < 0) top = 8;
+  return { left: left + 'px', top: top + 'px' };
+});
+
+const updateHoverDataFromTime = (time: Time | null) => {
+  if (!time) { hoverPercentB.value = null; showTooltip.value = false; return; }
+  const data = store.bollingerData.find(d => d.time === time);
+  hoverPercentB.value = data?.percentB ?? null;
+
+  if (chart && percentBSeries && data?.percentB != null) {
+    const timeCoord = chart.timeScale().timeToCoordinate(time);
+    const priceCoord = percentBSeries.priceToCoordinate(data.percentB);
+    if (timeCoord !== null && priceCoord !== null) {
+      tooltipX.value = timeCoord;
+      tooltipY.value = priceCoord;
+      showTooltip.value = true;
+    }
+  }
+};
+
+watch(
+  () => store.syncedHoverTime,
+  (newTime) => updateHoverDataFromTime(newTime),
+  { immediate: true }
+);
 
 const initChart = () => {
   if (!chartContainer.value) return;
 
   chart = createChart(chartContainer.value, {
-    layout: {
-      background: { color: '#0f0f0f' },
-      textColor: '#a0a0a0'
-    },
-    grid: {
-      vertLines: { color: '#1a1a1a' },
-      horzLines: { color: '#1a1a1a' }
-    },
+    layout: { background: { color: '#0f0f0f' }, textColor: '#a0a0a0' },
+    grid: { vertLines: { color: '#1a1a1a' }, horzLines: { color: '#1a1a1a' } },
     crosshair: {
       mode: CrosshairMode.Normal,
-      vertLine: {
-        width: 1,
-        color: '#505050',
-        style: 0,
-        labelVisible: false,
-        labelBackgroundColor: '#3b82f6'
-      },
-      horzLine: {
-        width: 1,
-        color: '#505050',
-        style: 0,
-        labelVisible: true,
-        labelBackgroundColor: '#3b82f6'
-      }
+      vertLine: { width: 1, color: '#505050', style: 0, labelVisible: false, labelBackgroundColor: '#3b82f6' },
+      horzLine: { width: 1, color: '#505050', style: 0, labelVisible: true, labelBackgroundColor: '#3b82f6' }
     },
-    rightPriceScale: {
-      borderColor: '#333',
-      scaleMargins: {
-        top: 0.1,
-        bottom: 0.1
-      },
-      minimumWidth: 70 // 設定較大的最小寬度以確保所有圖表對齊
-    },
-    timeScale: {
-      borderColor: '#333',
-      timeVisible: true,
-      secondsVisible: false,
-      barSpacing: 12,
-      minBarSpacing: 4,
-      rightOffset: 8,
-      fixLeftEdge: false,
-      fixRightEdge: false
-    }
+    rightPriceScale: { borderColor: '#333', scaleMargins: { top: 0.05, bottom: 0.05 }, minimumWidth: 70 },
+    timeScale: { borderColor: '#333', visible: false, barSpacing: 12, minBarSpacing: 4, rightOffset: 8, fixLeftEdge: false, fixRightEdge: false }
   });
 
-  // Bollinger %B line
-  percentBSeries = chart.addSeries(LineSeries, {
-    color: '#a855f7',
-    lineWidth: 1,
-    priceLineVisible: false,
-    lastValueVisible: false
-  });
+  percentBSeries = chart.addSeries(LineSeries, { color: '#a855f7', lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
 
   chart.subscribeCrosshairMove((param) => {
-    if (props.onCrosshairMove && chart) {
-      props.onCrosshairMove(chart, param);
-    }
-    // Update hover value and tooltip position
-    if (param.time && param.point && percentBSeries) {
+    if (props.onCrosshairMove && chart) props.onCrosshairMove(chart, param);
+    if (param.time && percentBSeries) {
       const val = param.seriesData.get(percentBSeries) as any;
-      hoverPercentB.value = val?.value ?? null;
-      tooltipVisible.value = true;
-      tooltipX.value = param.point.x;
-      tooltipY.value = param.point.y;
+      const value = val?.value ?? null;
+      hoverPercentB.value = value;
+
+      if (value != null) {
+        const timeCoord = chart!.timeScale().timeToCoordinate(param.time);
+        const priceCoord = percentBSeries!.priceToCoordinate(value);
+        if (timeCoord !== null && priceCoord !== null) {
+          tooltipX.value = timeCoord;
+          tooltipY.value = priceCoord;
+          showTooltip.value = true;
+        }
+      }
     } else {
       hoverPercentB.value = null;
-      tooltipVisible.value = false;
+      showTooltip.value = false;
     }
   });
 
-  if (props.onChartReady && percentBSeries) {
-    props.onChartReady(chart, percentBSeries);
-  }
+  if (props.onChartReady && percentBSeries) props.onChartReady(chart, percentBSeries);
 
   const resizeObserver = new ResizeObserver(() => {
-    if (chart && chartContainer.value) {
-      chart.applyOptions({
-        width: chartContainer.value.clientWidth,
-        height: chartContainer.value.clientHeight
-      });
-    }
+    if (chart && chartContainer.value) chart.applyOptions({ width: chartContainer.value.clientWidth, height: chartContainer.value.clientHeight });
   });
   resizeObserver.observe(chartContainer.value);
-
   updateData();
 };
 
 const updateData = () => {
   if (!percentBSeries) return;
-
-  const percentBData = store.bollingerData
-    .filter((d) => d.percentB !== null)
-    .map((d) => ({ time: d.time, value: d.percentB as number }));
-
+  const percentBData = store.bollingerData.filter((d) => d.percentB !== null).map((d) => ({ time: d.time, value: d.percentB as number }));
   percentBSeries.setData(percentBData as any);
 };
 
-watch(
-  () => store.bollingerData,
-  () => {
-    updateData();
-  },
-  { deep: true }
-);
-
-onMounted(() => {
-  initChart();
-});
-
-onUnmounted(() => {
-  if (chart) {
-    chart.remove();
-    chart = null;
-  }
-});
-
-defineExpose({
-  getChart: () => chart
-});
+watch(() => store.bollingerData, () => updateData(), { deep: true });
+onMounted(() => initChart());
+onUnmounted(() => { if (chart) { chart.remove(); chart = null; } });
+defineExpose({ getChart: () => chart });
 </script>
 
 <template>
   <div class="relative w-full h-full overflow-hidden">
     <div ref="chartContainer" class="w-full h-full"></div>
 
-    <!-- Floating Tooltip -->
+    <div class="absolute top-1 left-1 z-10 flex items-center gap-1 text-[10px] pointer-events-none">
+      <span class="text-white font-bold bg-[#1a1a1a]/80 px-1 rounded">布林通道</span>
+      <span v-if="hoverPercentB !== null" class="text-[#a855f7] bg-[#1a1a1a]/80 px-1 rounded">%B {{ hoverPercentB?.toFixed(2) }}</span>
+    </div>
+
     <div
-      v-if="tooltipVisible && hoverPercentB !== null"
-      class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-2 py-1 text-xs z-50"
-      :style="{ left: tooltipX + 15 + 'px', top: tooltipY + 15 + 'px' }"
+      v-if="showTooltip && hoverPercentB !== null"
+      class="absolute pointer-events-none bg-[#1a1a1a] border border-[#444] rounded px-1.5 py-0.5 text-[10px] z-50 whitespace-nowrap"
+      :style="tooltipStyle"
     >
-      <span class="text-[#a855f7]">%B {{ hoverPercentB.toFixed(2) }}</span>
+      <span class="text-[#a855f7]">%B {{ hoverPercentB?.toFixed(2) }}</span>
     </div>
   </div>
 </template>

@@ -64,8 +64,8 @@ export function useChartSync() {
     chartData.value.forEach((cd) => {
       if (cd.chart !== sourceChart) {
         if (param.time && cd.series) {
-          // Use setCrosshairPosition with price=0 to just show vertical line
-          cd.chart.setCrosshairPosition(0, param.time, cd.series);
+          // Use NaN as price to only show vertical line (not horizontal)
+          cd.chart.setCrosshairPosition(NaN, param.time, cd.series);
         } else {
           cd.chart.clearCrosshairPosition();
         }
