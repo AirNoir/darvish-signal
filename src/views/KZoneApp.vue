@@ -195,7 +195,7 @@ const sortedVisibleIndicators = computed(() => {
 </script>
 
 <template>
-  <div class="relative flex flex-col h-screen bg-[#0f0f0f] overflow-hidden">
+  <div class="relative flex flex-col h-screen bg-[#0f0f0f] overflow-hidden" style="height: 100vh;">
     <!-- Header - 縮小高度 -->
     <header class="h-10 min-h-[40px] flex items-center justify-between px-3 border-b border-[#333] bg-[#1a1a1a] flex-shrink-0">
       <!-- Left: Logo & Title -->
