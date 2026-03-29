@@ -11,10 +11,59 @@ const enterApp = () => {
 <template>
   <div class="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f] text-white overflow-auto">
     <!-- Hero Section -->
-    <section class="relative min-h-screen flex flex-col items-center justify-center px-6 py-20">
-      <!-- Background Pattern -->
-      <div class="absolute inset-0 opacity-5">
-        <div class="absolute inset-0" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 50px, #3b82f6 50px, #3b82f6 51px), repeating-linear-gradient(90deg, transparent, transparent 50px, #3b82f6 50px, #3b82f6 51px);"></div>
+    <section class="relative min-h-screen flex flex-col items-center justify-center px-6 py-20 overflow-hidden">
+      <!-- Animated Background with Stock Chart & Baseball Theme -->
+      <div class="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#0f0f1a]">
+        <!-- Grid Pattern -->
+        <div class="absolute inset-0 opacity-[0.03]">
+          <div class="absolute inset-0" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, #3b82f6 40px, #3b82f6 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, #3b82f6 40px, #3b82f6 41px);"></div>
+        </div>
+
+        <!-- Stock Chart Lines Pattern -->
+        <svg class="absolute inset-0 w-full h-full opacity-[0.08]" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="chart-pattern" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+              <!-- Candlestick 1 -->
+              <rect x="20" y="80" width="12" height="40" fill="#26a69a" opacity="0.6"/>
+              <line x1="26" y1="60" x2="26" y2="80" stroke="#26a69a" stroke-width="2" opacity="0.6"/>
+              <line x1="26" y1="120" x2="26" y2="140" stroke="#26a69a" stroke-width="2" opacity="0.6"/>
+
+              <!-- Candlestick 2 -->
+              <rect x="50" y="70" width="12" height="50" fill="#ef5350" opacity="0.6"/>
+              <line x1="56" y1="50" x2="56" y2="70" stroke="#ef5350" stroke-width="2" opacity="0.6"/>
+              <line x1="56" y1="120" x2="56" y2="150" stroke="#ef5350" stroke-width="2" opacity="0.6"/>
+
+              <!-- Candlestick 3 -->
+              <rect x="80" y="90" width="12" height="30" fill="#26a69a" opacity="0.6"/>
+              <line x1="86" y1="70" x2="86" y2="90" stroke="#26a69a" stroke-width="2" opacity="0.6"/>
+              <line x1="86" y1="120" x2="86" y2="135" stroke="#26a69a" stroke-width="2" opacity="0.6"/>
+
+              <!-- Moving Average Line -->
+              <polyline points="10,100 40,85 70,95 100,80 130,90 160,75 190,85"
+                        fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.4"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#chart-pattern)"/>
+        </svg>
+
+        <!-- Baseball Stitching Pattern -->
+        <svg class="absolute top-20 right-20 w-64 h-64 opacity-[0.05]" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="0.5"/>
+          <path d="M 30,20 Q 35,25 30,30 Q 25,35 30,40 Q 35,45 30,50" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M 70,50 Q 65,55 70,60 Q 75,65 70,70 Q 65,75 70,80" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+
+        <svg class="absolute bottom-32 left-32 w-48 h-48 opacity-[0.05] transform rotate-45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" stroke-width="0.5"/>
+          <path d="M 35,25 Q 40,30 35,35 Q 30,40 35,45" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M 65,55 Q 60,60 65,65 Q 70,70 65,75" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+
+        <!-- Floating Particles -->
+        <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 rounded-full opacity-20 animate-pulse"></div>
+        <div class="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-blue-300 rounded-full opacity-30 animate-pulse" style="animation-delay: 0.5s;"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-1 h-1 bg-blue-500 rounded-full opacity-25 animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-2/3 right-1/4 w-2 h-2 bg-blue-400 rounded-full opacity-20 animate-pulse" style="animation-delay: 1.5s;"></div>
       </div>
 
       <div class="relative z-10 max-w-5xl mx-auto text-center">
