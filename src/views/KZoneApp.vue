@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import type { IChartApi, MouseEventParams } from 'lightweight-charts';
 import type { IndicatorSettings } from '../types';
 import { useStockStore } from '../stores/stockStore';
@@ -22,11 +23,17 @@ import ShortMarginRatioChart from '../components/ShortMarginRatioChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
 
+const router = useRouter();
 const store = useStockStore();
 const { addChart, syncCrosshair } = useChartSync();
 const showAlphaPick = ref(false);
 const showSettings = ref(false);
 const showMobileMenu = ref(false);
+
+// Navigate back to landing page
+const goToHome = () => {
+  router.push('/');
+};
 
 // Indicator visibility settings - 預設只開啟 3 個重要指標
 const indicatorSettings = ref<IndicatorSettings>({
@@ -199,7 +206,7 @@ const sortedVisibleIndicators = computed(() => {
     <!-- Header - 縮小高度 -->
     <header class="h-10 min-h-[40px] flex items-center justify-between px-3 border-b border-[#333] bg-[#1a1a1a] flex-shrink-0">
       <!-- Left: Logo & Title -->
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity" @click="goToHome">
         <img src="/logo.png" alt="達比 K-Zone" class="w-7 h-7 rounded-full" />
         <h1 class="text-sm font-semibold text-white hidden sm:block">達比 K-Zone</h1>
       </div>

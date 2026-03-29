@@ -27,7 +27,7 @@ const handleKeydown = (e: KeyboardEvent) => {
         type="text"
         placeholder="Stock ID (e.g., 2330)"
         @keydown="handleKeydown"
-        class="w-48 px-3 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#3b82f6] transition-colors"
+        class="w-48 px-3 py-1 bg-[#1a1a1a] border border-[#333] rounded text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#3b82f6] transition-colors"
       />
       <svg
         v-if="store.isLoading"
@@ -54,7 +54,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     <button
       @click="handleSearch"
       :disabled="store.isLoading"
-      class="px-4 py-2 bg-[#3b82f6] hover:bg-[#2563eb] disabled:bg-[#1e40af] disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
+      class="px-3 py-1 bg-[#3b82f6] hover:bg-[#2563eb] disabled:bg-[#1e40af] disabled:cursor-not-allowed text-white text-sm rounded transition-colors"
     >
       搜尋
     </button>
