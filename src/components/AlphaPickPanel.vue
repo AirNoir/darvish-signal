@@ -4,7 +4,12 @@ import { useStockStore } from '../stores/stockStore'
 
 const store = useStockStore()
 const activeTab = ref<'buy' | 'sell'>('buy')
-const showDisclaimer = ref(true)
+
+// Check localStorage immediately to avoid flash
+const hasSeenDisclaimer = typeof window !== 'undefined'
+  ? localStorage.getItem('alpha-disclaimer-seen') === 'true'
+  : false
+const showDisclaimer = ref(!hasSeenDisclaimer)
 
 onMounted(async () => {
   await store.fetchAvailableDates()
@@ -12,11 +17,6 @@ onMounted(async () => {
     store.fetchAlphaPicks(),
     store.fetchSellAlerts(),
   ])
-  // Check if user has seen disclaimer
-  const hasSeenDisclaimer = localStorage.getItem('alpha-disclaimer-seen')
-  if (hasSeenDisclaimer === 'true') {
-    showDisclaimer.value = false
-  }
 })
 
 const closeDisclaimer = () => {
