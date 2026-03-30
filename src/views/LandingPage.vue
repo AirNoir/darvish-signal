@@ -193,7 +193,7 @@ const enterApp = () => {
               </svg>
             </div>
             <h3 class="text-xl font-bold mb-3 text-white">Alpha 訊號</h3>
-            <p class="text-gray-400">精選強勢股與賣出警示，協助掌握最佳進出場時機</p>
+            <p class="text-gray-400">精選強勢股與弱勢股資訊，協助觀察市場趨勢</p>
           </div>
 
           <!-- Feature 3 -->
@@ -569,11 +569,62 @@ const enterApp = () => {
       </div>
     </section>
 
+    <!-- Disclaimer Section -->
+    <section class="relative py-20 px-6 bg-gradient-to-b from-transparent to-red-950/10">
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-3xl p-10 md:p-12 border-2 border-red-500/30 shadow-2xl">
+          <div class="flex items-start gap-4 mb-6">
+            <svg class="w-10 h-10 text-red-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="flex-1">
+              <h2 class="text-2xl md:text-3xl font-bold mb-4 text-red-400">投資風險警示與免責聲明</h2>
+              <p class="text-lg text-gray-300 mb-6 font-semibold">
+                本網站提供的資訊僅供參考，不構成任何投資建議或推薦。
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4 text-gray-300 leading-relaxed">
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 text-xl">•</span>
+              <p>本網站所標示的<span class="text-blue-400 font-semibold">「強勢股」</span>與<span class="text-red-400 font-semibold">「弱勢股」</span>僅為基於技術指標的分析結果，並非買賣建議或投資推薦。</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 text-xl">•</span>
+              <p>投資有風險，過去的表現不代表未來的結果。股票市場波動可能導致本金損失。</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 text-xl">•</span>
+              <p>使用者應自行審慎評估並承擔所有投資決策的風險與責任，本網站不對任何投資損失負責。</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 text-xl">•</span>
+              <p>本網站資訊來源力求準確，但不保證資料的完整性、即時性或正確性。</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 text-xl">•</span>
+              <p>投資前請詳閱相關金融商品公開說明書，並建議諮詢合格的專業財務顧問。</p>
+            </div>
+          </div>
+
+          <div class="mt-8 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <p class="text-red-300 text-center font-semibold">
+              使用本網站服務即表示您已閱讀、理解並同意本免責聲明的所有條款
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer -->
     <footer class="relative py-12 px-6 border-t border-gray-800">
       <div class="max-w-6xl mx-auto text-center text-gray-500">
         <p class="mb-4">© 2024 達比 K-Zone. All rights reserved.</p>
         <p class="text-sm">Powered by precision, inspired by excellence.</p>
+        <p class="text-xs mt-4 text-gray-600">
+          本網站僅提供資訊參考，不構成投資建議 | 投資有風險，請謹慎評估
+        </p>
       </div>
     </footer>
   </div>

@@ -4,6 +4,7 @@ import { useStockStore } from '../stores/stockStore'
 
 const store = useStockStore()
 const activeTab = ref<'buy' | 'sell'>('buy')
+const showDisclaimer = ref(true)
 
 onMounted(async () => {
   await store.fetchAvailableDates()
@@ -11,7 +12,17 @@ onMounted(async () => {
     store.fetchAlphaPicks(),
     store.fetchSellAlerts(),
   ])
+  // Check if user has seen disclaimer
+  const hasSeenDisclaimer = localStorage.getItem('alpha-disclaimer-seen')
+  if (hasSeenDisclaimer === 'true') {
+    showDisclaimer.value = false
+  }
 })
+
+const closeDisclaimer = () => {
+  showDisclaimer.value = false
+  localStorage.setItem('alpha-disclaimer-seen', 'true')
+}
 
 watch(() => store.selectedDate, async (newDate) => {
   if (newDate) {
@@ -51,13 +62,13 @@ const conditionCount = (pick: any) => {
         :class="['tab', activeTab === 'buy' ? 'tab-active-buy' : '']"
         @click="activeTab = 'buy'"
       >
-        ▲ 買入 ({{ store.alphaPicks.length }})
+        ▲ 強勢股 ({{ store.alphaPicks.length }})
       </button>
       <button
         :class="['tab', activeTab === 'sell' ? 'tab-active-sell' : '']"
         @click="activeTab = 'sell'"
       >
-        ▼ 賣出 ({{ store.sellAlerts.length }})
+        ▼ 弱勢股 ({{ store.sellAlerts.length }})
       </button>
     </div>
 
@@ -65,7 +76,7 @@ const conditionCount = (pick: any) => {
 
     <!-- BUY Picks -->
     <div v-else-if="activeTab === 'buy'" class="pick-list">
-      <div v-if="store.alphaPicks.length === 0" class="empty">暫無買入訊號</div>
+      <div v-if="store.alphaPicks.length === 0" class="empty">暫無強勢股訊號</div>
       <div
         v-for="pick in store.alphaPicks"
         :key="pick.symbol"
@@ -79,7 +90,7 @@ const conditionCount = (pick: any) => {
           </div>
           <div class="price-group">
             <span class="price">{{ pick.close }}</span>
-            <span class="signal-badge buy-badge">買入</span>
+            <span class="signal-badge buy-badge">強勢股</span>
           </div>
         </div>
 
@@ -96,7 +107,7 @@ const conditionCount = (pick: any) => {
 
     <!-- SELL Alerts -->
     <div v-else class="pick-list">
-      <div v-if="store.sellAlerts.length === 0" class="empty">暫無賣出訊號</div>
+      <div v-if="store.sellAlerts.length === 0" class="empty">暫無弱勢股訊號</div>
       <div
         v-for="alert in store.sellAlerts"
         :key="alert.symbol"
@@ -110,7 +121,7 @@ const conditionCount = (pick: any) => {
           </div>
           <div class="price-group">
             <span class="price">{{ alert.close }}</span>
-            <span class="signal-badge sell-badge">賣出</span>
+            <span class="signal-badge sell-badge">弱勢股</span>
           </div>
         </div>
 
@@ -128,6 +139,32 @@ const conditionCount = (pick: any) => {
     <!-- Date info -->
     <div class="footer" v-if="store.alphaPickDate">
       資料日期：{{ formatDate(store.alphaPickDate) }}
+    </div>
+
+    <!-- Disclaimer Modal -->
+    <div v-if="showDisclaimer" class="disclaimer-overlay" @click="closeDisclaimer">
+      <div class="disclaimer-modal" @click.stop>
+        <div class="disclaimer-header">
+          <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <h3>⚠️ 投資風險警示與免責聲明</h3>
+        </div>
+        <div class="disclaimer-content">
+          <p><strong>本網站提供的資訊僅供參考，不構成任何投資建議或推薦。</strong></p>
+          <ul>
+            <li>「強勢股」與「弱勢股」標記僅為技術指標分析結果，非交易建議。</li>
+            <li>投資有風險，過去表現不代表未來結果。</li>
+            <li>使用者應自行判斷並承擔所有投資決策的風險與責任。</li>
+            <li>本網站對於因使用本服務所產生的任何損失，不負任何法律責任。</li>
+            <li>投資前請詳閱公開說明書，並諮詢專業財務顧問。</li>
+          </ul>
+          <p class="disclaimer-highlight">請確認您已閱讀並理解以上聲明</p>
+        </div>
+        <button class="disclaimer-button" @click="closeDisclaimer">
+          我已了解風險，繼續使用
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -325,5 +362,108 @@ const conditionCount = (pick: any) => {
   color: #555;
   border-top: 1px solid #0f3460;
   text-align: center;
+}
+
+/* Disclaimer Modal Styles */
+.disclaimer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.disclaimer-modal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid #0f3460;
+}
+
+.disclaimer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #0f3460;
+}
+
+.disclaimer-header svg {
+  width: 32px;
+  height: 32px;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+.disclaimer-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.disclaimer-content {
+  color: #e0e0e0;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.disclaimer-content p {
+  margin: 0 0 12px 0;
+}
+
+.disclaimer-content strong {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.disclaimer-content ul {
+  margin: 12px 0;
+  padding-left: 20px;
+}
+
+.disclaimer-content li {
+  margin: 8px 0;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.disclaimer-highlight {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid #f59e0b;
+  border-radius: 4px;
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+.disclaimer-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.disclaimer-button:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 </style>
