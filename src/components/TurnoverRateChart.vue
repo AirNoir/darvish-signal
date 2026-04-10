@@ -64,7 +64,7 @@ const initChart = () => {
       horzLine: { width: 1, color: '#505050', style: 0, labelVisible: true, labelBackgroundColor: '#3b82f6' }
     },
     rightPriceScale: { borderColor: '#333', scaleMargins: { top: 0.05, bottom: 0 }, minimumWidth: 70 },
-    timeScale: { borderColor: '#333', visible: false, barSpacing: 12, minBarSpacing: 4, rightOffset: 8, fixLeftEdge: false, fixRightEdge: false }
+    timeScale: { borderColor: '#333', visible: false, barSpacing: 12, minBarSpacing: 4, rightOffset: 0, fixLeftEdge: true, fixRightEdge: true }
   });
 
   series = chart.addSeries(HistogramSeries, { priceLineVisible: false, lastValueVisible: false, color: '#8b5cf6' });

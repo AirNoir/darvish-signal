@@ -152,9 +152,9 @@ const initChart = () => {
       secondsVisible: false,
       barSpacing: 12,
       minBarSpacing: 4,
-      rightOffset: 8,
-      fixLeftEdge: false,
-      fixRightEdge: false
+      rightOffset: 0,
+      fixLeftEdge: true,
+      fixRightEdge: true
     }
   });
 

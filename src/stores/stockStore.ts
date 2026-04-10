@@ -181,7 +181,7 @@ export const useStockStore = defineStore('stock', () => {
 
         turnoverRateData.value = sorted.map((item) => ({
           time: item.trade_date,
-          value: item.turnover_rate ?? null
+          value: item.turnover_rate != null ? item.turnover_rate * 100 : null
         }));
 
         volumeMAData.value = sorted.map((item) => ({
@@ -213,7 +213,7 @@ export const useStockStore = defineStore('stock', () => {
 
         shortMarginRatioData.value = sorted.map((item) => ({
           time: item.trade_date,
-          value: item.short_margin_ratio ?? null
+          value: item.short_margin_ratio != null ? item.short_margin_ratio * 100 : null
         }));
 
         // Fetch signal markers in background
