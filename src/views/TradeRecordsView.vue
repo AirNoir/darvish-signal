@@ -10,9 +10,12 @@ const isLoading = ref(false);
 const error = ref<string | null>(null);
 const currentPage = ref(1);
 
-// Last 2 years
-const FROM = '2024-01-01';
-const TO = '2026-01-01';
+// Last 2 years from today
+const today = new Date();
+const twoYearsAgo = new Date(today);
+twoYearsAgo.setFullYear(today.getFullYear() - 2);
+const TO = today.toISOString().slice(0, 10);
+const FROM = twoYearsAgo.toISOString().slice(0, 10);
 
 onMounted(async () => {
   isLoading.value = true;
