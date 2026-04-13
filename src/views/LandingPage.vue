@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import AppHeader from '../components/AppHeader.vue';
 
 const router = useRouter();
 
@@ -10,6 +11,7 @@ const enterApp = () => {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f] text-white overflow-auto">
+    <AppHeader />
     <!-- Hero Section -->
     <section class="relative min-h-screen flex flex-col items-center justify-center px-6 py-20 overflow-hidden">
       <!-- Animated Background with Stock Chart & Baseball Theme -->

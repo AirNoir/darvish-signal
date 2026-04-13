@@ -153,6 +153,26 @@ export interface StockSignalResponse<T> {
 
 // --- API Functions ---
 
+// --- Trade Records Types ---
+
+export interface TradeRecord {
+  name: string
+  performance: number | null
+  price: number
+  symbol: string
+  trade_date: string
+  type: 'BUY' | 'SELL'
+}
+
+export interface TradeRecordsResponse {
+  avg_performance: number
+  count: number
+  loss_count: number
+  profit_count: number
+  records: TradeRecord[]
+  win_rate: number
+}
+
 async function apiFetch<T>(url: string): Promise<T> {
   const res = await fetch(url)
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`)
@@ -221,6 +241,11 @@ export const stockApi = {
 
   async getSellByStock(symbol: string): Promise<StockSignalResponse<SellAlertItem>> {
     return apiFetch<StockSignalResponse<SellAlertItem>>(`${API_BASE_URL}/api/alpha/sell/stock/${symbol}`)
+  },
+
+  // Trade Records - robot performance
+  async getTradeRecords(from: string, to: string): Promise<TradeRecordsResponse> {
+    return apiFetch<TradeRecordsResponse>(`${API_BASE_URL}/api/trade/trade-records?from=${from}&to=${to}`)
   },
 }
 
