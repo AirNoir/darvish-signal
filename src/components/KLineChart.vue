@@ -159,12 +159,12 @@ const initChart = () => {
   });
 
   candlestickSeries = chart.addSeries(CandlestickSeries, {
-    upColor: '#26a69a',
-    downColor: '#ef5350',
-    borderUpColor: '#26a69a',
-    borderDownColor: '#ef5350',
-    wickUpColor: '#26a69a',
-    wickDownColor: '#ef5350'
+    upColor: '#ef5350',
+    downColor: '#26a69a',
+    borderUpColor: '#ef5350',
+    borderDownColor: '#26a69a',
+    wickUpColor: '#ef5350',
+    wickDownColor: '#26a69a'
   });
 
   ma5Series = chart.addSeries(LineSeries, {
