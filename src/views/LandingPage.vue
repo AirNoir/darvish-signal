@@ -10,7 +10,7 @@ const enterApp = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#00000a] text-white overflow-auto font-mono">
+  <div class="min-h-screen bg-[#00000a] text-white overflow-auto font-mono" style="font-family: '851Gkktt', ui-monospace, monospace;">
     <AppHeader />
 
     <!-- Scanline Overlay -->
