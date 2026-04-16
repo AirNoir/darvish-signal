@@ -22,7 +22,7 @@ const enterApp = () => {
       <!-- Background -->
       <div class="absolute inset-0 bg-[#00000a]">
         <!-- Hex Grid -->
-        <div class="absolute inset-0 opacity-[0.06]" style="background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0-2l26-15V18L28 2 2 18v30L28 64z' fill='%2300d4ff'/%3E%3C/svg%3E\");"></div>
+        <div class="absolute inset-0 opacity-[0.06] hex-grid"></div>
 
         <!-- Neon Grid Lines -->
         <div class="absolute inset-0 opacity-[0.04]" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 60px, #00d4ff 60px, #00d4ff 61px), repeating-linear-gradient(90deg, transparent, transparent 60px, #00d4ff 60px, #00d4ff 61px);"></div>
@@ -517,6 +517,11 @@ const enterApp = () => {
 </template>
 
 <style scoped>
+/* Hex Grid */
+.hex-grid {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0-2l26-15V18L28 2 2 18v30L28 64z' fill='%2300d4ff'/%3E%3C/svg%3E");
+}
+
 /* Scanlines */
 .scanlines {
   background: repeating-linear-gradient(
