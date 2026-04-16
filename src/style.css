@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'GuanHei';
+  src: url('/fonts/guan-hei.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Custom dark theme variables */
 :root {
   --color-bg-primary: #0f0f0f;
