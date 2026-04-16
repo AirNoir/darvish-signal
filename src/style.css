@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'jf-openhuninn';
+  src: url('/fonts/jf-openhuninn.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Custom dark theme variables */
 :root {
   --color-bg-primary: #0f0f0f;
@@ -27,7 +35,7 @@ html, body, #app {
 }
 
 body {
-  font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+  font-family: 'jf-openhuninn', 'Noto Sans TC', system-ui, sans-serif;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
 }
