@@ -1,3 +1,3 @@
 [submodule "airnoir-ai-toolkit"]
 	path = airnoir-ai-toolkit
-	url = git@github.com:AirNoir/airnoir-ai-toolkit.git
+	url = https://github.com/AirNoir/airnoir-ai-toolkit.git
