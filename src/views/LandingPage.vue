@@ -465,17 +465,7 @@ const enterApp = () => {
     <section class="relative py-32 px-6">
       <div class="max-w-4xl mx-auto text-center">
         <!-- Terminal Block -->
-        <div class="inline-block text-left mb-12 p-6 border border-[#00d4ff]/20 bg-[#00d4ff]/3 w-full max-w-xl">
-          <div class="text-xs text-[#606080] mb-3">terminal ~</div>
-          <div class="text-sm text-[#a0b0c0] font-mono">
-            <span class="text-[#00d4ff]">$</span> darvish-kzone --start<br/>
-            <span class="text-[#00ff88]">✓</span> Market data loaded<br/>
-            <span class="text-[#00ff88]">✓</span> Signals initialized<br/>
-            <span class="text-[#00ff88]">✓</span> Ready to trade<span class="animate-pulse">_</span>
-          </div>
-        </div>
-
-        <h2 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-white tracking-wider font-noto">
+<h2 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-white tracking-wider font-noto">
           準備好進入 K-Zone 了嗎？
         </h2>
         <p class="text-xl text-[#a0b0c0] mb-12 tracking-wide font-noto">
