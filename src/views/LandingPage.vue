@@ -52,7 +52,7 @@ const enterApp = () => {
 
         <!-- Tagline -->
         <p class="text-xl md:text-2xl mb-4 text-[#a0b0c0] font-light tracking-wide">
-          如達比修有般精準的<span class="text-[#00d4ff] neon-text-cyan font-semibold">控球</span>，
+          如達比修有般精準的<span class="text-[#00d4ff] neon-text-cyan font-semibold">控球</span><span class="hidden md:inline">，</span><br class="md:hidden" />
           捕捉每一個<span class="text-[#ff006e] neon-text-pink font-semibold">投資訊號</span>
         </p>
 
