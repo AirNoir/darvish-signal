@@ -221,7 +221,7 @@ const sortedVisibleIndicators = computed(() => {
       <!-- Center: Current Stock Info -->
       <div v-if="latestData" class="flex items-center gap-1.5 text-xs">
         <span class="text-[#3b82f6] font-medium">{{ store.stockId }}</span>
-        <span v-if="store.stockName" class="text-[#888] hidden sm:inline">{{ store.stockName }}</span>
+        <span v-if="store.stockName" class="text-[#888]">{{ store.stockName }}</span>
         <span class="text-white">{{ latestData.close.toFixed(2) }}</span>
         <span
           v-if="priceChange"
