@@ -42,11 +42,6 @@ const enterApp = () => {
           </div>
         </div>
 
-        <!-- System Label -->
-        <div class="mb-4 text-xs tracking-[0.3em] text-[#00d4ff] opacity-70 uppercase">
-          [ SYS::MARKET_INTELLIGENCE_v2.0 ]
-        </div>
-
         <!-- Main Title with Glitch -->
         <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold mb-2 glitch-text" data-text="達比 K-Zone">
           達比 K-Zone
