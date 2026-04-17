@@ -8,6 +8,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'NanxiSong';
+  src: url('/fonts/nanxi.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Custom dark theme variables */
 :root {
   --color-bg-primary: #0f0f0f;
