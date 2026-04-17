@@ -48,10 +48,10 @@ const enterApp = () => {
         </div>
 
         <!-- Main Title with Glitch -->
-        <h1 class="text-6xl md:text-8xl font-bold mb-2 glitch-text" data-text="達比 K-Zone">
+        <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold mb-2 glitch-text" data-text="達比 K-Zone">
           達比 K-Zone
         </h1>
-        <h1 class="text-6xl md:text-8xl font-bold mb-6 glitch-text-en" data-text="DARVISH K-ZONE">
+        <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold mb-6 glitch-text-en" data-text="DARVISH K-ZONE">
           DARVISH K-ZONE
         </h1>
 
@@ -62,7 +62,7 @@ const enterApp = () => {
         </p>
 
         <!-- Status Bar -->
-        <div class="flex justify-center gap-6 mb-12 text-xs text-[#606080] tracking-widest">
+        <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-12 text-xs text-[#606080] tracking-widest">
           <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#00ff88] inline-block animate-pulse"></span>SIGNAL ACTIVE</span>
           <span>|</span>
           <span>TWSE DATA SYNC</span>
@@ -99,7 +99,7 @@ const enterApp = () => {
             <span class="text-xs text-[#00d4ff] tracking-[0.3em] uppercase">Origin Story</span>
             <div class="h-px w-12 bg-[#00d4ff] opacity-50"></div>
           </div>
-          <h2 class="text-4xl md:text-5xl font-bold text-white tracking-wider">命名由來</h2>
+          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-wider">命名由來</h2>
         </div>
 
         <div class="cyber-card p-10 md:p-12">
@@ -125,7 +125,7 @@ const enterApp = () => {
             <span class="text-xs text-[#ff006e] tracking-[0.3em] uppercase">System Core</span>
             <div class="h-px w-12 bg-[#ff006e] opacity-50"></div>
           </div>
-          <h2 class="text-4xl md:text-5xl font-bold text-white tracking-wider">什麼是 K-Zone？</h2>
+          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-wider">什麼是 K-Zone？</h2>
         </div>
 
         <div class="grid md:grid-cols-2 gap-6">
@@ -159,7 +159,7 @@ const enterApp = () => {
             <span class="text-xs text-[#7700ff] tracking-[0.3em] uppercase">Core Modules</span>
             <div class="h-px w-12 bg-[#7700ff] opacity-50"></div>
           </div>
-          <h2 class="text-4xl md:text-5xl font-bold text-white tracking-wider">核心功能</h2>
+          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-wider">核心功能</h2>
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
@@ -208,7 +208,7 @@ const enterApp = () => {
             <span class="text-xs text-[#00d4ff] tracking-[0.3em] uppercase">Full Specs</span>
             <div class="h-px w-12 bg-[#00d4ff] opacity-50"></div>
           </div>
-          <h2 class="text-4xl md:text-5xl font-bold text-white tracking-wider">完整功能一覽</h2>
+          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-wider">完整功能一覽</h2>
         </div>
 
         <div class="space-y-20">
@@ -368,7 +368,7 @@ const enterApp = () => {
             <span class="text-xs text-[#00ff88] tracking-[0.3em] uppercase">Why K-Zone</span>
             <div class="h-px w-12 bg-[#00ff88] opacity-50"></div>
           </div>
-          <h2 class="text-4xl md:text-5xl font-bold text-white tracking-wider">為什麼選擇達比 K-Zone？</h2>
+          <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold text-white tracking-wider">為什麼選擇達比 K-Zone？</h2>
         </div>
 
         <div class="grid md:grid-cols-2 gap-6">
@@ -405,7 +405,7 @@ const enterApp = () => {
             <span class="text-xs text-[#ff006e] tracking-[0.3em] uppercase">Developer Log</span>
             <div class="h-px w-12 bg-[#ff006e] opacity-50"></div>
           </div>
-          <h2 class="text-4xl md:text-5xl font-bold text-white tracking-wider">關於我</h2>
+          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-wider">關於我</h2>
           <p class="text-lg text-[#a0b0c0] mt-4 max-w-2xl mx-auto">
             熱愛棒球與投資的獨立開發者，致力於打造簡潔實用的股市分析工具
           </p>
@@ -480,7 +480,7 @@ const enterApp = () => {
           </div>
         </div>
 
-        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-white tracking-wider">
+        <h2 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-white tracking-wider">
           準備好進入 K-Zone 了嗎？
         </h2>
         <p class="text-xl text-[#a0b0c0] mb-12 tracking-wide">
@@ -643,9 +643,16 @@ const enterApp = () => {
 .glitch-text-en {
   color: transparent;
   -webkit-text-stroke: 1px rgba(0, 212, 255, 0.3);
-  font-size: 2rem;
-  letter-spacing: 0.5em;
+  font-size: 1.1rem;
+  letter-spacing: 0.25em;
   position: relative;
+}
+
+@media (min-width: 640px) {
+  .glitch-text-en {
+    font-size: 2rem;
+    letter-spacing: 0.5em;
+  }
 }
 
 @keyframes glitch {

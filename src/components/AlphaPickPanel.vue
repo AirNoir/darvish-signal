@@ -2,6 +2,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { useStockStore } from '../stores/stockStore'
 
+const emit = defineEmits<{ stockSelected: [] }>()
+
 const store = useStockStore()
 const activeTab = ref<'buy' | 'sell'>('buy')
 
@@ -81,7 +83,7 @@ const conditionCount = (pick: any) => {
         v-for="pick in store.alphaPicks"
         :key="pick.symbol"
         class="pick-card pick-card-buy"
-        @click="store.searchStock(pick.symbol)"
+        @click="store.searchStock(pick.symbol); emit('stockSelected')"
       >
         <div class="pick-header">
           <div class="symbol-group">
@@ -112,7 +114,7 @@ const conditionCount = (pick: any) => {
         v-for="alert in store.sellAlerts"
         :key="alert.symbol"
         class="pick-card pick-card-sell"
-        @click="store.searchStock(alert.symbol)"
+        @click="store.searchStock(alert.symbol); emit('stockSelected')"
       >
         <div class="pick-header">
           <div class="symbol-group">

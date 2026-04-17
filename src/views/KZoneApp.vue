@@ -35,6 +35,13 @@ const goToHome = () => {
   router.push('/');
 };
 
+// Close Alpha panel on mobile after selecting a stock
+const onAlphaStockSelected = () => {
+  if (window.innerWidth < 768) {
+    showAlphaPick.value = false;
+  }
+};
+
 // Indicator visibility settings - 預設只開啟 3 個重要指標
 const indicatorSettings = ref<IndicatorSettings>({
   // 價量指標
@@ -307,7 +314,7 @@ const sortedVisibleIndicators = computed(() => {
         v-if="showAlphaPick"
         class="w-72 border-r border-[#333] overflow-y-auto flex-shrink-0"
       >
-        <AlphaPickPanel />
+        <AlphaPickPanel @stock-selected="onAlphaStockSelected" />
       </div>
 
       <!-- Charts Area -->
