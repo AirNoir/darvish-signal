@@ -226,7 +226,7 @@ const sortedVisibleIndicators = computed(() => {
         <span
           v-if="priceChange"
           :class="[
-            priceChange.isPositive ? 'text-[#26a69a]' : 'text-[#ef5350]'
+            priceChange.isPositive ? 'text-[#ef5350]' : 'text-[#26a69a]'
           ]"
         >
           {{ priceChange.isPositive ? '+' : '' }}{{ priceChange.value.toFixed(2) }}
