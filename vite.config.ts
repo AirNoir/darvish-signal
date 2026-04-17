@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://twstockapi-testnet.up.railway.app',
+        target: 'https://api.darvishkzone.com',
         changeOrigin: true,
       },
     },

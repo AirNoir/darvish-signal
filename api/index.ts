@@ -1,7 +1,7 @@
 // DarvishSignal API - Transparent Proxy to TWStock API
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const EXTERNAL_API_BASE = 'https://twstockapi-testnet.up.railway.app';
+const EXTERNAL_API_BASE = 'https://api.darvishkzone.com';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const path = req.url || '';

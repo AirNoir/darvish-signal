@@ -1,5 +1,5 @@
 // Stock API Service for DarvishSignal
-const API_BASE_URL = '' // Empty = same origin (Vercel proxy)
+const API_BASE_URL = 'https://api.darvishkzone.com'
 
 // --- Types ---
 
