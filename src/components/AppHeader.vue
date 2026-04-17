@@ -31,9 +31,7 @@ const enterApp = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
       <!-- Logo -->
       <button @click="goHome" class="flex items-center gap-2 group">
-        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-blue-500/30 transition-shadow">
-          K
-        </div>
+        <img src="/logo.png" alt="達比 K-Zone" class="w-7 h-7 rounded-full" />
         <span class="text-white font-bold text-base tracking-wide group-hover:text-blue-400 transition-colors">達比 K-Zone</span>
       </button>
 
