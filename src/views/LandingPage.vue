@@ -51,7 +51,7 @@ const enterApp = () => {
         </h1>
 
         <!-- Tagline -->
-        <p class="text-xl md:text-2xl mb-4 text-[#a0b0c0] font-light tracking-wide">
+        <p class="text-xl md:text-2xl mb-4 text-[#a0b0c0] font-light tracking-wide font-noto">
           如達比修有般精準的<span class="text-[#00d4ff] neon-text-cyan font-semibold">控球</span><span class="hidden md:inline">，</span><br class="md:hidden" />
           捕捉每一個<span class="text-[#ff006e] neon-text-pink font-semibold">投資訊號</span>
         </p>
@@ -102,7 +102,7 @@ const enterApp = () => {
             「<span class="text-[#00d4ff] font-semibold neon-text-cyan">達比</span>」源自於日本職棒傳奇投手
             <span class="text-[#00d4ff] font-semibold neon-text-cyan">達比修有</span>（Yu Darvish）。
           </p>
-          <p class="text-xl md:text-2xl text-[#a0b0c0] leading-relaxed">
+          <p class="text-xl md:text-2xl text-[#a0b0c0] leading-relaxed font-noto">
             如同他在投手丘上的<span class="text-[#ff006e] font-semibold neon-text-pink">精準控球</span>，
             達比 K-Zone 致力於提供<span class="text-[#ff006e] font-semibold neon-text-pink">精準的市場訊號</span>，
             幫助投資者在股市中捕捉每一個關鍵時刻。
@@ -127,7 +127,7 @@ const enterApp = () => {
           <div class="cyber-card-pink p-8 group hover:scale-[1.02] transition-transform">
             <div class="text-xs text-[#ff006e] tracking-widest mb-4 uppercase">Module_01 :: Baseball</div>
             <h3 class="text-2xl font-bold mb-4 text-white">棒球好球帶</h3>
-            <p class="text-[#a0b0c0] leading-relaxed">
+            <p class="text-[#a0b0c0] leading-relaxed font-noto">
               在棒球中，K-Zone 代表<span class="text-[#ff006e]">好球帶</span>——
               投手必須精準控球的區域，決定每一球的成敗。
             </p>
@@ -136,7 +136,7 @@ const enterApp = () => {
           <div class="cyber-card p-8 group hover:scale-[1.02] transition-transform">
             <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">Module_02 :: Market</div>
             <h3 class="text-2xl font-bold mb-4 text-white">股市訊號區</h3>
-            <p class="text-[#a0b0c0] leading-relaxed">
+            <p class="text-[#a0b0c0] leading-relaxed font-noto">
               在股市中，K-Zone 是<span class="text-[#00d4ff]">最佳進場時機</span>——
               透過技術指標與法人動向，精準捕捉買賣訊號。
             </p>
@@ -321,7 +321,7 @@ const enterApp = () => {
                 <li class="flex items-center gap-3 text-[#a0b0c0]">
                   <span class="text-[#7700ff] font-bold">›</span>圖表自動縮放，適應不同螢幕尺寸
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#7700ff] font-bold">›</span>跨圖表同步 Tooltip，精準比對數據
                 </li>
               </ul>
@@ -375,7 +375,7 @@ const enterApp = () => {
           <div class="cyber-card p-8">
             <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">feature.trusted_data</div>
             <h3 class="text-xl font-bold mb-3 text-white">資料可信</h3>
-            <p class="text-[#606080]">數據來源自台灣證券交易所公開資訊，準確度有保障</p>
+            <p class="text-[#606080] font-noto">數據來源自台灣證券交易所公開資訊，準確度有保障</p>
           </div>
           <div class="cyber-card p-8">
             <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">feature.cross_platform</div>
@@ -407,11 +407,11 @@ const enterApp = () => {
         </div>
 
         <div class="cyber-card-pink p-10 md:p-12">
-          <p class="text-lg text-[#a0b0c0] leading-relaxed mb-6">
+          <p class="text-lg text-[#a0b0c0] leading-relaxed mb-6 font-noto">
             作為一名軟體工程師與長期投資者，我深刻體會到在資訊爆炸的時代，
             投資人需要的不是更多功能，而是<span class="text-[#00d4ff] font-semibold">精準、即時、易讀</span>的關鍵資訊。
           </p>
-          <p class="text-lg text-[#a0b0c0] leading-relaxed mb-10">
+          <p class="text-lg text-[#a0b0c0] leading-relaxed mb-10 font-noto">
             達比 K-Zone 是我為自己打造的看盤工具，融合了技術分析與法人動向追蹤，
             並以達比修有的精準控球為靈感，希望每位使用者都能在股市中找到屬於自己的「好球帶」。
           </p>
@@ -475,10 +475,10 @@ const enterApp = () => {
           </div>
         </div>
 
-        <h2 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-white tracking-wider">
+        <h2 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-white tracking-wider font-noto">
           準備好進入 K-Zone 了嗎？
         </h2>
-        <p class="text-xl text-[#a0b0c0] mb-12 tracking-wide">
+        <p class="text-xl text-[#a0b0c0] mb-12 tracking-wide font-noto">
           像達比修有一樣，用精準的判斷掌握每一個投資機會
         </p>
 
@@ -515,6 +515,11 @@ const enterApp = () => {
 /* Hex Grid */
 .hex-grid {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0-2l26-15V18L28 2 2 18v30L28 64z' fill='%2300d4ff'/%3E%3C/svg%3E");
+}
+
+/* Noto Sans TC override for elements containing 準 */
+.font-noto {
+  font-family: 'Noto Sans TC', sans-serif;
 }
 
 /* Scanlines */
