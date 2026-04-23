@@ -10,7 +10,7 @@ const enterApp = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#00000a] text-white overflow-auto" style="font-family: 'GuanHei', 'Noto Sans TC', sans-serif;">
+  <div class="min-h-screen bg-[#00000a] text-white overflow-auto" style="font-family: 'GuanHei', 'LXGWWenKai', sans-serif;">
     <AppHeader />
 
     <!-- Scanline Overlay -->
@@ -492,10 +492,20 @@ const enterApp = () => {
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-[#00d4ff]/10 py-8 px-6">
-      <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#606080] tracking-widest">
-        <span>© 2025 DARVISH K-ZONE. ALL RIGHTS RESERVED.</span>
-        <span>SYS_VERSION :: 2.0.0 | TWSE_SYNC :: DAILY</span>
+    <footer class="border-t border-[#00d4ff]/10 pt-8 pb-10 px-6">
+      <div class="max-w-6xl mx-auto space-y-6">
+        <!-- Disclaimer -->
+        <div class="border border-[#00d4ff]/10 bg-[#00d4ff]/[0.02] p-5">
+          <div class="text-xs text-[#00d4ff]/50 tracking-widest mb-3 uppercase">// DISCLAIMER</div>
+          <p class="text-xs text-[#404858] leading-relaxed">
+            資訊來源：臺灣證券交易所 TWSE、財團法人中華民國證券櫃檯買賣中心 GTSM、台灣期貨交易所處理提供。使用者須遵守台灣證券交易所「交易資訊使用管理辦法」等交易資訊管理相關規定，所有資訊以台灣證券交易所公告資料為主。本網站提供之資料僅供參考，對資訊正確、延遲或傳輸中斷不負任何責任，如使用者依本資料交易發生損失需自行負責。
+          </p>
+        </div>
+        <!-- Bottom Bar -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#404858] tracking-widest">
+          <span>© 2025 DARVISH K-ZONE. ALL RIGHTS RESERVED.</span>
+          <span>SYS_VERSION :: 2.0.0 | TWSE_SYNC :: DAILY</span>
+        </div>
       </div>
     </footer>
   </div>
@@ -509,7 +519,7 @@ const enterApp = () => {
 
 /* Noto Sans TC override for elements containing 準 */
 .font-noto {
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'LXGWWenKai', sans-serif;
 }
 
 /* Scanlines */
