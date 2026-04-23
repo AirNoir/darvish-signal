@@ -10,7 +10,7 @@ const enterApp = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#00000a] text-white overflow-auto" style="font-family: 'GuanHei', 'LXGWWenKai', sans-serif;">
+  <div class="min-h-screen bg-[#00000a] text-white overflow-auto" style="font-family: 'GuanHei', 'Iansui', sans-serif;">
     <AppHeader />
 
     <!-- Scanline Overlay -->
@@ -212,20 +212,20 @@ const enterApp = () => {
             <div class="flex-1 order-2 md:order-1">
               <div class="text-xs text-[#00d4ff] tracking-widest mb-2 uppercase">// 技術指標</div>
               <h3 class="text-3xl font-bold mb-4 text-white">多元技術分析工具</h3>
-              <p class="text-[#a0b0c0] text-lg mb-6 leading-relaxed">
+              <p class="text-[#a0b0c0] text-lg mb-6 leading-relaxed font-noto">
                 提供 MACD、KD、RSI、布林通道等經典技術指標，協助你從多個角度分析市場趨勢。
               </p>
               <ul class="space-y-3">
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#00d4ff] font-bold">›</span>MA5/MA20 移動平均線，掌握趨勢方向
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#00d4ff] font-bold">›</span>MACD 與 KD 動能指標，判斷買賣時機
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#00d4ff] font-bold">›</span>RSI 超買超賣指標，避免追高殺低
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#00d4ff] font-bold">›</span>布林通道，捕捉價格波動區間
                 </li>
               </ul>
@@ -283,20 +283,20 @@ const enterApp = () => {
             <div class="flex-1">
               <div class="text-xs text-[#ff006e] tracking-widest mb-2 uppercase">// 法人動向</div>
               <h3 class="text-3xl font-bold mb-4 text-white">追蹤大戶籌碼</h3>
-              <p class="text-[#a0b0c0] text-lg mb-6 leading-relaxed">
+              <p class="text-[#a0b0c0] text-lg mb-6 leading-relaxed font-noto">
                 即時顯示外資、投信買賣超數據，以及融資融券變化，掌握主力動向。
               </p>
               <ul class="space-y-3">
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#ff006e] font-bold">›</span>外資與投信買賣超日報表
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#ff006e] font-bold">›</span>外資買賣超移動平均（5/10/15/30日）
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#ff006e] font-bold">›</span>融資融券餘額與變化追蹤
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#ff006e] font-bold">›</span>券資比指標，洞察散戶信心
                 </li>
               </ul>
@@ -308,17 +308,17 @@ const enterApp = () => {
             <div class="flex-1 order-2 md:order-1">
               <div class="text-xs text-[#7700ff] tracking-widest mb-2 uppercase">// 客製化</div>
               <h3 class="text-3xl font-bold mb-4 text-white">打造專屬看盤介面</h3>
-              <p class="text-[#a0b0c0] text-lg mb-6 leading-relaxed">
+              <p class="text-[#a0b0c0] text-lg mb-6 leading-relaxed font-noto">
                 最多可同時顯示 6 個指標，自由排序與組合，建立最適合你的交易儀表板。
               </p>
               <ul class="space-y-3">
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#7700ff] font-bold">›</span>一鍵切換指標顯示/隱藏
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#7700ff] font-bold">›</span>拖曳調整指標順序，優先顯示重要資訊
                 </li>
-                <li class="flex items-center gap-3 text-[#a0b0c0]">
+                <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#7700ff] font-bold">›</span>圖表自動縮放，適應不同螢幕尺寸
                 </li>
                 <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
@@ -370,7 +370,7 @@ const enterApp = () => {
           <div class="cyber-card p-8">
             <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">feature.realtime</div>
             <h3 class="text-xl font-bold mb-3 text-white">即時更新</h3>
-            <p class="text-[#606080]">每日自動更新股價與法人數據，確保你看到的都是最新資訊</p>
+            <p class="text-[#606080] font-noto">每日自動更新股價與法人數據，確保你看到的都是最新資訊</p>
           </div>
           <div class="cyber-card p-8">
             <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">feature.trusted_data</div>
@@ -380,12 +380,12 @@ const enterApp = () => {
           <div class="cyber-card p-8">
             <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">feature.cross_platform</div>
             <h3 class="text-xl font-bold mb-3 text-white">跨平台支援</h3>
-            <p class="text-[#606080]">支援桌機、平板與手機，隨時隨地掌握市場動態</p>
+            <p class="text-[#606080] font-noto">支援桌機、平板與手機，隨時隨地掌握市場動態</p>
           </div>
           <div class="cyber-card p-8">
             <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">feature.clean_ui</div>
             <h3 class="text-xl font-bold mb-3 text-white">簡潔易用</h3>
-            <p class="text-[#606080]">專注於重要資訊呈現，不被複雜功能干擾交易判斷</p>
+            <p class="text-[#606080] font-noto">專注於重要資訊呈現，不被複雜功能干擾交易判斷</p>
           </div>
         </div>
       </div>
@@ -401,7 +401,7 @@ const enterApp = () => {
             <div class="h-px w-12 bg-[#ff006e] opacity-50"></div>
           </div>
           <h2 class="text-3xl md:text-5xl font-bold text-white tracking-wider">關於我</h2>
-          <p class="text-lg text-[#a0b0c0] mt-4 max-w-2xl mx-auto">
+          <p class="text-lg text-[#a0b0c0] mt-4 max-w-2xl mx-auto font-noto">
             熱愛棒球與投資的獨立開發者，致力於打造簡潔實用的股市分析工具
           </p>
         </div>
@@ -496,8 +496,8 @@ const enterApp = () => {
       <div class="max-w-6xl mx-auto space-y-6">
         <!-- Disclaimer -->
         <div class="border border-[#00d4ff]/10 bg-[#00d4ff]/[0.02] p-5">
-          <div class="text-xs text-[#00d4ff]/50 tracking-widest mb-3 uppercase">// DISCLAIMER</div>
-          <p class="text-xs text-[#404858] leading-relaxed">
+          <div class="text-sm text-[#f5f0e8] tracking-widest mb-3 uppercase">// 免責聲明 DISCLAIMER</div>
+          <p class="text-base text-[#a8c4d8] leading-relaxed font-noto">
             資訊來源：臺灣證券交易所 TWSE、財團法人中華民國證券櫃檯買賣中心 GTSM、台灣期貨交易所處理提供。使用者須遵守台灣證券交易所「交易資訊使用管理辦法」等交易資訊管理相關規定，所有資訊以台灣證券交易所公告資料為主。本網站提供之資料僅供參考，對資訊正確、延遲或傳輸中斷不負任何責任，如使用者依本資料交易發生損失需自行負責。
           </p>
         </div>
@@ -519,7 +519,7 @@ const enterApp = () => {
 
 /* Noto Sans TC override for elements containing 準 */
 .font-noto {
-  font-family: 'LXGWWenKai', sans-serif;
+  font-family: 'Iansui', sans-serif;
 }
 
 /* Scanlines */
