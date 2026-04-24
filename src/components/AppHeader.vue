@@ -27,7 +27,10 @@ const enterApp = () => {
 </script>
 
 <template>
-  <header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5">
+  <header
+    class="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5"
+    style="font-family: 'GuanHei', 'Iansui', sans-serif;"
+  >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
       <!-- Logo -->
       <button @click="goHome" class="flex items-center gap-2 group">
