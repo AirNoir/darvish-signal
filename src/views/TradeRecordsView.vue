@@ -80,9 +80,28 @@ const avgPerfPositive = computed(() => (data.value?.avg_performance ?? 0) >= 0);
 
     <main class="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-16">
       <!-- Page Title -->
-      <div class="mb-8">
+      <div class="mb-6">
         <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">機器人戰績</h1>
         <p class="text-gray-400 text-sm">達比訊號自動交易紀錄 · {{ FROM }} ～ {{ TO }}</p>
+      </div>
+
+      <!-- Simulation Warning Banner -->
+      <div class="mb-8 rounded-xl overflow-hidden border border-amber-500/30 bg-gradient-to-r from-amber-500/[0.08] via-amber-500/[0.04] to-transparent">
+        <div class="flex items-start gap-3 sm:gap-4 p-4 sm:p-5">
+          <div class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl">
+            ⚠️
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
+              <span class="text-amber-400 font-bold text-sm sm:text-base tracking-wide">模擬交易紀錄</span>
+              <span class="text-amber-500/40 text-xs">‧</span>
+              <span class="text-amber-400/80 text-xs sm:text-sm font-semibold">非真實交易</span>
+            </div>
+            <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
+              本頁為根據系統訊號機械式買賣的回測結果，並非實盤下單。僅供策略參考，不構成任何投資建議。
+            </p>
+          </div>
+        </div>
       </div>
 
       <!-- Loading -->
@@ -207,6 +226,40 @@ const avgPerfPositive = computed(() => (data.value?.avg_performance ?? 0) >= 0);
           </div>
         </div>
       </template>
+
+      <!-- Disclaimer Section -->
+      <section class="mt-10 rounded-xl border border-white/10 bg-white/[0.03]">
+        <header class="flex items-center gap-3 px-5 sm:px-6 py-4 border-b border-white/10">
+          <span class="inline-block w-1 h-5 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full"></span>
+          <h2 class="text-sm sm:text-base font-semibold text-white tracking-wide">模擬交易說明與免責聲明</h2>
+        </header>
+        <ul class="px-5 sm:px-6 py-5 space-y-3 text-xs sm:text-sm text-gray-400 leading-relaxed">
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">01</span>
+            <span>本頁所列之交易紀錄為系統回測之模擬交易，並非真實帳戶下單結果。</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">02</span>
+            <span>買進訊號依據 <code class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-xs">alpha pick</code> 條件觸發（近 4 個交易日中至少 3 日入選）。</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">03</span>
+            <span>賣出訊號依據 <code class="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 text-xs">alpha sell</code> 條件觸發（近 5 個交易日中至少 2 日觸發）。</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">04</span>
+            <span>交易價格採用訊號觸發次一交易日之 <span class="text-gray-300 font-mono text-xs">(開盤價 + 收盤價) / 2</span>，未計入手續費、交易稅、滑價。</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">05</span>
+            <span>績效數據為「假設完全依訊號買賣」之理論值，實盤將受成交量、流動性、個人情緒與判斷影響。</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">06</span>
+            <span class="text-gray-300">過去績效不代表未來表現，本頁不構成任何投資建議或推薦。<span class="text-amber-400/90 font-semibold">投資決策請自行判斷並承擔風險。</span></span>
+          </li>
+        </ul>
+      </section>
     </main>
   </div>
 </template>
