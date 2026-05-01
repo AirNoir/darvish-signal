@@ -81,8 +81,8 @@ const avgPerfPositive = computed(() => (data.value?.avg_performance ?? 0) >= 0);
     <main class="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-16">
       <!-- Page Title -->
       <div class="mb-6">
-        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">機器人戰績</h1>
-        <p class="text-gray-400 text-sm">達比訊號自動交易紀錄 · {{ FROM }} ～ {{ TO }}</p>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">策略回測模擬</h1>
+        <p class="text-gray-400 text-sm">技術條件機械式回測示例 · {{ FROM }} ～ {{ TO }}</p>
       </div>
 
       <!-- Simulation Warning Banner -->
@@ -93,12 +93,13 @@ const avgPerfPositive = computed(() => (data.value?.avg_performance ?? 0) >= 0);
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
-              <span class="text-amber-400 font-bold text-sm sm:text-base tracking-wide">模擬交易紀錄</span>
+              <span class="text-amber-400 font-bold text-sm sm:text-base tracking-wide">回測模擬資料</span>
               <span class="text-amber-500/40 text-xs">‧</span>
-              <span class="text-amber-400/80 text-xs sm:text-sm font-semibold">非真實交易</span>
+              <span class="text-amber-400/80 text-xs sm:text-sm font-semibold">非真實交易、非投資建議</span>
             </div>
             <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
-              本頁為根據系統訊號機械式買賣的回測結果，並非實盤下單。僅供策略參考，不構成任何投資建議。
+              本頁為依預設技術條件對歷史公開資料機械式比對的模擬結果，並非實盤下單，亦非個股推介或選股建議。
+              本網站不揭露任何具名個股之未來預期績效，數據僅供工具測試與技術指標研究之用。
             </p>
           </div>
         </div>
@@ -231,32 +232,32 @@ const avgPerfPositive = computed(() => (data.value?.avg_performance ?? 0) >= 0);
       <section class="mt-10 rounded-xl border border-white/10 bg-white/[0.03]">
         <header class="flex items-center gap-3 px-5 sm:px-6 py-4 border-b border-white/10">
           <span class="inline-block w-1 h-5 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full"></span>
-          <h2 class="text-sm sm:text-base font-semibold text-white tracking-wide">模擬交易說明與免責聲明</h2>
+          <h2 class="text-sm sm:text-base font-semibold text-white tracking-wide">回測模擬說明與免責聲明</h2>
         </header>
         <ul class="px-5 sm:px-6 py-5 space-y-3 text-xs sm:text-sm text-gray-400 leading-relaxed">
           <li class="flex gap-3">
             <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">01</span>
-            <span>本頁所列之交易紀錄為系統回測之模擬交易，並非真實帳戶下單結果。</span>
+            <span>本頁所列之資料為對歷史公開資料以預設技術條件機械式比對的模擬結果，<strong class="text-gray-300">並非真實帳戶下單紀錄、亦非個股推介或選股建議</strong>。</span>
           </li>
           <li class="flex gap-3">
             <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">02</span>
-            <span>買進訊號依據 <code class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-xs">alpha pick</code> 條件觸發（近 4 個交易日中至少 3 日入選）。</span>
+            <span>買進條件依據 <code class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-xs">技術多方條件</code> 觸發（近 4 個交易日中至少 3 日符合）。</span>
           </li>
           <li class="flex gap-3">
             <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">03</span>
-            <span>賣出訊號依據 <code class="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 text-xs">alpha sell</code> 條件觸發（近 5 個交易日中至少 2 日觸發）。</span>
+            <span>賣出條件依據 <code class="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 text-xs">技術空方條件</code> 觸發（近 5 個交易日中至少 2 日符合）。</span>
           </li>
           <li class="flex gap-3">
             <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">04</span>
-            <span>交易價格採用訊號觸發次一交易日之 <span class="text-gray-300 font-mono text-xs">(開盤價 + 收盤價) / 2</span>，未計入手續費、交易稅、滑價。</span>
+            <span>模擬價格採用條件觸發次一交易日之 <span class="text-gray-300 font-mono text-xs">(開盤價 + 收盤價) / 2</span>，未計入手續費、交易稅與滑價。</span>
           </li>
           <li class="flex gap-3">
             <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">05</span>
-            <span>績效數據為「假設完全依訊號買賣」之理論值，實盤將受成交量、流動性、個人情緒與判斷影響。</span>
+            <span>本頁績效數據為「假設完全依條件機械式進出」之理論值，實際投資將受成交量、流動性、個人判斷等因素影響。</span>
           </li>
           <li class="flex gap-3">
             <span class="flex-shrink-0 text-blue-400/60 font-mono select-none">06</span>
-            <span class="text-gray-300">過去績效不代表未來表現，本頁不構成任何投資建議或推薦。<span class="text-amber-400/90 font-semibold">投資決策請自行判斷並承擔風險。</span></span>
+            <span class="text-gray-300">過去績效不代表未來表現。本頁內容不構成《證券投資信託及顧問法》第 4 條所定義之投資分析意見或推介建議。<span class="text-amber-400/90 font-semibold">投資決策請自行判斷並承擔全部風險，必要時請諮詢具合格證照之專業顧問。</span></span>
           </li>
         </ul>
       </section>

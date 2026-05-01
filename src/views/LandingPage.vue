@@ -53,16 +53,21 @@ const enterApp = () => {
         <!-- Tagline -->
         <p class="text-xl md:text-2xl mb-4 text-[#a0b0c0] font-light tracking-wide font-noto">
           如達比修有般精準的<span class="text-[#00d4ff] neon-text-cyan font-semibold">控球</span><span class="hidden md:inline">，</span><br class="md:hidden" />
-          捕捉每一個<span class="text-[#ff006e] neon-text-pink font-semibold">投資訊號</span>
+          清晰呈現每一個<span class="text-[#ff006e] neon-text-pink font-semibold">技術指標</span>
+        </p>
+
+        <!-- Notice Bar -->
+        <p class="mb-6 text-xs text-[#606080] tracking-widest font-noto">
+          ※ 本網站為技術指標視覺化工具，所有內容均非投資建議
         </p>
 
         <!-- Status Bar -->
         <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-12 text-xs text-[#606080] tracking-widest">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#00ff88] inline-block animate-pulse"></span>SIGNAL ACTIVE</span>
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#00ff88] inline-block animate-pulse"></span>CHART READY</span>
           <span>|</span>
-          <span>TWSE DATA SYNC</span>
+          <span>TWSE PUBLIC DATA</span>
           <span>|</span>
-          <span>AI POWERED</span>
+          <span>VISUALIZATION TOOL</span>
         </div>
 
         <!-- CTA Button -->
@@ -104,8 +109,8 @@ const enterApp = () => {
           </p>
           <p class="text-xl md:text-2xl text-[#a0b0c0] leading-relaxed font-noto">
             如同他在投手丘上的<span class="text-[#ff006e] font-semibold neon-text-pink">精準控球</span>，
-            達比 K-Zone 致力於提供<span class="text-[#ff006e] font-semibold neon-text-pink">精準的市場訊號</span>，
-            幫助投資者在股市中捕捉每一個關鍵時刻。
+            達比 K-Zone 致力於將<span class="text-[#ff006e] font-semibold neon-text-pink">公開市場資料</span>
+            以清晰、可自訂的圖表方式呈現，協助使用者建立屬於自己的觀察介面。
           </p>
         </div>
       </div>
@@ -134,11 +139,11 @@ const enterApp = () => {
           </div>
 
           <div class="cyber-card p-8 group hover:scale-[1.02] transition-transform">
-            <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">Module_02 :: Market</div>
-            <h3 class="text-2xl font-bold mb-4 text-white">股市訊號區</h3>
+            <div class="text-xs text-[#00d4ff] tracking-widest mb-4 uppercase">Module_02 :: Charting</div>
+            <h3 class="text-2xl font-bold mb-4 text-white">技術圖表區</h3>
             <p class="text-[#a0b0c0] leading-relaxed font-noto">
-              在股市中，K-Zone 是<span class="text-[#00d4ff]">最佳進場時機</span>——
-              透過技術指標與法人動向，精準捕捉買賣訊號。
+              在股市中，K-Zone 是<span class="text-[#00d4ff]">資料聚合的觀察區</span>——
+              將技術指標與公開籌碼資料整合於同一畫面，僅供參考、非投資建議。
             </p>
           </div>
         </div>
@@ -165,8 +170,8 @@ const enterApp = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
               </svg>
             </div>
-            <h3 class="text-xl font-bold mb-3 text-white">即時 K 線圖表</h3>
-            <p class="text-[#606080]">整合技術指標、成交量與法人動向，一目了然掌握市場脈動</p>
+            <h3 class="text-xl font-bold mb-3 text-white">K 線圖表呈現</h3>
+            <p class="text-[#606080]">技術指標、成交量與公開籌碼資料以圖表方式呈現於同一畫面</p>
           </div>
 
           <div class="cyber-card p-8 group hover:scale-[1.02] transition-transform">
@@ -176,8 +181,8 @@ const enterApp = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
               </svg>
             </div>
-            <h3 class="text-xl font-bold mb-3 text-white">Alpha 訊號</h3>
-            <p class="text-[#606080]">精選強勢股與弱勢股資訊，協助觀察市場趨勢</p>
+            <h3 class="text-xl font-bold mb-3 text-white">技術條件清單</h3>
+            <p class="text-[#606080]">依預設技術指標規則對個股做條件比對的視覺化結果，非選股推薦</p>
           </div>
 
           <div class="cyber-card-pink p-8 group hover:scale-[1.02] transition-transform">
@@ -281,23 +286,23 @@ const enterApp = () => {
               </div>
             </div>
             <div class="flex-1">
-              <div class="text-xs text-[#ff006e] tracking-widest mb-2 uppercase">// 法人動向</div>
-              <h3 class="text-3xl font-bold mb-4 text-white">追蹤大戶籌碼</h3>
+              <div class="text-xs text-[#ff006e] tracking-widest mb-2 uppercase">// 公開籌碼資料</div>
+              <h3 class="text-3xl font-bold mb-4 text-white">籌碼資料圖表化</h3>
               <p class="text-[#a0b0c0] text-lg mb-6 leading-relaxed font-noto">
-                即時顯示外資、投信買賣超數據，以及融資融券變化，掌握主力動向。
+                將 TWSE 公開的外資、投信買賣超與融資融券資料以圖表方式呈現，僅做資料視覺化，不做任何解讀或建議。
               </p>
               <ul class="space-y-3">
                 <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
-                  <span class="text-[#ff006e] font-bold">›</span>外資與投信買賣超日報表
+                  <span class="text-[#ff006e] font-bold">›</span>外資與投信買賣超日資料圖表
                 </li>
                 <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
                   <span class="text-[#ff006e] font-bold">›</span>外資買賣超移動平均（5/10/15/30日）
                 </li>
                 <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
-                  <span class="text-[#ff006e] font-bold">›</span>融資融券餘額與變化追蹤
+                  <span class="text-[#ff006e] font-bold">›</span>融資融券餘額與變化呈現
                 </li>
                 <li class="flex items-center gap-3 text-[#a0b0c0] font-noto">
-                  <span class="text-[#ff006e] font-bold">›</span>券資比指標，洞察散戶信心
+                  <span class="text-[#ff006e] font-bold">›</span>券資比資料圖表
                 </li>
               </ul>
             </div>
@@ -408,12 +413,12 @@ const enterApp = () => {
 
         <div class="cyber-card-pink p-10 md:p-12">
           <p class="text-lg text-[#a0b0c0] leading-relaxed mb-6 font-noto">
-            作為一名軟體工程師與長期投資者，我深刻體會到在資訊爆炸的時代，
-            投資人需要的不是更多功能，而是<span class="text-[#00d4ff] font-semibold">精準、即時、易讀</span>的關鍵資訊。
+            作為一名軟體工程師，我希望在資訊爆炸的時代，
+            提供一款<span class="text-[#00d4ff] font-semibold">清晰、易讀、可自訂</span>的技術指標視覺化工具。
           </p>
           <p class="text-lg text-[#a0b0c0] leading-relaxed mb-10 font-noto">
-            達比 K-Zone 是我為自己打造的看盤工具，融合了技術分析與法人動向追蹤，
-            並以達比修有的精準控球為靈感，希望每位使用者都能在股市中找到屬於自己的「好球帶」。
+            達比 K-Zone 是我為自己打造的圖表工具，將公開市場資料整合於同一介面，
+            以達比修有的精準控球為靈感命名。本網站非投顧服務，所有內容均不構成投資建議。
           </p>
 
           <div class="border-t border-[#ff006e]/20 pt-8">
@@ -453,8 +458,8 @@ const enterApp = () => {
                 </div>
               </a>
             </div>
-            <p class="text-xs text-[#606080] mt-4 tracking-widest">
-              // 歡迎追蹤，獲取最新功能更新與市場觀點分享
+            <p class="text-xs text-[#606080] mt-4 tracking-widest font-noto">
+              // 此頻道僅做技術指標教學與工具更新公告，不推播個股買賣訊號、不提供選股建議
             </p>
           </div>
         </div>
@@ -468,8 +473,11 @@ const enterApp = () => {
 <h2 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-white tracking-wider font-noto">
           準備好進入 K-Zone 了嗎？
         </h2>
-        <p class="text-xl text-[#a0b0c0] mb-12 tracking-wide font-noto">
-          像達比修有一樣，用精準的判斷掌握每一個投資機會
+        <p class="text-xl text-[#a0b0c0] mb-4 tracking-wide font-noto">
+          以客觀的技術指標與公開資料，建立屬於你的觀察介面
+        </p>
+        <p class="text-xs text-[#606080] mb-12 tracking-widest font-noto">
+          ※ 本網站為技術指標視覺化工具，所有內容均非投資建議
         </p>
 
         <button
@@ -494,17 +502,34 @@ const enterApp = () => {
     <!-- Footer -->
     <footer class="border-t border-[#00d4ff]/10 pt-8 pb-10 px-6">
       <div class="max-w-6xl mx-auto space-y-6">
-        <!-- Disclaimer -->
+        <!-- Legal Notice -->
+        <div class="border border-amber-500/20 bg-amber-500/[0.03] p-5">
+          <div class="text-sm text-amber-300 tracking-widest mb-3 uppercase">// 投資警語 INVESTMENT NOTICE</div>
+          <p class="text-base text-[#e8d8b8] leading-relaxed font-noto mb-3">
+            <strong class="text-amber-300">本網站為技術指標視覺化工具，並非證券投資顧問業務。</strong>
+            網站之 K 線圖、技術指標、條件清單、回測模擬等內容，均屬公開資料的圖表化呈現，
+            <strong class="text-amber-300">不構成個股推介、選股建議或任何投資意見</strong>，
+            亦非《證券投資信託及顧問法》第 4 條所定義之分析意見或推介建議。
+          </p>
+          <p class="text-sm text-[#a8c4d8] leading-relaxed font-noto">
+            投資有風險，過去績效不代表未來表現。任何投資決策請使用者依自身判斷與風險承受能力為之，
+            必要時請諮詢領有合格證照之專業投顧人員。本網站對使用者依本網站資訊交易產生之任何損失，不負任何法律責任。
+          </p>
+        </div>
+        <!-- Data Source -->
         <div class="border border-[#00d4ff]/10 bg-[#00d4ff]/[0.02] p-5">
-          <div class="text-sm text-[#f5f0e8] tracking-widest mb-3 uppercase">// 免責聲明 DISCLAIMER</div>
+          <div class="text-sm text-[#f5f0e8] tracking-widest mb-3 uppercase">// 資料來源 DATA SOURCE</div>
           <p class="text-base text-[#a8c4d8] leading-relaxed font-noto">
-            資訊來源：臺灣證券交易所 TWSE、財團法人中華民國證券櫃檯買賣中心 GTSM、台灣期貨交易所處理提供。使用者須遵守台灣證券交易所「交易資訊使用管理辦法」等交易資訊管理相關規定，所有資訊以台灣證券交易所公告資料為主。本網站提供之資料僅供參考，對資訊正確、延遲或傳輸中斷不負任何責任，如使用者依本資料交易發生損失需自行負責。
+            本網站圖表資料來源為臺灣證券交易所（TWSE）、櫃買中心（GTSM）等公開資訊。
+            使用者須遵守 TWSE《交易資訊使用管理辦法》等相關規定，
+            所有資訊以主管機關公告為主。本網站不保證資料之即時性、完整性與正確性，
+            如因傳輸延遲或中斷造成之任何損失，本網站不負任何責任。
           </p>
         </div>
         <!-- Bottom Bar -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#404858] tracking-widest">
           <span>© 2025 DARVISH K-ZONE. ALL RIGHTS RESERVED.</span>
-          <span>SYS_VERSION :: 2.0.0 | TWSE_SYNC :: DAILY</span>
+          <span>VISUALIZATION TOOL :: NOT INVESTMENT ADVICE</span>
         </div>
       </div>
     </footer>

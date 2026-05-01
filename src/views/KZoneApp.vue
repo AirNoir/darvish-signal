@@ -26,7 +26,8 @@ import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
 const router = useRouter();
 const store = useStockStore();
 const { addChart, syncCrosshair } = useChartSync();
-const showAlphaPick = ref(false);
+// Mobile-only toggle. Desktop has the panel permanently pinned to the left.
+const showMobileAlphaPick = ref(false);
 const showSettings = ref(false);
 const showMobileMenu = ref(false);
 
@@ -38,7 +39,7 @@ const goToHome = () => {
 // Close Alpha panel on mobile after selecting a stock
 const onAlphaStockSelected = () => {
   if (window.innerWidth < 768) {
-    showAlphaPick.value = false;
+    showMobileAlphaPick.value = false;
   }
 };
 
@@ -250,17 +251,6 @@ const sortedVisibleIndicators = computed(() => {
           </span>
         </button>
 
-        <!-- Alpha Signal Toggle -->
-        <button
-          @click="showAlphaPick = !showAlphaPick"
-          :class="[
-            'px-2 py-1 text-xs font-medium rounded transition-colors',
-            showAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
-          ]"
-        >
-          Alpha
-        </button>
-
         <SearchBar />
       </div>
 
@@ -297,22 +287,24 @@ const sortedVisibleIndicators = computed(() => {
         </span>
       </button>
       <button
-        @click="showAlphaPick = !showAlphaPick; showMobileMenu = false"
+        @click="showMobileAlphaPick = !showMobileAlphaPick; showMobileMenu = false"
         :class="[
           'w-full px-3 py-1.5 text-xs font-medium rounded transition-colors text-left',
-          showAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
+          showMobileAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
         ]"
       >
-        Alpha 訊號
+        技術條件清單
       </button>
     </div>
 
     <!-- Main Content -->
     <main class="flex-1 flex overflow-hidden">
-      <!-- Alpha Pick Panel (Left Sidebar) -->
+      <!-- Alpha Pick Panel (Left Sidebar) - permanently pinned on desktop, toggled on mobile -->
       <div
-        v-if="showAlphaPick"
-        class="w-72 border-r border-[#333] overflow-y-auto flex-shrink-0"
+        :class="[
+          'w-72 border-r border-[#333] overflow-y-auto flex-shrink-0 md:block',
+          showMobileAlphaPick ? 'block' : 'hidden'
+        ]"
       >
         <AlphaPickPanel @stock-selected="onAlphaStockSelected" />
       </div>

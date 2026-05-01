@@ -50,12 +50,15 @@ const conditionCount = (pick: any) => {
   <div class="alpha-pick-panel">
     <!-- Header -->
     <div class="panel-header">
-      <h2>📊 Alpha 訊號</h2>
+      <h2>📊 技術條件清單</h2>
       <select v-model="store.selectedDate" class="date-select">
         <option v-for="date in store.availableDates" :key="date" :value="date">
           {{ formatDate(date) }}
         </option>
       </select>
+    </div>
+    <div class="panel-notice">
+      ※ 以下清單為技術指標條件比對之視覺化結果，<strong>非個股推介或投資建議</strong>。
     </div>
 
     <!-- Tabs -->
@@ -64,13 +67,13 @@ const conditionCount = (pick: any) => {
         :class="['tab', activeTab === 'buy' ? 'tab-active-buy' : '']"
         @click="activeTab = 'buy'"
       >
-        ▲ 強勢股 ({{ store.alphaPicks.length }})
+        ▲ 多方條件 ({{ store.alphaPicks.length }})
       </button>
       <button
         :class="['tab', activeTab === 'sell' ? 'tab-active-sell' : '']"
         @click="activeTab = 'sell'"
       >
-        ▼ 弱勢股 ({{ store.sellAlerts.length }})
+        ▼ 空方條件 ({{ store.sellAlerts.length }})
       </button>
     </div>
 
@@ -78,7 +81,7 @@ const conditionCount = (pick: any) => {
 
     <!-- BUY Picks -->
     <div v-else-if="activeTab === 'buy'" class="pick-list">
-      <div v-if="store.alphaPicks.length === 0" class="empty">暫無強勢股訊號</div>
+      <div v-if="store.alphaPicks.length === 0" class="empty">無符合多方條件的個股</div>
       <div
         v-for="pick in store.alphaPicks"
         :key="pick.symbol"
@@ -92,7 +95,7 @@ const conditionCount = (pick: any) => {
           </div>
           <div class="price-group">
             <span class="price">{{ pick.close }}</span>
-            <span class="signal-badge buy-badge">強勢股</span>
+            <span class="signal-badge buy-badge">多方</span>
           </div>
         </div>
 
@@ -100,7 +103,7 @@ const conditionCount = (pick: any) => {
           <span class="indicator">RSI {{ pick.rsi_14.toFixed(1) }}</span>
           <span class="indicator">MACD {{ pick.macd_hist >= 0 ? '+' : '' }}{{ pick.macd_hist.toFixed(2) }}</span>
           <span class="indicator">%B {{ pick.bb_percent_b.toFixed(2) }}</span>
-          <span class="indicator">法人 {{ conditionCount(pick) }}項</span>
+          <span class="indicator">籌碼 {{ conditionCount(pick) }}項</span>
         </div>
 
         <div class="reasons">{{ pick.reasons }}</div>
@@ -109,7 +112,7 @@ const conditionCount = (pick: any) => {
 
     <!-- SELL Alerts -->
     <div v-else class="pick-list">
-      <div v-if="store.sellAlerts.length === 0" class="empty">暫無弱勢股訊號</div>
+      <div v-if="store.sellAlerts.length === 0" class="empty">無符合空方條件的個股</div>
       <div
         v-for="alert in store.sellAlerts"
         :key="alert.symbol"
@@ -123,7 +126,7 @@ const conditionCount = (pick: any) => {
           </div>
           <div class="price-group">
             <span class="price">{{ alert.close }}</span>
-            <span class="signal-badge sell-badge">弱勢股</span>
+            <span class="signal-badge sell-badge">空方</span>
           </div>
         </div>
 
@@ -150,21 +153,21 @@ const conditionCount = (pick: any) => {
           <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
           </svg>
-          <h3>⚠️ 投資風險警示與免責聲明</h3>
+          <h3>⚠️ 工具性質聲明與投資警語</h3>
         </div>
         <div class="disclaimer-content">
-          <p><strong>本網站提供的資訊僅供參考，不構成任何投資建議或推薦。</strong></p>
+          <p><strong>本網站為技術指標視覺化工具，所有內容均非投資建議、推介或選股服務。</strong></p>
           <ul>
-            <li>「強勢股」與「弱勢股」標記僅為技術指標分析結果，非交易建議。</li>
+            <li>「多方條件」與「空方條件」清單僅為預設技術指標規則對公開資料比對後的視覺化結果，並非個股推介或交易建議。</li>
+            <li>本網站之內容不構成《證券投資信託及顧問法》第 4 條所定義之分析意見或推介建議。</li>
             <li>投資有風險，過去表現不代表未來結果。</li>
-            <li>使用者應自行判斷並承擔所有投資決策的風險與責任。</li>
+            <li>使用者應自行判斷並承擔所有投資決策的風險與責任，必要時應諮詢具合格證照之專業顧問。</li>
             <li>本網站對於因使用本服務所產生的任何損失，不負任何法律責任。</li>
-            <li>投資前請詳閱公開說明書，並諮詢專業財務顧問。</li>
           </ul>
           <p class="disclaimer-highlight">請確認您已閱讀並理解以上聲明</p>
         </div>
         <button class="disclaimer-button" @click="closeDisclaimer">
-          我已了解風險，繼續使用
+          我已了解，繼續使用工具
         </button>
       </div>
     </div>
@@ -192,6 +195,20 @@ const conditionCount = (pick: any) => {
   margin: 0;
   font-size: 1rem;
   color: #e0e0e0;
+}
+
+.panel-notice {
+  padding: 8px 16px;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: #c0a060;
+  background: rgba(245, 158, 11, 0.06);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.panel-notice strong {
+  color: #f5b840;
+  font-weight: 600;
 }
 
 .date-select {

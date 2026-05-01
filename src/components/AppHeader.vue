@@ -7,7 +7,7 @@ const route = useRoute();
 const mobileOpen = ref(false);
 
 const navItems = [
-  { label: '機器人戰績', to: '/trade-records' },
+  { label: '策略回測', to: '/trade-records' },
 ];
 
 const goHome = () => {
