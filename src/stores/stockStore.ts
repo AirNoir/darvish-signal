@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import type { Time } from 'lightweight-charts';
 import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, ForeignNetMAData, MarginData, ShortData, ShortMarginRatioData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
 import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock } from '../api/stockApi';
@@ -38,10 +37,10 @@ export const useStockStore = defineStore('stock', () => {
   const isLoadingMarkers = ref<boolean>(false);
 
   // 同步 hover 的時間點，用於所有圖表同步顯示 tooltip
-  const syncedHoverTime = ref<Time | null>(null);
+  const syncedHoverTime = ref<string | null>(null);
 
   // 設置同步 hover 時間
-  const setSyncedHoverTime = (time: Time | null) => {
+  const setSyncedHoverTime = (time: string | null) => {
     syncedHoverTime.value = time;
   };
 
