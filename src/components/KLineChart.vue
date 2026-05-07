@@ -152,7 +152,7 @@ const initChart = () => {
       secondsVisible: false,
       barSpacing: 12,
       minBarSpacing: 4,
-      rightOffset: 1.5,
+      rightOffset: 3,
       fixLeftEdge: false,
       fixRightEdge: false
     }
@@ -246,12 +246,9 @@ const updateData = () => {
   ma5Series.setData(store.ma5Data);
   ma20Series.setData(store.ma20Data);
 
-  // Padding inside the plot area: ~16px on the left (negative `from`) plus
-  // `rightOffset: 1.5` on the timeScale for the right side. Avoids data
-  // candles being flush against the chart edges.
   chart.timeScale().setVisibleLogicalRange({
-    from: -1.3,
-    to: data.length - 1
+    from: -3,
+    to: data.length - 1 + 3
   });
   updateMarkers();
 };

@@ -81,7 +81,7 @@ const initChart = () => {
       visible: true,
       barSpacing: 12,
       minBarSpacing: 4,
-      rightOffset: 1.5,
+      rightOffset: 3,
       fixLeftEdge: false,
       fixRightEdge: false
     }

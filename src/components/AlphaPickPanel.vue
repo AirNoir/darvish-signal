@@ -39,11 +39,6 @@ const formatDate = (dateStr: string) => {
   const date = new Date(dateStr + 'T00:00:00')
   return date.toLocaleDateString('zh-TW')
 }
-
-const conditionCount = (pick: any) => {
-  const keys = Object.keys(pick).filter(k => k.startsWith('cond_'))
-  return keys.filter(k => pick[k] === true).length
-}
 </script>
 
 <template>
@@ -103,7 +98,6 @@ const conditionCount = (pick: any) => {
           <span class="indicator">RSI {{ pick.rsi_14.toFixed(1) }}</span>
           <span class="indicator">MACD {{ pick.macd_hist >= 0 ? '+' : '' }}{{ pick.macd_hist.toFixed(2) }}</span>
           <span class="indicator">%B {{ pick.bb_percent_b.toFixed(2) }}</span>
-          <span class="indicator">籌碼 {{ conditionCount(pick) }}項</span>
         </div>
 
         <div class="reasons">{{ pick.reasons }}</div>
