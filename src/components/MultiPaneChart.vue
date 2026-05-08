@@ -282,8 +282,8 @@ onMounted(() => {
       const dir = isBuy ? 1 : -1;
 
       const gap = 14;
-      const headH = 30;
-      const headHalfW = 8;
+      const headH = 22;
+      const headHalfW = 13;
 
       const tipY = c.y + dir * gap;
       const baseY = tipY + dir * headH;
