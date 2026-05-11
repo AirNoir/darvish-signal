@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, computed, ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import type { IndicatorSettings } from '../types';
 import { useStockStore } from '../stores/stockStore';
 import SearchBar from '../components/SearchBar.vue';
 import MultiPaneChart from '../components/MultiPaneChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
+import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
 
 const router = useRouter();
+const route = useRoute();
 const store = useStockStore();
 const showMobileAlphaPick = ref(false);
 const showSettings = ref(false);
@@ -31,6 +33,8 @@ const indicatorSettings = ref<IndicatorSettings>({
   foreignNet: true,
   foreignNetMA: true,
   trustNet: false,
+  foreignHoldingPct: false,
+  instiHoldingPct: false,
   marginBalance: false,
   marginChange: false,
   shortBalance: false,
@@ -49,6 +53,8 @@ const indicatorOrder = ref<string[]>([
   'volumeMA',
   'turnoverRate',
   'trustNet',
+  'foreignHoldingPct',
+  'instiHoldingPct',
   'margin',
   'short',
   'shortMarginRatio',
@@ -81,26 +87,50 @@ const priceChange = computed(() => {
   };
 });
 
+const routeSymbol = computed(() => {
+  const s = route.params.symbol;
+  return typeof s === 'string' && s.trim() ? s.trim() : null;
+});
+
 onMounted(() => {
-  store.fetchStockData('2330');
+  store.fetchStockData(routeSymbol.value ?? '2330');
+});
+
+// URL → store：使用者直接改網址 / 上一頁下一頁
+watch(routeSymbol, (s) => {
+  if (s && s !== store.stockId) {
+    store.fetchStockData(s);
+  }
+});
+
+// store → URL：使用者透過搜尋或 alpha pick 切換股票時同步路徑
+watch(() => store.stockId, (id) => {
+  if (id && id !== routeSymbol.value) {
+    router.replace({ name: 'app', params: { symbol: id } });
+  }
 });
 </script>
 
 <template>
   <div class="relative flex flex-col h-screen bg-[#0f0f0f] overflow-hidden" style="height: 100vh;">
     <!-- Header -->
-    <header class="h-10 min-h-[40px] flex items-center justify-between px-3 border-b border-[#333] bg-[#1a1a1a] flex-shrink-0">
+    <header class="h-14 min-h-[56px] md:h-10 md:min-h-[40px] flex items-center justify-between px-3 border-b border-[#333] bg-[#1a1a1a] flex-shrink-0">
       <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity" @click="goToHome">
         <img src="/logo.png" alt="達比 K-Zone" class="w-7 h-7 rounded-full" />
         <h1 class="text-sm font-semibold text-white hidden sm:block">達比 K-Zone</h1>
       </div>
 
-      <div v-if="latestData" class="flex items-center gap-1.5 text-xs">
-        <span class="text-[#3b82f6] font-medium">{{ store.stockId }}</span>
-        <span v-if="store.stockName" class="text-[#888]">{{ store.stockName }}</span>
-        <span class="text-white">{{ latestData.close.toFixed(2) }}</span>
+      <div v-if="latestData" class="flex items-center gap-x-2 gap-y-0 flex-wrap justify-end">
+        <span class="text-[#3b82f6] font-semibold text-sm">{{ store.stockId }}</span>
+        <span
+          v-if="store.stockName"
+          class="text-[#f5b840] font-semibold text-base"
+          style="text-shadow: 0 0 8px rgba(245, 184, 64, 0.35);"
+        >{{ store.stockName }}</span>
+        <span class="text-white text-sm font-medium">{{ latestData.close.toFixed(2) }}</span>
         <span
           v-if="priceChange"
+          class="text-sm font-medium"
           :class="[priceChange.isPositive ? 'text-[#ef5350]' : 'text-[#26a69a]']"
         >
           {{ priceChange.isPositive ? '+' : '' }}{{ priceChange.value.toFixed(2) }}
@@ -171,11 +201,14 @@ onMounted(() => {
       <!-- Alpha Pick Panel -->
       <div
         :class="[
-          'w-72 border-r border-[#333] overflow-y-auto flex-shrink-0 md:block',
-          showMobileAlphaPick ? 'block' : 'hidden'
+          'w-72 border-r border-[#333] flex-col flex-shrink-0 md:flex',
+          showMobileAlphaPick ? 'flex' : 'hidden'
         ]"
       >
-        <AlphaPickPanel @stock-selected="onAlphaStockSelected" />
+        <MarketSummaryCard />
+        <div class="flex-1 overflow-y-auto min-h-0">
+          <AlphaPickPanel @stock-selected="onAlphaStockSelected" />
+        </div>
       </div>
 
       <!-- Charts Area -->

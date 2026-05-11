@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, ForeignNetMAData, MarginData, ShortData, ShortMarginRatioData } from '../types';
+import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, ForeignNetMAData, MarginData, ShortData, ShortMarginRatioData, HoldingPctData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
-import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock } from '../api/stockApi';
+import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock, type MarketData } from '../api/stockApi';
 
 const FINMIND_API_BASE = 'https://api.finmindtrade.com/api/v4/data';
 
@@ -20,6 +20,7 @@ export const useStockStore = defineStore('stock', () => {
   const stockName = ref<string>('');
   const stockData = ref<StockData[]>([]);
   const isLoading = ref<boolean>(false);
+  const isPicksLoading = ref<boolean>(false);
   const error = ref<string | null>(null);
   const indicators = ref<TechnicalIndicators | null>(null);
 
@@ -30,6 +31,7 @@ export const useStockStore = defineStore('stock', () => {
   const stockList = ref<Stock[]>([]);
   const alphaPicks = ref<AlphaPickItem[]>([]);
   const sellAlerts = ref<SellAlertItem[]>([]);
+  const marketData = ref<MarketData[]>([]);
   const availableDates = ref<string[]>([]);
   const selectedDate = ref<string>('');
   const alphaPickDate = ref<string>('');
@@ -117,6 +119,8 @@ export const useStockStore = defineStore('stock', () => {
   const marginData = ref<MarginData[]>([]);
   const shortData = ref<ShortData[]>([]);
   const shortMarginRatioData = ref<ShortMarginRatioData[]>([]);
+  const foreignHoldingPctData = ref<HoldingPctData[]>([]);
+  const instiHoldingPctData = ref<HoldingPctData[]>([]);
 
   // Actions
   const fetchStockData = async (id: string, startDate?: string) => {
@@ -215,6 +219,16 @@ export const useStockStore = defineStore('stock', () => {
           value: item.short_margin_ratio != null ? item.short_margin_ratio * 100 : null
         }));
 
+        foreignHoldingPctData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          value: item.foreign_holding_pct != null ? item.foreign_holding_pct * 100 : null
+        }));
+
+        instiHoldingPctData.value = sorted.map((item) => ({
+          time: item.trade_date,
+          value: item.insti_holding_pct != null ? item.insti_holding_pct * 100 : null
+        }));
+
         // Fetch signal markers in background
         fetchSignalMarkers(id);
       } catch (err) {
@@ -309,7 +323,7 @@ export const useStockStore = defineStore('stock', () => {
   };
 
   const fetchAlphaPicks = async (date?: string) => {
-    isLoading.value = true;
+    isPicksLoading.value = true;
     try {
       const resp = date
         ? await stockApi.getAlphaPickByDate(date)
@@ -320,11 +334,12 @@ export const useStockStore = defineStore('stock', () => {
       error.value = err instanceof Error ? err.message : 'Failed to fetch Alpha Picks';
       console.error('Error fetching Alpha Picks:', err);
     } finally {
-      isLoading.value = false;
+      isPicksLoading.value = false;
     }
   };
 
   const fetchSellAlerts = async (date?: string) => {
+    isPicksLoading.value = true;
     try {
       const resp = date
         ? await stockApi.getSellByDate(date)
@@ -332,6 +347,8 @@ export const useStockStore = defineStore('stock', () => {
       sellAlerts.value = resp.sells;
     } catch (err) {
       console.error('Error fetching Sell Alerts:', err);
+    } finally {
+      isPicksLoading.value = false;
     }
   };
 
@@ -350,6 +367,14 @@ export const useStockStore = defineStore('stock', () => {
     apiSource.value = source;
   };
 
+  const fetchMarketData = async (limit = 60) => {
+    try {
+      marketData.value = await stockApi.getMarket(limit);
+    } catch (err) {
+      console.error('Error fetching market data:', err);
+    }
+  };
+
   const getDefaultStartDate = (): string => {
     const date = new Date();
     date.setFullYear(date.getFullYear() - 1);
@@ -362,6 +387,7 @@ export const useStockStore = defineStore('stock', () => {
     stockName,
     stockData,
     isLoading,
+    isPicksLoading,
     isLoadingMarkers,
     error,
     indicators,
@@ -369,6 +395,7 @@ export const useStockStore = defineStore('stock', () => {
     stockList,
     alphaPicks,
     sellAlerts,
+    marketData,
     availableDates,
     selectedDate,
     alphaPickDate,
@@ -390,6 +417,8 @@ export const useStockStore = defineStore('stock', () => {
     marginData,
     shortData,
     shortMarginRatioData,
+    foreignHoldingPctData,
+    instiHoldingPctData,
     // Actions
     fetchStockData,
     searchStock,
@@ -397,6 +426,7 @@ export const useStockStore = defineStore('stock', () => {
     fetchAlphaPicks,
     fetchSellAlerts,
     fetchAvailableDates,
+    fetchMarketData,
     setApiSource,
     fetchSignalMarkers,
     setSyncedHoverTime,

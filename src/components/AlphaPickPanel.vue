@@ -15,10 +15,12 @@ const showDisclaimer = ref(!hasSeenDisclaimer)
 
 onMounted(async () => {
   await store.fetchAvailableDates()
-  await Promise.all([
-    store.fetchAlphaPicks(),
-    store.fetchSellAlerts(),
-  ])
+  if (!store.selectedDate) {
+    await Promise.all([
+      store.fetchAlphaPicks(),
+      store.fetchSellAlerts(),
+    ])
+  }
 })
 
 const closeDisclaimer = () => {
@@ -72,7 +74,7 @@ const formatDate = (dateStr: string) => {
       </button>
     </div>
 
-    <div v-if="store.isLoading" class="loading">載入中...</div>
+    <div v-if="store.isPicksLoading" class="loading">載入中...</div>
 
     <!-- BUY Picks -->
     <div v-else-if="activeTab === 'buy'" class="pick-list">

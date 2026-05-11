@@ -23,6 +23,8 @@ export interface ExtraValues {
   macd?: number | null;
   macdSignal?: number | null;
   macdHist?: number | null;
+  foreignHoldingPct?: number | null;
+  instiHoldingPct?: number | null;
 }
 
 const lookup = new Map<number, ExtraValues>();
@@ -233,6 +235,28 @@ export function registerCustomIndicators() {
       { key: 'rsi14', title: 'RSI14: ', type: 'line', styles: () => ({ color: '#ef4444' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ rsi9: get(d, 'rsi9'), rsi14: get(d, 'rsi14') }))
+  });
+
+  // 外資持股占比 (%)
+  registerIndicator<{ value: number | null }>({
+    name: 'FHP',
+    shortName: '外資持股',
+    precision: 2,
+    figures: [
+      { key: 'value', title: '外資持股: ', type: 'line', styles: () => ({ color: '#3b82f6' }) }
+    ],
+    calc: (dataList) => dataList.map((d) => ({ value: get(d, 'foreignHoldingPct') }))
+  });
+
+  // 三大法人持股占比 (%)
+  registerIndicator<{ value: number | null }>({
+    name: 'IHP',
+    shortName: '法人持股',
+    precision: 2,
+    figures: [
+      { key: 'value', title: '法人持股: ', type: 'line', styles: () => ({ color: '#f59e0b' }) }
+    ],
+    calc: (dataList) => dataList.map((d) => ({ value: get(d, 'instiHoldingPct') }))
   });
 
   // MACD（用 store 已算好的值）

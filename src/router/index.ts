@@ -12,7 +12,7 @@ const router = createRouter({
       component: LandingPage
     },
     {
-      path: '/app',
+      path: '/app/:symbol?',
       name: 'app',
       component: KZoneApp
     },

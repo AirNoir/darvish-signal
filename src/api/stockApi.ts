@@ -42,6 +42,8 @@ export interface DailyDataItem {
   bb_lower?: number
   bb_percent_b?: number
   bb_bandwidth?: number
+  foreign_holding_pct?: number
+  insti_holding_pct?: number
 }
 
 export interface AlphaPickItem {
@@ -155,6 +157,18 @@ export interface StockSignalResponse<T> {
 
 // --- Trade Records Types ---
 
+export interface MarketData {
+  trade_date: string
+  taiex_open: number
+  taiex_high: number
+  taiex_low: number
+  taiex_close: number
+  total_volume: number
+  foreign_net: number
+  margin_balance: number
+  margin_balance_change: number
+}
+
 export interface TradeRecord {
   name: string
   performance: number | null
@@ -246,6 +260,11 @@ export const stockApi = {
   // Trade Records - robot performance
   async getTradeRecords(from: string, to: string): Promise<TradeRecordsResponse> {
     return apiFetch<TradeRecordsResponse>(`${API_BASE_URL}/api/trade/trade-records?from=${from}&to=${to}`)
+  },
+
+  // Market - TAIEX 大盤資料
+  async getMarket(limit = 60): Promise<MarketData[]> {
+    return apiFetch<MarketData[]>(`${API_BASE_URL}/api/market?limit=${limit}`)
   },
 }
 

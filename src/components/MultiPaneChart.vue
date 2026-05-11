@@ -49,6 +49,8 @@ const INDICATOR_NAME: Record<string, string> = {
   foreignNet: 'FN',
   foreignNetMA: 'FNMA',
   trustNet: 'TN',
+  foreignHoldingPct: 'FHP',
+  instiHoldingPct: 'IHP',
   margin: 'MARGIN',
   short: 'SHORT',
   shortMarginRatio: 'SMR',
@@ -66,6 +68,8 @@ const isVisible = (key: string, s: IndicatorSettings): boolean => {
     case 'foreignNet': return s.foreignNet;
     case 'foreignNetMA': return s.foreignNetMA;
     case 'trustNet': return s.trustNet;
+    case 'foreignHoldingPct': return s.foreignHoldingPct;
+    case 'instiHoldingPct': return s.instiHoldingPct;
     case 'margin': return s.marginBalance || s.marginChange;
     case 'short': return s.shortBalance || s.shortChange;
     case 'shortMarginRatio': return s.shortMarginRatio;
@@ -105,6 +109,8 @@ const buildExtras = () => {
     const boll = store.bollingerData[i];
     const rsi = store.rsiData[i];
     const macd = store.macdData[i];
+    const fhp = store.foreignHoldingPctData[i];
+    const ihp = store.instiHoldingPctData[i];
     records.push({
       timestamp: ts,
       values: {
@@ -128,7 +134,9 @@ const buildExtras = () => {
         rsi14: rsi?.rsi14,
         macd: macd?.macd,
         macdSignal: macd?.signal,
-        macdHist: macd?.histogram
+        macdHist: macd?.histogram,
+        foreignHoldingPct: fhp?.value,
+        instiHoldingPct: ihp?.value
       }
     });
   });
@@ -194,6 +202,8 @@ const tipLinesForPane = (paneId: string, k: { open: number; close: number; volum
       return [`5日 ${formatBig(f?.avg5)}`, `10日 ${formatBig(f?.avg10)}`, `15日 ${formatBig(f?.avg15)}`, `30日 ${formatBig(f?.avg30)}`];
     }
     case 'trustNet': return [`投信 ${formatBig(store.institutionalData[idx]?.trust)}`];
+    case 'foreignHoldingPct': return [`外資持股 ${fmt(store.foreignHoldingPctData[idx]?.value)}%`];
+    case 'instiHoldingPct': return [`法人持股 ${fmt(store.instiHoldingPctData[idx]?.value)}%`];
     case 'margin': {
       const m = store.marginData[idx];
       const lines: string[] = [];

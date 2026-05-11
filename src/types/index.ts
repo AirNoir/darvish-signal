@@ -87,6 +87,11 @@ export interface ShortMarginRatioData {
   value: number | null;
 }
 
+export interface HoldingPctData {
+  time: string;
+  value: number | null;
+}
+
 // Indicator settings for visibility control
 export interface IndicatorSettings {
   // 價量指標
@@ -97,6 +102,8 @@ export interface IndicatorSettings {
   foreignNet: boolean;
   foreignNetMA: boolean;
   trustNet: boolean;
+  foreignHoldingPct: boolean;
+  instiHoldingPct: boolean;
   // 融資融券
   marginBalance: boolean;
   marginChange: boolean;
