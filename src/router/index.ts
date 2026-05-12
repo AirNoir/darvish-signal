@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import LandingPage from '../views/LandingPage.vue';
 import KZoneApp from '../views/KZoneApp.vue';
 import TradeRecordsView from '../views/TradeRecordsView.vue';
+import FeedView from '../views/FeedView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: '/trade-records',
       name: 'trade-records',
       component: TradeRecordsView
+    },
+    {
+      path: '/feed',
+      name: 'feed',
+      component: FeedView
     }
   ]
 });

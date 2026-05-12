@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AppHeader from '../components/AppHeader.vue';
 
@@ -8,17 +7,6 @@ const router = useRouter();
 const enterApp = () => {
   router.push('/app');
 };
-
-// Threads embed: SPA 導航回此頁時重新注入 script，強制重新 process blockquotes
-const THREADS_EMBED_SRC = 'https://www.threads.net/embed.js';
-onMounted(() => {
-  const old = document.querySelector(`script[src="${THREADS_EMBED_SRC}"]`);
-  if (old) old.remove();
-  const s = document.createElement('script');
-  s.src = THREADS_EMBED_SRC;
-  s.async = true;
-  document.head.appendChild(s);
-});
 </script>
 
 <template>
@@ -505,47 +493,6 @@ onMounted(() => {
             <p class="text-xs text-[#606080] mt-4 tracking-widest font-noto">
               // 此頻道僅做技術指標教學與工具更新公告，不推播個股買賣訊號、不提供選股建議
             </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Latest Threads Posts -->
-    <section class="relative py-24 px-6">
-      <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-12">
-          <div class="inline-flex items-center gap-3 mb-4">
-            <div class="h-px w-12 bg-[#7700ff] opacity-50"></div>
-            <span class="text-xs text-[#7700ff] tracking-[0.3em] uppercase">Latest Posts</span>
-            <div class="h-px w-12 bg-[#7700ff] opacity-50"></div>
-          </div>
-          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-wider">最新動態</h2>
-          <p class="text-sm text-[#a0b0c0] mt-4 font-noto">
-            來自 Threads
-            <a
-              href="https://www.threads.com/@darvishkzone"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-[#7700ff] hover:underline"
-            >@darvishkzone</a>
-          </p>
-        </div>
-
-        <div class="flex justify-center">
-          <div class="w-full max-w-xl">
-            <blockquote
-              class="text-post-media"
-              data-text-post-permalink="https://www.threads.com/@darvishkzone/post/DYM4wIQGs54"
-              data-text-post-version="0"
-              style="background:#FFF;border:0;border-radius:8px;box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15);margin:0 auto;max-width:540px;min-width:270px;padding:0;width:100%;"
-            >
-              <a
-                href="https://www.threads.com/@darvishkzone/post/DYM4wIQGs54"
-                target="_blank"
-                rel="noopener noreferrer"
-                style="background:#FFFFFF;line-height:0;padding:32px 0;text-align:center;text-decoration:none;width:100%;display:block;color:#000;"
-              >View on Threads</a>
-            </blockquote>
           </div>
         </div>
       </div>

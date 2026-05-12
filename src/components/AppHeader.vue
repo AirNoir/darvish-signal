@@ -7,6 +7,7 @@ const route = useRoute();
 const mobileOpen = ref(false);
 
 const navItems = [
+  { label: '最新動態', to: '/feed' },
   { label: '策略回測', to: '/trade-records' },
 ];
 
