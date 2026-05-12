@@ -6,6 +6,9 @@ import AppHeader from '../components/AppHeader.vue';
 const posts = [
   'https://www.threads.com/@darvishkzone/post/DYO8-IRmrXk',
   'https://www.threads.com/@darvishkzone/post/DYM4wIQGs54',
+  'https://www.threads.com/@darvishkzone/post/DYM4wtOmiUE',
+  'https://www.threads.com/@darvishkzone/post/DXa1DaniF9K',
+  'https://www.threads.com/@darvishkzone/post/DYLyQFGmnxx',
 ];
 
 // 直接用 /embed/ URL 嵌 iframe，繞過 Threads embed.js（多篇時會 race）。
