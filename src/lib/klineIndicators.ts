@@ -1,4 +1,4 @@
-import { registerIndicator, IndicatorSeries } from 'klinecharts';
+import { registerIndicator } from 'klinecharts';
 import type { KLineData } from 'klinecharts';
 
 export interface ExtraValues {
@@ -49,17 +49,17 @@ const formatBig = (v: number | null | undefined): string => {
   return v.toFixed(0);
 };
 
+
 let registered = false;
 
 export function registerCustomIndicators() {
   if (registered) return;
   registered = true;
 
-  // 成交量 (僅柱) — built-in VOL 也帶 MA, 我們拆成兩個獨立 toggle
+  // 成交量 (拆成正負方向：紅K往上、綠K往下)
   registerIndicator<{ value: number | null }>({
     name: 'VOL_BARS',
     shortName: '成交量',
-    series: IndicatorSeries.Volume,
     precision: 0,
     shouldFormatBigNumber: true,
     figures: [
@@ -67,20 +67,26 @@ export function registerCustomIndicators() {
         key: 'value',
         title: '成交量: ',
         type: 'bar',
+        baseValue: 0,
         styles: ({ current }) => ({
           color: (current.kLineData?.close ?? 0) >= (current.kLineData?.open ?? 0) ? '#ef5350' : '#26a69a'
         })
       }
     ],
-    calc: (dataList) => dataList.map((d) => ({ value: d.volume ?? 0 }))
+    calc: (dataList) =>
+      dataList.map((d) => {
+        const vol = d.volume ?? 0;
+        const isUp = (d.close ?? 0) >= (d.open ?? 0);
+        return { value: isUp ? vol : -vol };
+      })
   });
 
   // 成交均量
   registerIndicator<{ ma5: number | null; ma10: number | null; ma20: number | null }>({
     name: 'VOL_MA',
     shortName: '成交均量',
-    series: IndicatorSeries.Volume,
     precision: 0,
+    minValue: 0,
     shouldFormatBigNumber: true,
     figures: [
       { key: 'ma5', title: 'MA5: ', type: 'line', styles: () => ({ color: '#f59e0b' }) },
@@ -117,6 +123,7 @@ export function registerCustomIndicators() {
         key: 'value',
         title: '外資: ',
         type: 'bar',
+        baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.value) })
       }
     ],
@@ -155,6 +162,7 @@ export function registerCustomIndicators() {
         key: 'value',
         title: '投信: ',
         type: 'bar',
+        baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.value) })
       }
     ],
@@ -173,6 +181,7 @@ export function registerCustomIndicators() {
         key: 'change',
         title: '融資增減: ',
         type: 'bar',
+        baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.change) })
       }
     ],
@@ -192,6 +201,7 @@ export function registerCustomIndicators() {
         key: 'change',
         title: '融券增減: ',
         type: 'bar',
+        baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.change) })
       }
     ],
@@ -269,6 +279,7 @@ export function registerCustomIndicators() {
         key: 'hist',
         title: 'MACD: ',
         type: 'bar',
+        baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.hist) })
       },
       { key: 'dif', title: 'DIF: ', type: 'line', styles: () => ({ color: '#3b82f6' }) },

@@ -218,7 +218,7 @@ const tipLinesForPane = (paneId: string, k: { open: number; close: number; volum
       if (settings.shortChange) lines.push(`增減 ${formatBig(s?.change)}`);
       return lines;
     }
-    case 'shortMarginRatio': return [`券資比 ${fmt(store.shortMarginRatioData[idx]?.value)}`];
+    case 'shortMarginRatio': return [`券資比 ${fmt(store.shortMarginRatioData[idx]?.value)}%`];
     case 'bollinger': return [`%B ${fmt(store.bollingerData[idx]?.percentB)}`];
     case 'rsi': {
       const r = store.rsiData[idx];
@@ -465,12 +465,14 @@ onMounted(() => {
       const cursorX = c.x;
       const activePaneId = c.paneId;
       const activeY = c.y;
+      const activeBound = chart.getSize(activePaneId);
+      const activeYGlobal = activeBound ? activeBound.top + activeY : activeY;
       const tips: HoverTip[] = [];
 
       const candleBound = chart.getSize('candle_pane');
       if (candleBound) {
         const lines = tipLinesForPane('candle_pane', k, k.timestamp, props.settings);
-        const y = activePaneId === 'candle_pane' ? activeY : candleBound.top + 6;
+        const y = activePaneId === 'candle_pane' ? activeYGlobal : candleBound.top + 6;
         tips.push({ paneId: 'candle_pane', date: dateLabel, lines, x: cursorX, y });
       }
 
@@ -480,7 +482,7 @@ onMounted(() => {
         if (!bound) return;
         const lines = tipLinesForPane(paneId, k, k.timestamp, props.settings);
         if (lines.length === 0) return;
-        const y = activePaneId === paneId ? activeY : bound.top + 6;
+        const y = activePaneId === paneId ? activeYGlobal : bound.top + 6;
         tips.push({ paneId, date: dateLabel, lines, x: cursorX, y });
       });
 

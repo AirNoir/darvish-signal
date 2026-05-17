@@ -202,17 +202,25 @@ export const useStockStore = defineStore('stock', () => {
           avg30: item.foreign_net_30d_avg ?? null
         }));
 
-        marginData.value = sorted.map((item) => ({
-          time: item.trade_date,
-          balance: item.margin_balance ?? null,
-          change: null // API doesn't provide change, would need to calculate
-        }));
+        marginData.value = sorted.map((item, i, arr) => {
+          const prev = i > 0 ? arr[i - 1]?.margin_balance ?? null : null;
+          const cur = item.margin_balance ?? null;
+          return {
+            time: item.trade_date,
+            balance: cur,
+            change: cur != null && prev != null ? cur - prev : null
+          };
+        });
 
-        shortData.value = sorted.map((item) => ({
-          time: item.trade_date,
-          balance: item.short_balance ?? null,
-          change: null // API doesn't provide change, would need to calculate
-        }));
+        shortData.value = sorted.map((item, i, arr) => {
+          const prev = i > 0 ? arr[i - 1]?.short_balance ?? null : null;
+          const cur = item.short_balance ?? null;
+          return {
+            time: item.trade_date,
+            balance: cur,
+            change: cur != null && prev != null ? cur - prev : null
+          };
+        });
 
         shortMarginRatioData.value = sorted.map((item) => ({
           time: item.trade_date,
