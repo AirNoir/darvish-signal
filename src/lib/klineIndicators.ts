@@ -56,11 +56,12 @@ export function registerCustomIndicators() {
   if (registered) return;
   registered = true;
 
-  // 成交量 (拆成正負方向：紅K往上、綠K往下)
+  // 成交量 (僅往上長，紅綠靠顏色區分)
   registerIndicator<{ value: number | null }>({
     name: 'VOL_BARS',
     shortName: '成交量',
     precision: 0,
+    minValue: 0,
     shouldFormatBigNumber: true,
     figures: [
       {
@@ -73,12 +74,7 @@ export function registerCustomIndicators() {
         })
       }
     ],
-    calc: (dataList) =>
-      dataList.map((d) => {
-        const vol = d.volume ?? 0;
-        const isUp = (d.close ?? 0) >= (d.open ?? 0);
-        return { value: isUp ? vol : -vol };
-      })
+    calc: (dataList) => dataList.map((d) => ({ value: d.volume ?? 0 }))
   });
 
   // 成交均量
