@@ -256,11 +256,11 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 
 .date {
   font-size: 0.7rem;
-  color: #888;
+  color: #b8c4d4;
 }
 
 .chevron {
-  color: #888;
+  color: #b8c4d4;
   transition: transform 0.2s;
 }
 
@@ -310,7 +310,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
   bottom: 0;
   right: 0;
   font-size: 0.65rem;
-  color: #666;
+  color: #a0aab8;
   white-space: nowrap;
 }
 
@@ -347,7 +347,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 }
 
 .stat-label {
-  color: #888;
+  color: #b8c4d4;
 }
 
 .stat-value {
@@ -365,7 +365,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 
 .stat-value .unit {
   font-size: 0.7rem;
-  color: #888;
+  color: #a0aab8;
   font-weight: 400;
   min-width: 1.5em;
   text-align: left;
@@ -377,7 +377,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 
 .loading-text {
   font-size: 0.8rem;
-  color: #666;
+  color: #a0aab8;
   padding: 8px 0;
 }
 </style>
