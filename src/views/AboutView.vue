@@ -28,17 +28,17 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
           </div>
           <h1 class="text-3xl md:text-5xl font-bold text-white tracking-wider">關於我</h1>
           <p class="text-lg text-[#a0b0c0] mt-4 max-w-2xl mx-auto font-noto">
-            熱愛棒球與投資的獨立開發者，致力於打造簡潔實用的股市分析工具
+            現職為美商量化交易工程師，熱愛棒球與投資的獨立開發者，致力於打造簡潔實用的股市分析工具
           </p>
         </div>
 
         <div class="cyber-card-pink p-10 md:p-12">
           <p class="text-lg text-[#a0b0c0] leading-relaxed mb-6 font-noto">
-            作為一名軟體工程師，我希望在資訊爆炸的時代，
+            作為一名量化交易工程師，我希望在資訊爆炸的時代，
             提供一款<span class="text-[#00d4ff] font-semibold">清晰、易讀、可自訂</span>的技術指標視覺化工具。
           </p>
           <p class="text-lg text-[#a0b0c0] leading-relaxed mb-10 font-noto">
-            達比 K-Zone 是我為自己打造的圖表工具，將公開市場資料整合於同一介面，
+            達比 K-Zone 是三五好友為自己打造的圖表工具，將公開市場資料整合於同一介面，
             以達比修有的精準控球為靈感命名。本網站非投顧服務，所有內容均不構成投資建議。
           </p>
 
