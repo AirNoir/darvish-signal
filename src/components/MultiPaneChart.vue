@@ -148,7 +148,7 @@ const adjustCandlePaneHeight = () => {
   const total = containerEl.value.clientHeight;
   if (total <= 0) return;
   const candleH = Math.max(140, Math.floor(total * 0.25));
-  chart.setPaneOptions({ id: 'candle_pane', height: candleH });
+  chart.setPaneOptions({ id: 'candle_pane', height: candleH, gap: { top: 28, bottom: 8 } });
 };
 
 const reconcileIndicators = () => {
@@ -246,7 +246,8 @@ const drawSignalOverlays = () => {
       name: 'signal_marker',
       groupId: 'signals',
       points: [{ timestamp: tsOf(m.date), value }],
-      extendData: m.type
+      extendData: m.type,
+      lock: true
     });
   }
 };
@@ -343,6 +344,9 @@ onMounted(() => {
     }
   });
 
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+  const tooltipRule = isMobile ? TooltipShowRule.None : TooltipShowRule.Always;
+
   chart = init(containerId, {
     styles: {
       grid: {
@@ -368,7 +372,7 @@ onMounted(() => {
           }
         },
         tooltip: {
-          showRule: TooltipShowRule.Always,
+          showRule: tooltipRule,
           showType: TooltipShowType.Standard
         }
       },
@@ -376,7 +380,7 @@ onMounted(() => {
         bars: [{ style: PolygonType.Fill }],
         lines: [{ size: 1 }],
         tooltip: {
-          showRule: TooltipShowRule.Always,
+          showRule: tooltipRule,
           showType: TooltipShowType.Standard
         }
       },
@@ -438,6 +442,15 @@ onMounted(() => {
   if (chart) {
     chart.setLocale('zh-TW');
     chart.setOffsetRightDistance(16);
+    chart.setCustomApi({
+      formatDate: (_dtf, timestamp) => {
+        const d = new Date(timestamp);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+    });
     chart.createIndicator(
       { name: 'MA', calcParams: [5, 20] },
       false,

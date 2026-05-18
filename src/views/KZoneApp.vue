@@ -97,6 +97,48 @@ const priceChange = computed(() => {
   };
 });
 
+const formatMobileVolume = (v: number | null | undefined): string => {
+  if (v == null || !Number.isFinite(v)) return '—';
+  if (v >= 1e8) return (v / 1e8).toFixed(2) + ' 億';
+  if (v >= 1e4) return (v / 1e4).toFixed(1) + ' 萬';
+  return v.toLocaleString();
+};
+
+const displayedIdx = computed<number>(() => {
+  const n = store.stockData.length;
+  if (n === 0) return -1;
+  const hoverTime = store.syncedHoverTime;
+  if (!hoverTime) return n - 1;
+  const idx = store.stockData.findIndex((d) => d.time === hoverTime);
+  return idx >= 0 ? idx : n - 1;
+});
+
+const displayedData = computed(() => {
+  const idx = displayedIdx.value;
+  return idx >= 0 ? store.stockData[idx] : null;
+});
+
+const isLatestBar = computed(() => {
+  const n = store.stockData.length;
+  return n > 0 && displayedIdx.value === n - 1;
+});
+
+const displayedMA5 = computed<number | null>(() => {
+  const idx = displayedIdx.value;
+  if (idx < 4) return null;
+  let sum = 0;
+  for (let i = idx - 4; i <= idx; i++) sum += store.stockData[i]!.close;
+  return sum / 5;
+});
+
+const displayedMA20 = computed<number | null>(() => {
+  const idx = displayedIdx.value;
+  if (idx < 19) return null;
+  let sum = 0;
+  for (let i = idx - 19; i <= idx; i++) sum += store.stockData[i]!.close;
+  return sum / 20;
+});
+
 const routeSymbol = computed(() => {
   const s = route.params.symbol;
   return typeof s === 'string' && s.trim() ? s.trim() : null;
@@ -257,9 +299,34 @@ watch(() => store.stockId, (id) => {
           </div>
         </div>
 
-        <div v-else class="flex-1 py-2 overflow-hidden">
-          <div class="border-y border-[#333] overflow-hidden h-full">
-            <MultiPaneChart :settings="indicatorSettings" :indicator-order="indicatorOrder" />
+        <div v-else class="flex-1 flex flex-col overflow-hidden">
+          <!-- Mobile OHLC + MA strip (dynamic: updates with klinecharts crosshair on long-press) -->
+          <div
+            v-if="displayedData"
+            class="md:hidden flex items-center gap-x-3 gap-y-0 flex-wrap px-3 py-1.5 bg-[#1a1a1a] border-b border-[#333] text-xs flex-shrink-0"
+          >
+            <span class="flex items-center gap-1">
+              <span class="text-[#888]">時間</span>
+              <span class="tabular-nums" :class="isLatestBar ? 'text-white' : 'text-[#f5b840]'">{{ displayedData.time }}</span>
+              <button
+                v-if="!isLatestBar"
+                @click="store.setSyncedHoverTime(null)"
+                class="ml-0.5 text-[10px] text-[#3b82f6] px-1.5 py-px border border-[#3b82f6]/60 rounded hover:bg-[#3b82f6]/10 transition-colors"
+              >↩ 最新</button>
+            </span>
+            <span><span class="text-[#888]">開</span> <span class="text-white tabular-nums">{{ displayedData.open.toFixed(2) }}</span></span>
+            <span><span class="text-[#888]">高</span> <span class="text-[#ef5350] tabular-nums">{{ displayedData.high.toFixed(2) }}</span></span>
+            <span><span class="text-[#888]">低</span> <span class="text-[#26a69a] tabular-nums">{{ displayedData.low.toFixed(2) }}</span></span>
+            <span><span class="text-[#888]">收</span> <span class="text-white tabular-nums">{{ displayedData.close.toFixed(2) }}</span></span>
+            <span><span class="text-[#888]">量</span> <span class="text-white tabular-nums">{{ formatMobileVolume(displayedData.volume) }}</span></span>
+            <span v-if="displayedMA5 !== null"><span class="text-[#f5b840]">MA5</span> <span class="text-white tabular-nums">{{ displayedMA5.toFixed(2) }}</span></span>
+            <span v-if="displayedMA20 !== null"><span class="text-[#b388ff]">MA20</span> <span class="text-white tabular-nums">{{ displayedMA20.toFixed(2) }}</span></span>
+          </div>
+
+          <div class="flex-1 py-2 overflow-hidden min-h-0">
+            <div class="border-y border-[#333] overflow-hidden h-full">
+              <MultiPaneChart :settings="indicatorSettings" :indicator-order="indicatorOrder" />
+            </div>
           </div>
         </div>
       </div>
