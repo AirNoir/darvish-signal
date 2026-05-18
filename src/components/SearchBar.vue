@@ -3,6 +3,8 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { useStockStore } from '../stores/stockStore';
 import { trackEvent } from '../lib/analytics';
 
+const emit = defineEmits<{ stockSelected: [] }>();
+
 const store = useStockStore();
 const searchInput = ref<string>(store.stockId);
 
@@ -40,6 +42,7 @@ const selectStock = (symbol: string) => {
   closeDropdown();
   trackEvent('stock_search', { symbol, method: 'dropdown' });
   store.searchStock(symbol);
+  emit('stockSelected');
   nextTick(() => {
     inputRef.value?.select();
   });
@@ -51,6 +54,7 @@ const handleSearch = () => {
     closeDropdown();
     trackEvent('stock_search', { symbol: query, method: 'submit' });
     store.searchStock(query);
+    emit('stockSelected');
   }
 };
 
@@ -111,7 +115,7 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
         @click="openDropdown"
         @keydown="handleKeydown"
         @input="highlightedIndex = -1"
-        class="w-48 px-3 py-1 bg-[#1a1a1a] border border-[#333] rounded text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#3b82f6] transition-colors"
+        class="w-48 px-3 py-1 bg-[#1a1a1a] border border-[#333] rounded text-base md:text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#3b82f6] transition-colors"
       />
       <svg
         v-if="store.isLoading"

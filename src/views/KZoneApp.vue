@@ -28,9 +28,12 @@ const goToHome = () => {
 };
 
 const onAlphaStockSelected = () => {
-  if (window.innerWidth < 768) {
-    showMobileAlphaPick.value = false;
-  }
+  // 桌機因 md:flex 永遠顯示面板，所以這個 flag 收合不影響桌機 UI
+  showMobileAlphaPick.value = false;
+};
+
+const closeMobileAlphaPanel = () => {
+  showMobileAlphaPick.value = false;
 };
 
 const indicatorSettings = ref<IndicatorSettings>({
@@ -179,7 +182,7 @@ watch(() => store.stockId, (id) => {
       v-if="showMobileMenu"
       class="md:hidden absolute top-10 left-0 right-0 bg-[#1a1a1a] border-b border-[#333] z-50 p-3 flex flex-col gap-2"
     >
-      <SearchBar />
+      <SearchBar @stock-selected="showMobileMenu = false" />
       <button
         @click="openIndicatorSettings('mobile')"
         class="w-full px-3 py-1.5 text-xs font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444] text-left"
@@ -205,10 +208,17 @@ watch(() => store.stockId, (id) => {
 
     <!-- Main Content -->
     <main class="flex-1 flex overflow-hidden">
+      <!-- Mobile Backdrop -->
+      <div
+        v-if="showMobileAlphaPick"
+        class="md:hidden fixed inset-0 z-30 bg-black/40"
+        @click="closeMobileAlphaPanel"
+      ></div>
+
       <!-- Alpha Pick Panel -->
       <div
         :class="[
-          'w-72 border-r border-[#333] flex-col flex-shrink-0 md:flex',
+          'w-72 border-r border-[#333] flex-col flex-shrink-0 md:flex relative z-40 bg-[#0f0f0f]',
           showMobileAlphaPick ? 'flex' : 'hidden'
         ]"
       >
