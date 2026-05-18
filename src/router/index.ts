@@ -30,4 +30,21 @@ const router = createRouter({
   ]
 });
 
+declare global {
+  interface Window {
+    dataLayer?: Record<string, unknown>[];
+  }
+}
+
+router.afterEach((to) => {
+  if (typeof window === 'undefined') return;
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: 'page_view',
+    page_path: to.fullPath,
+    page_location: window.location.href,
+    page_title: document.title
+  });
+});
+
 export default router;
