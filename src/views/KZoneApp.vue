@@ -204,6 +204,13 @@ watch(() => store.stockId, (id) => {
       >
         技術條件清單
       </button>
+
+      <button
+        @click="showMobileMenu = false"
+        class="w-full mt-1 px-4 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm font-medium rounded-lg transition-colors"
+      >
+        完成
+      </button>
     </div>
 
     <!-- Main Content -->
