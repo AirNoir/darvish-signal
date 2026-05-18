@@ -437,6 +437,7 @@ onMounted(() => {
 
   if (chart) {
     chart.setLocale('zh-TW');
+    chart.setOffsetRightDistance(16);
     chart.createIndicator(
       { name: 'MA', calcParams: [5, 20] },
       false,

@@ -257,8 +257,8 @@ watch(() => store.stockId, (id) => {
           </div>
         </div>
 
-        <div v-else class="flex-1 p-2 overflow-hidden">
-          <div class="border border-[#333] rounded overflow-hidden h-full">
+        <div v-else class="flex-1 py-2 overflow-hidden">
+          <div class="border-y border-[#333] overflow-hidden h-full">
             <MultiPaneChart :settings="indicatorSettings" :indicator-order="indicatorOrder" />
           </div>
         </div>
