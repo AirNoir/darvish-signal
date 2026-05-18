@@ -66,7 +66,7 @@ export function registerCustomIndicators() {
     figures: [
       {
         key: 'value',
-        title: '成交量: ',
+        title: '',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({
@@ -103,7 +103,7 @@ export function registerCustomIndicators() {
     shortName: '週轉率',
     precision: 2,
     figures: [
-      { key: 'value', title: '週轉率: ', type: 'bar', styles: () => ({ color: '#8b5cf6' }) }
+      { key: 'value', title: '', type: 'bar', styles: () => ({ color: '#8b5cf6' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'turnoverRate') }))
   });
@@ -117,7 +117,7 @@ export function registerCustomIndicators() {
     figures: [
       {
         key: 'value',
-        title: '外資: ',
+        title: '',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.value) })
@@ -156,7 +156,7 @@ export function registerCustomIndicators() {
     figures: [
       {
         key: 'value',
-        title: '投信: ',
+        title: '',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.value) })
@@ -211,7 +211,7 @@ export function registerCustomIndicators() {
     shortName: '券資比',
     precision: 2,
     figures: [
-      { key: 'value', title: '券資比: ', type: 'line', styles: () => ({ color: '#ec4899' }) }
+      { key: 'value', title: '', type: 'line', styles: () => ({ color: '#ec4899' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'shortMarginRatio') }))
   });
@@ -224,7 +224,7 @@ export function registerCustomIndicators() {
     minValue: -0.5,
     maxValue: 1.5,
     figures: [
-      { key: 'value', title: '%B: ', type: 'line', styles: () => ({ color: '#a855f7' }) }
+      { key: 'value', title: '', type: 'line', styles: () => ({ color: '#a855f7' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'bbPercentB') }))
   });
