@@ -9,11 +9,16 @@ const trackThreadsProfile = () => {
 
 // 目前手動列表；之後改成從 /api/threads-latest 拉
 const posts = [
+  'https://www.threads.com/@darvishkzone/post/DYdvDxGmgQ1',
+  'https://www.threads.com/@darvishkzone/post/DYV8qgsGmZD',
+  'https://www.threads.com/@darvishkzone/post/DYV54PTmplP',
+  'https://www.threads.com/@darvishkzone/post/DYUq0byGs2A',
+  'https://www.threads.com/@darvishkzone/post/DYV6CMhGibr',
   'https://www.threads.com/@darvishkzone/post/DYO8-IRmrXk',
   'https://www.threads.com/@darvishkzone/post/DYM4wIQGs54',
   'https://www.threads.com/@darvishkzone/post/DYM4wtOmiUE',
-  'https://www.threads.com/@darvishkzone/post/DXa1DaniF9K',
   'https://www.threads.com/@darvishkzone/post/DYLyQFGmnxx',
+  'https://www.threads.com/@darvishkzone/post/DXa1DaniF9K',
 ];
 
 // 直接用 /embed/ URL 嵌 iframe，繞過 Threads embed.js（多篇時會 race）。
