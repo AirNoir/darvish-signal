@@ -380,7 +380,7 @@ onMounted(() => {
         bars: [{ style: PolygonType.Fill }],
         lines: [{ size: 1 }],
         tooltip: {
-          showRule: tooltipRule,
+          showRule: TooltipShowRule.Always,
           showType: TooltipShowType.Standard
         }
       },
