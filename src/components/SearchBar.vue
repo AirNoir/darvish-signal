@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { useStockStore } from '../stores/stockStore';
+import { trackEvent } from '../lib/analytics';
 
 const store = useStockStore();
 const searchInput = ref<string>(store.stockId);
@@ -37,6 +38,7 @@ const closeDropdown = () => {
 const selectStock = (symbol: string) => {
   searchInput.value = symbol;
   closeDropdown();
+  trackEvent('stock_search', { symbol, method: 'dropdown' });
   store.searchStock(symbol);
   nextTick(() => {
     inputRef.value?.select();
@@ -47,6 +49,7 @@ const handleSearch = () => {
   const query = searchInput.value.trim();
   if (query) {
     closeDropdown();
+    trackEvent('stock_search', { symbol: query, method: 'submit' });
     store.searchStock(query);
   }
 };

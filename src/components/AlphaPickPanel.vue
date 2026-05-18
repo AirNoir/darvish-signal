@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useStockStore } from '../stores/stockStore'
+import { trackEvent } from '../lib/analytics'
 
 const emit = defineEmits<{ stockSelected: [] }>()
 
 const store = useStockStore()
 const activeTab = ref<'buy' | 'sell'>('buy')
+
+const onAlphaPickClick = (symbol: string, signal: 'buy' | 'sell') => {
+  trackEvent('alpha_pick_select', { symbol, signal })
+  store.searchStock(symbol)
+  emit('stockSelected')
+}
 
 // Check localStorage immediately to avoid flash
 const hasSeenDisclaimer = typeof window !== 'undefined'
@@ -83,7 +90,7 @@ const formatDate = (dateStr: string) => {
         v-for="pick in store.alphaPicks"
         :key="pick.symbol"
         class="pick-card pick-card-buy"
-        @click="store.searchStock(pick.symbol); emit('stockSelected')"
+        @click="onAlphaPickClick(pick.symbol, 'buy')"
       >
         <div class="pick-header">
           <div class="symbol-group">
@@ -113,7 +120,7 @@ const formatDate = (dateStr: string) => {
         v-for="alert in store.sellAlerts"
         :key="alert.symbol"
         class="pick-card pick-card-sell"
-        @click="store.searchStock(alert.symbol); emit('stockSelected')"
+        @click="onAlphaPickClick(alert.symbol, 'sell')"
       >
         <div class="pick-header">
           <div class="symbol-group">

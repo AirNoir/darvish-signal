@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { trackEvent } from '../lib/analytics';
 
 const router = useRouter();
 const route = useRoute();
@@ -8,6 +9,7 @@ const mobileOpen = ref(false);
 
 const navItems = [
   { label: '最新動態', to: '/feed' },
+  { label: '關於我', to: '/about' },
 ];
 
 const goHome = () => {
@@ -15,13 +17,15 @@ const goHome = () => {
   router.push('/');
 };
 
-const navigate = (to: string) => {
+const navigate = (item: { label: string; to: string }) => {
   mobileOpen.value = false;
-  router.push(to);
+  trackEvent('nav_click', { nav_label: item.label, nav_to: item.to });
+  router.push(item.to);
 };
 
 const enterApp = () => {
   mobileOpen.value = false;
+  trackEvent('cta_click', { cta_id: 'enter_kzone', cta_location: 'header' });
   router.push('/app');
 };
 </script>
@@ -43,7 +47,7 @@ const enterApp = () => {
         <button
           v-for="item in navItems"
           :key="item.to"
-          @click="navigate(item.to)"
+          @click="navigate(item)"
           :class="[
             'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
             route.path === item.to
@@ -81,7 +85,7 @@ const enterApp = () => {
       <button
         v-for="item in navItems"
         :key="item.to"
-        @click="navigate(item.to)"
+        @click="navigate(item)"
         :class="[
           'w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors',
           route.path === item.to

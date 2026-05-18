@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import AppHeader from '../components/AppHeader.vue';
+import { trackEvent } from '../lib/analytics';
+
+const trackThreadsProfile = () => {
+  trackEvent('social_click', { social_platform: 'threads', social_location: 'feed' });
+};
 
 // 目前手動列表；之後改成從 /api/threads-latest 拉
 const posts = [
@@ -58,6 +63,7 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage));
               href="https://www.threads.com/@darvishkzone"
               target="_blank"
               rel="noopener noreferrer"
+              @click="trackThreadsProfile"
               class="text-[#7700ff] hover:underline"
             >@darvishkzone</a>
           </p>

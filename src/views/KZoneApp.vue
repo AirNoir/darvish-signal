@@ -8,6 +8,7 @@ import MultiPaneChart from '../components/MultiPaneChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
+import { trackEvent } from '../lib/analytics';
 
 const router = useRouter();
 const route = useRoute();
@@ -15,6 +16,12 @@ const store = useStockStore();
 const showMobileAlphaPick = ref(false);
 const showSettings = ref(false);
 const showMobileMenu = ref(false);
+
+const openIndicatorSettings = (source: 'desktop' | 'mobile') => {
+  showSettings.value = true;
+  showMobileMenu.value = false;
+  trackEvent('indicator_settings_open', { source });
+};
 
 const goToHome = () => {
   router.push('/');
@@ -114,13 +121,13 @@ watch(() => store.stockId, (id) => {
 <template>
   <div class="relative flex flex-col h-screen bg-[#0f0f0f] overflow-hidden" style="height: 100vh;">
     <!-- Header -->
-    <header class="h-14 min-h-[56px] md:h-10 md:min-h-[40px] flex items-center justify-between px-3 border-b border-[#333] bg-[#1a1a1a] flex-shrink-0">
+    <header class="h-14 min-h-[56px] md:h-10 md:min-h-[40px] flex items-center px-3 border-b border-[#333] bg-[#1a1a1a] flex-shrink-0 gap-2">
       <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity" @click="goToHome">
         <img src="/logo.png" alt="達比 K-Zone" class="w-7 h-7 rounded-full" />
         <h1 class="text-sm font-semibold text-white hidden sm:block">達比 K-Zone</h1>
       </div>
 
-      <div v-if="latestData" class="flex items-center gap-x-2 gap-y-0 flex-wrap justify-end">
+      <div v-if="latestData" class="ml-auto flex items-center gap-x-2 gap-y-0 flex-wrap justify-end min-w-0">
         <span class="text-[#3b82f6] font-semibold text-sm">{{ store.stockId }}</span>
         <span
           v-if="store.stockName"
@@ -138,9 +145,9 @@ watch(() => store.stockId, (id) => {
         </span>
       </div>
 
-      <div class="hidden md:flex items-center gap-2">
+      <div :class="['hidden md:flex items-center gap-2', !latestData && 'ml-auto']">
         <button
-          @click="showSettings = true"
+          @click="openIndicatorSettings('desktop')"
           class="px-2 py-1 text-xs font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444]"
         >
           <span class="flex items-center gap-1">
@@ -174,7 +181,7 @@ watch(() => store.stockId, (id) => {
     >
       <SearchBar />
       <button
-        @click="showSettings = true; showMobileMenu = false"
+        @click="openIndicatorSettings('mobile')"
         class="w-full px-3 py-1.5 text-xs font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444] text-left"
       >
         <span class="flex items-center gap-2">

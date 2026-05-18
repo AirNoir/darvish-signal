@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { IndicatorSettings } from '../types';
+import { trackEvent } from '../lib/analytics';
 
 const props = defineProps<{
   modelValue: IndicatorSettings;
@@ -152,6 +153,8 @@ const toggleIndicator = (key: string) => {
     showWarning(`最多只能同時觀看 ${MAX_INDICATORS} 個指標`);
     return;
   }
+
+  trackEvent('indicator_toggle', { indicator: key, enabled: newState });
 
   emit('update:modelValue', {
     ...props.modelValue,
