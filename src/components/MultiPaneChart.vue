@@ -147,8 +147,27 @@ const adjustCandlePaneHeight = () => {
   if (!chart || !containerEl.value) return;
   const total = containerEl.value.clientHeight;
   if (total <= 0) return;
-  const candleH = Math.max(140, Math.floor(total * 0.25));
-  chart.setPaneOptions({ id: 'candle_pane', height: candleH, gap: { top: 28, bottom: 8 } });
+
+  // klinecharts always sizes candle pane as leftover after indicator panes
+  // (see source: _measurePaneHeight). So to make candle pane small we must
+  // size the indicator panes large enough to consume the desired remainder.
+  const xAxisApprox = 24;
+  const separatorPx = 1;
+  const numIndicators = paneIndicatorMap.size;
+  const desiredCandleH = Math.max(120, Math.floor(total * 0.3));
+
+  // Give candle pane breathing room for above/below-bar signal markers
+  // (BUY pin extends ~36px below bar low, SELL pin ~36px above bar high).
+  chart.setPaneOptions({ id: 'candle_pane', gap: { top: 50, bottom: 40 } });
+
+  if (numIndicators > 0) {
+    const separators = (numIndicators + 1) * separatorPx;
+    const remaining = total - desiredCandleH - xAxisApprox - separators;
+    const perIndicatorH = Math.max(60, Math.floor(remaining / numIndicators));
+    paneIndicatorMap.forEach((_key, paneId) => {
+      chart!.setPaneOptions({ id: paneId, height: perIndicatorH });
+    });
+  }
 };
 
 const reconcileIndicators = () => {
@@ -452,7 +471,23 @@ onMounted(() => {
       }
     });
     chart.createIndicator(
-      { name: 'MA', calcParams: [5, 20] },
+      {
+        name: 'MA',
+        calcParams: [5, 10, 20],
+        styles: {
+          lines: [
+            { color: '#f5b840' },
+            { color: '#22d3ee' },
+            { color: '#b388ff' }
+          ]
+        } as any,
+        createTooltipDataSource: () => ({
+          name: '',
+          calcParamsText: '',
+          icons: [],
+          values: []
+        })
+      },
       false,
       { id: 'candle_pane' }
     );

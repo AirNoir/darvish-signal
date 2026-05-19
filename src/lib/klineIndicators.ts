@@ -66,7 +66,6 @@ export function registerCustomIndicators() {
     figures: [
       {
         key: 'value',
-        title: '',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({
@@ -85,9 +84,9 @@ export function registerCustomIndicators() {
     minValue: 0,
     shouldFormatBigNumber: true,
     figures: [
-      { key: 'ma5', title: 'MA5: ', type: 'line', styles: () => ({ color: '#f59e0b' }) },
-      { key: 'ma10', title: 'MA10: ', type: 'line', styles: () => ({ color: '#3b82f6' }) },
-      { key: 'ma20', title: 'MA20: ', type: 'line', styles: () => ({ color: '#8b5cf6' }) }
+      { key: 'ma5', type: 'line', styles: () => ({ color: '#f59e0b' }) },
+      { key: 'ma10', type: 'line', styles: () => ({ color: '#3b82f6' }) },
+      { key: 'ma20', type: 'line', styles: () => ({ color: '#8b5cf6' }) }
     ],
     calc: (dataList) =>
       dataList.map((d) => ({
@@ -103,7 +102,7 @@ export function registerCustomIndicators() {
     shortName: '週轉率',
     precision: 2,
     figures: [
-      { key: 'value', title: '', type: 'bar', styles: () => ({ color: '#8b5cf6' }) }
+      { key: 'value', type: 'bar', styles: () => ({ color: '#8b5cf6' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'turnoverRate') }))
   });
@@ -117,7 +116,6 @@ export function registerCustomIndicators() {
     figures: [
       {
         key: 'value',
-        title: '',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.value) })
@@ -133,10 +131,10 @@ export function registerCustomIndicators() {
     precision: 0,
     shouldFormatBigNumber: true,
     figures: [
-      { key: 'avg5', title: '5日: ', type: 'line', styles: () => ({ color: '#f59e0b' }) },
-      { key: 'avg10', title: '10日: ', type: 'line', styles: () => ({ color: '#3b82f6' }) },
-      { key: 'avg15', title: '15日: ', type: 'line', styles: () => ({ color: '#8b5cf6' }) },
-      { key: 'avg30', title: '30日: ', type: 'line', styles: () => ({ color: '#ec4899' }) }
+      { key: 'avg5', type: 'line', styles: () => ({ color: '#f59e0b' }) },
+      { key: 'avg10', type: 'line', styles: () => ({ color: '#3b82f6' }) },
+      { key: 'avg15', type: 'line', styles: () => ({ color: '#8b5cf6' }) },
+      { key: 'avg30', type: 'line', styles: () => ({ color: '#ec4899' }) }
     ],
     calc: (dataList) =>
       dataList.map((d) => ({
@@ -156,7 +154,6 @@ export function registerCustomIndicators() {
     figures: [
       {
         key: 'value',
-        title: '',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.value) })
@@ -172,10 +169,9 @@ export function registerCustomIndicators() {
     precision: 0,
     shouldFormatBigNumber: true,
     figures: [
-      { key: 'balance', title: '融資餘額: ', type: 'line', styles: () => ({ color: '#3b82f6' }) },
+      { key: 'balance', type: 'line', styles: () => ({ color: '#3b82f6' }) },
       {
         key: 'change',
-        title: '融資增減: ',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.change) })
@@ -192,10 +188,9 @@ export function registerCustomIndicators() {
     precision: 0,
     shouldFormatBigNumber: true,
     figures: [
-      { key: 'balance', title: '融券餘額: ', type: 'line', styles: () => ({ color: '#ec4899' }) },
+      { key: 'balance', type: 'line', styles: () => ({ color: '#ec4899' }) },
       {
         key: 'change',
-        title: '融券增減: ',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.change) })
@@ -211,7 +206,7 @@ export function registerCustomIndicators() {
     shortName: '券資比',
     precision: 2,
     figures: [
-      { key: 'value', title: '', type: 'line', styles: () => ({ color: '#ec4899' }) }
+      { key: 'value', type: 'line', styles: () => ({ color: '#ec4899' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'shortMarginRatio') }))
   });
@@ -224,7 +219,7 @@ export function registerCustomIndicators() {
     minValue: -0.5,
     maxValue: 1.5,
     figures: [
-      { key: 'value', title: '', type: 'line', styles: () => ({ color: '#a855f7' }) }
+      { key: 'value', type: 'line', styles: () => ({ color: '#a855f7' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'bbPercentB') }))
   });
@@ -237,8 +232,8 @@ export function registerCustomIndicators() {
     minValue: 0,
     maxValue: 100,
     figures: [
-      { key: 'rsi9', title: 'RSI9: ', type: 'line', styles: () => ({ color: '#22c55e' }) },
-      { key: 'rsi14', title: 'RSI14: ', type: 'line', styles: () => ({ color: '#ef4444' }) }
+      { key: 'rsi9', type: 'line', styles: () => ({ color: '#22c55e' }) },
+      { key: 'rsi14', type: 'line', styles: () => ({ color: '#ef4444' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ rsi9: get(d, 'rsi9'), rsi14: get(d, 'rsi14') }))
   });
@@ -249,7 +244,7 @@ export function registerCustomIndicators() {
     shortName: '外資持股',
     precision: 2,
     figures: [
-      { key: 'value', title: '外資持股: ', type: 'line', styles: () => ({ color: '#3b82f6' }) }
+      { key: 'value', type: 'line', styles: () => ({ color: '#3b82f6' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'foreignHoldingPct') }))
   });
@@ -260,7 +255,7 @@ export function registerCustomIndicators() {
     shortName: '法人持股',
     precision: 2,
     figures: [
-      { key: 'value', title: '法人持股: ', type: 'line', styles: () => ({ color: '#f59e0b' }) }
+      { key: 'value', type: 'line', styles: () => ({ color: '#f59e0b' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'instiHoldingPct') }))
   });
@@ -273,13 +268,12 @@ export function registerCustomIndicators() {
     figures: [
       {
         key: 'hist',
-        title: 'MACD: ',
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.hist) })
       },
-      { key: 'dif', title: 'DIF: ', type: 'line', styles: () => ({ color: '#3b82f6' }) },
-      { key: 'dea', title: 'DEA: ', type: 'line', styles: () => ({ color: '#f59e0b' }) }
+      { key: 'dif', type: 'line', styles: () => ({ color: '#3b82f6' }) },
+      { key: 'dea', type: 'line', styles: () => ({ color: '#f59e0b' }) }
     ],
     calc: (dataList) =>
       dataList.map((d) => ({ dif: get(d, 'macd'), dea: get(d, 'macdSignal'), hist: get(d, 'macdHist') }))

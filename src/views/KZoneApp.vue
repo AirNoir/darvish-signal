@@ -131,6 +131,14 @@ const displayedMA5 = computed<number | null>(() => {
   return sum / 5;
 });
 
+const displayedMA10 = computed<number | null>(() => {
+  const idx = displayedIdx.value;
+  if (idx < 9) return null;
+  let sum = 0;
+  for (let i = idx - 9; i <= idx; i++) sum += store.stockData[i]!.close;
+  return sum / 10;
+});
+
 const displayedMA20 = computed<number | null>(() => {
   const idx = displayedIdx.value;
   if (idx < 19) return null;
@@ -320,6 +328,7 @@ watch(() => store.stockId, (id) => {
             <span><span class="text-[#888]">收</span> <span class="text-white tabular-nums">{{ displayedData.close.toFixed(2) }}</span></span>
             <span><span class="text-[#888]">量</span> <span class="text-white tabular-nums">{{ formatMobileVolume(displayedData.volume) }}</span></span>
             <span v-if="displayedMA5 !== null"><span class="text-[#f5b840]">MA5</span> <span class="text-white tabular-nums">{{ displayedMA5.toFixed(2) }}</span></span>
+            <span v-if="displayedMA10 !== null"><span class="text-[#22d3ee]">MA10</span> <span class="text-white tabular-nums">{{ displayedMA10.toFixed(2) }}</span></span>
             <span v-if="displayedMA20 !== null"><span class="text-[#b388ff]">MA20</span> <span class="text-white tabular-nums">{{ displayedMA20.toFixed(2) }}</span></span>
           </div>
 
