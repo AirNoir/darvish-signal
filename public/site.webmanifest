@@ -1,0 +1,22 @@
+{
+  "name": "達比 K-Zone",
+  "short_name": "K-Zone",
+  "description": "達比 K-Zone 是一款台股技術指標視覺化工具，依公開資料呈現 K 線圖表、外資與投信買賣超、MACD／KD／RSI／布林通道等指標。",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#0f0f0f",
+  "background_color": "#0f0f0f",
+  "display": "standalone",
+  "start_url": "/",
+  "lang": "zh-TW"
+}
