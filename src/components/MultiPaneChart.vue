@@ -452,23 +452,7 @@ onMounted(() => {
       }
     });
     chart.createIndicator(
-      {
-        name: 'MA',
-        calcParams: [5, 10, 20],
-        styles: {
-          lines: [
-            { color: '#f5b840' },
-            { color: '#22d3ee' },
-            { color: '#b388ff' }
-          ]
-        } as any,
-        createTooltipDataSource: () => ({
-          name: '',
-          calcParamsText: '',
-          icons: [],
-          values: []
-        })
-      },
+      { name: 'MA', calcParams: [5, 10, 20] },
       false,
       { id: 'candle_pane' }
     );
