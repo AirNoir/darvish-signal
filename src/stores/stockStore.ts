@@ -339,8 +339,10 @@ export const useStockStore = defineStore('stock', () => {
       alphaPicks.value = resp.picks;
       alphaPickDate.value = resp.trade_date;
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to fetch Alpha Picks';
-      console.error('Error fetching Alpha Picks:', err);
+      // 該日沒有 alpha pick（例如新一天但訊號未算）→ 顯示空清單而非舊資料
+      alphaPicks.value = [];
+      alphaPickDate.value = date ?? '';
+      console.warn('No Alpha Picks for', date ?? 'latest', err);
     } finally {
       isPicksLoading.value = false;
     }
@@ -354,7 +356,9 @@ export const useStockStore = defineStore('stock', () => {
         : await stockApi.getSellLatest();
       sellAlerts.value = resp.sells;
     } catch (err) {
-      console.error('Error fetching Sell Alerts:', err);
+      // 該日沒有 sell alert → 顯示空清單而非舊資料
+      sellAlerts.value = [];
+      console.warn('No Sell Alerts for', date ?? 'latest', err);
     } finally {
       isPicksLoading.value = false;
     }
@@ -362,9 +366,22 @@ export const useStockStore = defineStore('stock', () => {
 
   const fetchAvailableDates = async () => {
     try {
-      availableDates.value = await stockApi.getAlphaPickDates(60);
-      if (availableDates.value.length > 0) {
-        selectedDate.value = availableDates.value[0] as string;
+      const [alphaDates, mkt] = await Promise.all([
+        stockApi.getAlphaPickDates(60).catch(() => [] as string[]),
+        marketData.value.length > 0
+          ? Promise.resolve(marketData.value)
+          : stockApi.getMarket(60).catch(() => [] as MarketData[])
+      ]);
+      if (marketData.value.length === 0 && mkt.length > 0) {
+        marketData.value = mkt;
+      }
+      const marketDates = marketData.value.map((m) => m.trade_date);
+      // Merge + dedupe + sort newest first (string compare works for YYYY-MM-DD)
+      const merged = Array.from(new Set([...marketDates, ...alphaDates]))
+        .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
+      availableDates.value = merged;
+      if (merged.length > 0) {
+        selectedDate.value = merged[0] as string;
       }
     } catch (err) {
       console.error('Error fetching available dates:', err);
