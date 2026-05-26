@@ -9,16 +9,26 @@ const trackThreadsProfile = () => {
 
 // 目前手動列表；之後改成從 /api/threads-latest 拉
 const posts = [
+  'https://www.threads.com/@darvishkzone/post/DYzd08JlHGl',
+  'https://www.threads.com/@darvishkzone/post/DYyXcm6kfy2',
+  'https://www.threads.com/@darvishkzone/post/DYyXb-7ERLm',
+  'https://www.threads.com/@darvishkzone/post/DYwS6ZMmm53',
+  'https://www.threads.com/@darvishkzone/post/DYwC0-Dmiup',
+  'https://www.threads.com/@darvishkzone/post/DYmsovFmhqu',
+  'https://www.threads.com/@darvishkzone/post/DYmsn3zGjr5',
+  'https://www.threads.com/@darvishkzone/post/DYmsnSZGree',
+  'https://www.threads.com/@darvishkzone/post/DYlh0fdmvXD',
   'https://www.threads.com/@darvishkzone/post/DYdvDxGmgQ1',
   'https://www.threads.com/@darvishkzone/post/DYV8qgsGmZD',
+  'https://www.threads.com/@darvishkzone/post/DYV6CMhGibr',
   'https://www.threads.com/@darvishkzone/post/DYV54PTmplP',
   'https://www.threads.com/@darvishkzone/post/DYUq0byGs2A',
-  'https://www.threads.com/@darvishkzone/post/DYV6CMhGibr',
   'https://www.threads.com/@darvishkzone/post/DYO8-IRmrXk',
-  'https://www.threads.com/@darvishkzone/post/DYM4wIQGs54',
   'https://www.threads.com/@darvishkzone/post/DYM4wtOmiUE',
+  'https://www.threads.com/@darvishkzone/post/DYM4wIQGs54',
   'https://www.threads.com/@darvishkzone/post/DYLyQFGmnxx',
   'https://www.threads.com/@darvishkzone/post/DXa1DaniF9K',
+  'https://www.threads.com/@darvishkzone/post/DW5KBlTE1r5',
 ];
 
 // 直接用 /embed/ URL 嵌 iframe，繞過 Threads embed.js（多篇時會 race）。
