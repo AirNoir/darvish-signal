@@ -100,17 +100,23 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
               </a>
             </div>
 
-            <div class="mt-6 flex flex-col sm:flex-row items-center gap-5 p-5 border border-[#06C755]/30 bg-[#06C755]/[0.04]">
-              <div class="flex-shrink-0 p-2 bg-white">
-                <img src="/images/line-qr.png" alt="LINE 社群 QR Code" class="w-32 h-32 block" />
+            <div class="mt-6 p-5 border border-[#06C755]/30 bg-[#06C755]/[0.04]">
+              <div class="flex flex-col sm:flex-row items-center gap-5">
+                <div class="flex-shrink-0 p-2 bg-white">
+                  <img src="/images/line-qr.png" alt="LINE 社群 QR Code" class="w-32 h-32 block" />
+                </div>
+                <div class="text-center sm:text-left">
+                  <div class="text-xs text-[#06C755] tracking-widest mb-2 uppercase">// scan to join</div>
+                  <h4 class="text-base font-semibold text-white mb-1 font-noto">掃描加入 LINE 社群</h4>
+                  <p class="text-xs text-[#a0b0c0] leading-relaxed font-noto">
+                    手機開啟 LINE 掃描左側 QR Code，或在電腦版直接點上方「LINE 社群」連結加入。
+                  </p>
+                </div>
               </div>
-              <div class="text-center sm:text-left">
-                <div class="text-xs text-[#06C755] tracking-widest mb-2 uppercase">// scan to join</div>
-                <h4 class="text-base font-semibold text-white mb-1 font-noto">掃描加入 LINE 社群</h4>
-                <p class="text-xs text-[#a0b0c0] leading-relaxed font-noto">
-                  手機開啟 LINE 掃描左側 QR Code，或在電腦版直接點上方「LINE 社群」連結加入。
-                </p>
-              </div>
+
+              <p class="text-sm sm:text-base text-[#fbbf24] mt-5 pt-4 border-t border-[#06C755]/20 font-semibold leading-relaxed font-noto">
+                // 頻道僅做工具與技術分析討論，目的是用籌碼技術找出下一個飆股。不推播個股買賣訊號、不提供選股建議
+              </p>
             </div>
 
             <div class="mt-6 p-5 border border-[#00d4ff]/30 bg-[#00d4ff]/[0.04]">
@@ -138,10 +144,6 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
                 </div>
               </div>
             </div>
-
-            <p class="text-sm sm:text-base text-[#fbbf24] mt-4 font-semibold leading-relaxed font-noto">
-              // 頻道僅做工具與技術分析討論，目的是用籌碼技術找出下一個飆股。不推播個股買賣訊號、不提供選股建議
-            </p>
           </div>
         </div>
       </div>
