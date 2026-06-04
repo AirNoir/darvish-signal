@@ -34,8 +34,13 @@ const previous = computed(() => {
 
 const priceChange = computed(() => {
   if (!current.value || !previous.value) return null;
-  const change = current.value.taiex_close - previous.value.taiex_close;
-  const pct = (change / previous.value.taiex_close) * 100;
+  const cur = current.value.taiex_close;
+  const prev = previous.value.taiex_close;
+  if (cur == null || prev == null || !Number.isFinite(cur) || !Number.isFinite(prev) || prev === 0) {
+    return null;
+  }
+  const change = cur - prev;
+  const pct = (change / prev) * 100;
   return { value: change, percent: pct, isPositive: change >= 0 };
 });
 
@@ -71,21 +76,30 @@ const sparkline = computed(() => {
 
 // 振幅 = (high - low) / open * 100
 const amplitude = computed(() => {
-  if (!current.value || current.value.taiex_open <= 0) return null;
-  return ((current.value.taiex_high - current.value.taiex_low) / current.value.taiex_open) * 100;
+  const c = current.value;
+  if (!c || c.taiex_open == null || c.taiex_high == null || c.taiex_low == null) return null;
+  if (!Number.isFinite(c.taiex_open) || c.taiex_open <= 0) return null;
+  const amp = ((c.taiex_high - c.taiex_low) / c.taiex_open) * 100;
+  return Number.isFinite(amp) ? amp : null;
 });
 
-const formatTaiex = (v: number) =>
-  v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const DASH = '—';
 
-const formatYi = (v: number): string => {
+const formatTaiex = (v: number | null | undefined) =>
+  v == null || !Number.isFinite(v)
+    ? DASH
+    : v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const formatYi = (v: number | null | undefined): string => {
+  if (v == null || !Number.isFinite(v)) return DASH;
   const yi = v / 1e8;
   const abs = Math.abs(yi);
   const decimals = abs >= 100 ? 0 : 2;
   return yi.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 };
 
-const formatVolume = (v: number): string => {
+const formatVolume = (v: number | null | undefined): string => {
+  if (v == null || !Number.isFinite(v)) return DASH;
   if (v >= 1e12) {
     return (v / 1e12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' 兆';
   }

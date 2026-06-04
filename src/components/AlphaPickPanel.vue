@@ -48,6 +48,12 @@ const formatDate = (dateStr: string) => {
   const date = new Date(dateStr + 'T00:00:00')
   return date.toLocaleDateString('zh-TW')
 }
+
+const fmtNum = (v: number | null | undefined, digits: number): string =>
+  v == null || !Number.isFinite(v) ? '—' : v.toFixed(digits)
+
+const fmtSigned = (v: number | null | undefined, digits: number): string =>
+  v == null || !Number.isFinite(v) ? '—' : (v >= 0 ? '+' : '') + v.toFixed(digits)
 </script>
 
 <template>
@@ -104,9 +110,9 @@ const formatDate = (dateStr: string) => {
         </div>
 
         <div class="indicators">
-          <span class="indicator">RSI {{ pick.rsi_14.toFixed(1) }}</span>
-          <span class="indicator">MACD {{ pick.macd_hist >= 0 ? '+' : '' }}{{ pick.macd_hist.toFixed(2) }}</span>
-          <span class="indicator">%B {{ pick.bb_percent_b.toFixed(2) }}</span>
+          <span class="indicator">RSI {{ fmtNum(pick.rsi_14, 1) }}</span>
+          <span class="indicator">MACD {{ fmtSigned(pick.macd_hist, 2) }}</span>
+          <span class="indicator">%B {{ fmtNum(pick.bb_percent_b, 2) }}</span>
         </div>
 
         <div class="reasons">{{ pick.reasons }}</div>
@@ -134,9 +140,9 @@ const formatDate = (dateStr: string) => {
         </div>
 
         <div class="indicators">
-          <span class="indicator">RSI {{ alert.rsi_14.toFixed(1) }}</span>
-          <span class="indicator">MACD {{ alert.macd_hist >= 0 ? '+' : '' }}{{ alert.macd_hist.toFixed(2) }}</span>
-          <span class="indicator">%B {{ alert.bb_percent_b.toFixed(2) }}</span>
+          <span class="indicator">RSI {{ fmtNum(alert.rsi_14, 1) }}</span>
+          <span class="indicator">MACD {{ fmtSigned(alert.macd_hist, 2) }}</span>
+          <span class="indicator">%B {{ fmtNum(alert.bb_percent_b, 2) }}</span>
           <span class="indicator">條件 {{ alert.conditions_met }}項</span>
         </div>
 

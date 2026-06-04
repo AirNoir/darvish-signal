@@ -88,8 +88,13 @@ const previousData = computed(() => {
 
 const priceChange = computed(() => {
   if (!latestData.value || !previousData.value) return null;
-  const change = latestData.value.close - previousData.value.close;
-  const changePercent = (change / previousData.value.close) * 100;
+  const cur = latestData.value.close;
+  const prev = previousData.value.close;
+  if (cur == null || prev == null || !Number.isFinite(cur) || !Number.isFinite(prev) || prev === 0) {
+    return null;
+  }
+  const change = cur - prev;
+  const changePercent = (change / prev) * 100;
   return {
     value: change,
     percent: changePercent,
@@ -103,6 +108,9 @@ const formatMobileVolume = (v: number | null | undefined): string => {
   if (v >= 1e4) return (v / 1e4).toFixed(1) + ' 萬';
   return v.toLocaleString();
 };
+
+const formatPrice = (v: number | null | undefined): string =>
+  v == null || !Number.isFinite(v) ? '—' : v.toFixed(2);
 
 const displayedIdx = computed<number>(() => {
   const n = store.stockData.length;
@@ -123,29 +131,20 @@ const isLatestBar = computed(() => {
   return n > 0 && displayedIdx.value === n - 1;
 });
 
-const displayedMA5 = computed<number | null>(() => {
-  const idx = displayedIdx.value;
-  if (idx < 4) return null;
+const movingAverage = (idx: number, period: number): number | null => {
+  if (idx < period - 1) return null;
   let sum = 0;
-  for (let i = idx - 4; i <= idx; i++) sum += store.stockData[i]!.close;
-  return sum / 5;
-});
+  for (let i = idx - (period - 1); i <= idx; i++) {
+    const c = store.stockData[i]!.close;
+    if (c == null || !Number.isFinite(c)) return null;
+    sum += c;
+  }
+  return sum / period;
+};
 
-const displayedMA10 = computed<number | null>(() => {
-  const idx = displayedIdx.value;
-  if (idx < 9) return null;
-  let sum = 0;
-  for (let i = idx - 9; i <= idx; i++) sum += store.stockData[i]!.close;
-  return sum / 10;
-});
-
-const displayedMA20 = computed<number | null>(() => {
-  const idx = displayedIdx.value;
-  if (idx < 19) return null;
-  let sum = 0;
-  for (let i = idx - 19; i <= idx; i++) sum += store.stockData[i]!.close;
-  return sum / 20;
-});
+const displayedMA5 = computed<number | null>(() => movingAverage(displayedIdx.value, 5));
+const displayedMA10 = computed<number | null>(() => movingAverage(displayedIdx.value, 10));
+const displayedMA20 = computed<number | null>(() => movingAverage(displayedIdx.value, 20));
 
 const routeSymbol = computed(() => {
   const s = route.params.symbol;
@@ -187,7 +186,7 @@ watch(() => store.stockId, (id) => {
           class="text-[#f5b840] font-semibold text-base"
           style="text-shadow: 0 0 8px rgba(245, 184, 64, 0.35);"
         >{{ store.stockName }}</span>
-        <span class="text-white text-sm font-medium">{{ latestData.close.toFixed(2) }}</span>
+        <span class="text-white text-sm font-medium">{{ formatPrice(latestData.close) }}</span>
         <span
           v-if="priceChange"
           class="text-sm font-medium"
@@ -322,10 +321,10 @@ watch(() => store.stockId, (id) => {
                 class="ml-0.5 text-[10px] text-[#3b82f6] px-1.5 py-px border border-[#3b82f6]/60 rounded hover:bg-[#3b82f6]/10 transition-colors"
               >↩ 最新</button>
             </span>
-            <span><span class="text-[#888]">開</span> <span class="text-white tabular-nums">{{ displayedData.open.toFixed(2) }}</span></span>
-            <span><span class="text-[#888]">高</span> <span class="text-[#ef5350] tabular-nums">{{ displayedData.high.toFixed(2) }}</span></span>
-            <span><span class="text-[#888]">低</span> <span class="text-[#26a69a] tabular-nums">{{ displayedData.low.toFixed(2) }}</span></span>
-            <span><span class="text-[#888]">收</span> <span class="text-white tabular-nums">{{ displayedData.close.toFixed(2) }}</span></span>
+            <span><span class="text-[#888]">開</span> <span class="text-white tabular-nums">{{ formatPrice(displayedData.open) }}</span></span>
+            <span><span class="text-[#888]">高</span> <span class="text-[#ef5350] tabular-nums">{{ formatPrice(displayedData.high) }}</span></span>
+            <span><span class="text-[#888]">低</span> <span class="text-[#26a69a] tabular-nums">{{ formatPrice(displayedData.low) }}</span></span>
+            <span><span class="text-[#888]">收</span> <span class="text-white tabular-nums">{{ formatPrice(displayedData.close) }}</span></span>
             <span><span class="text-[#888]">量</span> <span class="text-white tabular-nums">{{ formatMobileVolume(displayedData.volume) }}</span></span>
             <span v-if="displayedMA5 !== null"><span class="text-[#f5b840]">MA5</span> <span class="text-white tabular-nums">{{ displayedMA5.toFixed(2) }}</span></span>
             <span v-if="displayedMA10 !== null"><span class="text-[#22d3ee]">MA10</span> <span class="text-white tabular-nums">{{ displayedMA10.toFixed(2) }}</span></span>

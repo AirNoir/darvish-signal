@@ -54,8 +54,11 @@ const pageNumbers = computed(() => {
 
 const formatDate = (d: string) => d.replace(/-/g, '/');
 
-const formatPerformance = (v: number | null) => {
-  if (v === null) return null;
+const formatPrice = (v: number | null | undefined) =>
+  v == null || !Number.isFinite(v) ? '—' : v.toFixed(2);
+
+const formatPerformance = (v: number | null | undefined) => {
+  if (v == null || !Number.isFinite(v)) return null;
   const pct = (v * 100).toFixed(2);
   return v >= 0 ? `+${pct}%` : `${pct}%`;
 };
@@ -66,10 +69,14 @@ const perfClass = (v: number | null) => {
 };
 
 const winRatePct = computed(() =>
-  data.value ? (data.value.win_rate * 100).toFixed(1) : '--'
+  data.value && Number.isFinite(data.value.win_rate)
+    ? (data.value.win_rate * 100).toFixed(1)
+    : '--'
 );
 const avgPerfPct = computed(() =>
-  data.value ? ((data.value.avg_performance ?? 0) * 100).toFixed(2) : '--'
+  data.value && Number.isFinite(data.value.avg_performance)
+    ? (data.value.avg_performance * 100).toFixed(2)
+    : '--'
 );
 const avgPerfPositive = computed(() => (data.value?.avg_performance ?? 0) >= 0);
 </script>
@@ -176,7 +183,7 @@ const avgPerfPositive = computed(() => (data.value?.avg_performance ?? 0) >= 0);
                       {{ rec.type === 'BUY' ? '買入' : '賣出' }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-gray-300">{{ rec.price.toFixed(2) }}</td>
+                  <td class="px-4 py-3 text-gray-300">{{ formatPrice(rec.price) }}</td>
                   <td class="px-4 py-3">
                     <span v-if="rec.performance !== null" :class="perfClass(rec.performance)">
                       {{ formatPerformance(rec.performance) }}
