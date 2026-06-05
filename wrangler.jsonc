@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "darvish-signal-dev",
+  "name": "darvish-signal",
   "compatibility_date": "2026-04-16",
   "main": "worker.ts",
   "assets": {
