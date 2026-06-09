@@ -23,6 +23,7 @@ interface HoverTip {
   paneId: string;
   date: string;
   lines: string[];
+  colors?: (string | undefined)[];
   x: number;
   y: number;
 }
@@ -241,6 +242,10 @@ const tipLinesForPane = (paneId: string, k: { open: number; close: number; volum
     default: return [];
   }
 };
+
+// 浮動資訊框的逐行顏色（目前只有大戶散戶需要：大戶藍 / 散戶橘），其餘維持預設色
+const tipColorsForPane = (key: string | undefined): (string | undefined)[] | undefined =>
+  key === 'majorRetailHolding' ? ['#3b82f6', '#f59e0b'] : undefined;
 
 const drawSignalOverlays = () => {
   if (!chart) return;
@@ -500,14 +505,14 @@ onMounted(() => {
         tips.push({ paneId: 'candle_pane', date: dateLabel, lines, x: cursorX, y });
       }
 
-      paneIndicatorMap.forEach((_key, paneId) => {
+      paneIndicatorMap.forEach((key, paneId) => {
         if (!chart) return;
         const bound = chart.getSize(paneId);
         if (!bound) return;
         const lines = tipLinesForPane(paneId, k, k.timestamp, props.settings);
         if (lines.length === 0) return;
         const y = activePaneId === paneId ? activeYGlobal : bound.top + 6;
-        tips.push({ paneId, date: dateLabel, lines, x: cursorX, y });
+        tips.push({ paneId, date: dateLabel, lines, colors: tipColorsForPane(key), x: cursorX, y });
       });
 
       hoverTips.value = tips;
@@ -542,7 +547,7 @@ onUnmounted(() => {
       :style="tipPositionStyle(tip)"
     >
       <div class="tip-date">{{ tip.date }}</div>
-      <div v-for="(line, i) in tip.lines" :key="i" class="tip-line">{{ line }}</div>
+      <div v-for="(line, i) in tip.lines" :key="i" class="tip-line" :style="tip.colors && tip.colors[i] ? { color: tip.colors[i] } : undefined">{{ line }}</div>
     </div>
   </div>
 </template>
