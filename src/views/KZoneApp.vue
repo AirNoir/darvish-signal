@@ -5,6 +5,7 @@ import type { IndicatorSettings } from '../types';
 import { useStockStore } from '../stores/stockStore';
 import SearchBar from '../components/SearchBar.vue';
 import MultiPaneChart from '../components/MultiPaneChart.vue';
+import MajorRetailHoldingChart from '../components/MajorRetailHoldingChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
@@ -66,7 +67,6 @@ const indicatorOrder = ref<string[]>([
   'trustNet',
   'foreignHoldingPct',
   'instiHoldingPct',
-  'majorRetailHolding',
   'margin',
   'short',
   'shortMarginRatio',
@@ -336,6 +336,21 @@ watch(() => store.stockId, (id) => {
           <div class="flex-1 py-2 overflow-hidden min-h-0">
             <div class="border-y border-[#333] overflow-hidden h-full">
               <MultiPaneChart :settings="indicatorSettings" :indicator-order="indicatorOrder" />
+            </div>
+          </div>
+
+          <!-- 大戶 / 散戶持股（獨立雙軸週線圖） -->
+          <div v-if="indicatorSettings.majorRetailHolding" class="px-2 pb-2 flex-shrink-0">
+            <div class="border border-[#333] rounded-lg overflow-hidden">
+              <div class="flex items-center gap-3 px-3 py-1.5 bg-[#1a1a1a] text-xs">
+                <span class="text-white font-bold">大戶 / 散戶持股</span>
+                <span class="text-[#f59e0b]">散戶持股%</span>
+                <span class="text-[#3b82f6]">大戶持股%</span>
+                <span class="text-[#555] ml-auto">單位:% ・ 週</span>
+              </div>
+              <div class="h-[170px]">
+                <MajorRetailHoldingChart />
+              </div>
             </div>
           </div>
         </div>

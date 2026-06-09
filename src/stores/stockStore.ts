@@ -14,27 +14,6 @@ export interface SignalMarker {
   type: 'buy' | 'sell'
 }
 
-// 週頻大戶/散戶持股 forward-fill 對齊到日 K 線：
-// 每個交易日取「trade_date <= 當日」的最近一筆週資料，比率 *100 轉百分比。
-function alignWeeklyHolding(
-  daily: Array<{ trade_date: string }>,
-  weekly: PeriodHoldingItem[]
-): MajorRetailHoldingData[] {
-  const sorted = [...weekly].sort((a, b) => a.trade_date.localeCompare(b.trade_date));
-  let wi = 0;
-  let major: number | null = null;
-  let retail: number | null = null;
-  return daily.map((d) => {
-    while (wi < sorted.length && sorted[wi]!.trade_date <= d.trade_date) {
-      const w = sorted[wi]!;
-      major = w.major_ratio != null ? w.major_ratio * 100 : null;
-      retail = w.retail_ratio != null ? w.retail_ratio * 100 : null;
-      wi++;
-    }
-    return { time: d.trade_date, major, retail };
-  });
-}
-
 export const useStockStore = defineStore('stock', () => {
   // State
   const stockId = ref<string>('2330');
@@ -260,8 +239,14 @@ export const useStockStore = defineStore('stock', () => {
           value: item.insti_holding_pct != null ? item.insti_holding_pct * 100 : null
         }));
 
-        // 大戶 / 散戶持股 (週資料 forward-fill 對齊到日 K 線)
-        majorRetailHoldingData.value = alignWeeklyHolding(sorted, holdingRaw);
+        // 大戶 / 散戶持股 (週資料，原樣保留供獨立雙軸圖使用)
+        majorRetailHoldingData.value = [...holdingRaw]
+          .sort((a, b) => a.trade_date.localeCompare(b.trade_date))
+          .map((h) => ({
+            time: h.trade_date,
+            major: h.major_ratio != null ? h.major_ratio * 100 : null,
+            retail: h.retail_ratio != null ? h.retail_ratio * 100 : null,
+          }));
 
         // Fetch signal markers in background
         fetchSignalMarkers(id);

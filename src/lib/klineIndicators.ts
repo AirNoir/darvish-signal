@@ -25,8 +25,6 @@ export interface ExtraValues {
   macdHist?: number | null;
   foreignHoldingPct?: number | null;
   instiHoldingPct?: number | null;
-  majorHolding?: number | null;
-  retailHolding?: number | null;
 }
 
 const lookup = new Map<number, ExtraValues>();
@@ -260,19 +258,6 @@ export function registerCustomIndicators() {
       { key: 'value', type: 'line', styles: () => ({ color: '#f59e0b' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'instiHoldingPct') }))
-  });
-
-  // 大戶 / 散戶持股 (%) — 大戶藍、散戶橘，共用單一 Y 軸
-  registerIndicator<{ major: number | null; retail: number | null }>({
-    name: 'MRH',
-    shortName: '大戶散戶',
-    precision: 2,
-    figures: [
-      { key: 'major', type: 'line', styles: () => ({ color: '#3b82f6' }) },
-      { key: 'retail', type: 'line', styles: () => ({ color: '#f59e0b' }) }
-    ],
-    calc: (dataList) =>
-      dataList.map((d) => ({ major: get(d, 'majorHolding'), retail: get(d, 'retailHolding') }))
   });
 
   // MACD（用 store 已算好的值）

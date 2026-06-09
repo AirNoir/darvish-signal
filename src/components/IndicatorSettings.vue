@@ -36,7 +36,6 @@ const enabledChartCount = computed(() => {
   if (v.trustNet) count++;
   if (v.foreignHoldingPct) count++;
   if (v.instiHoldingPct) count++;
-  if (v.majorRetailHolding) count++;
   if (v.marginBalance || v.marginChange) count++;
   if (v.shortBalance || v.shortChange) count++;
   if (v.shortMarginRatio) count++;
@@ -50,6 +49,9 @@ const enabledChartCount = computed(() => {
 // 計算開啟某個指標後會新增多少圖表
 const getChartDelta = (key: string): number => {
   const v = props.modelValue;
+
+  // 大戶散戶持股是獨立雙軸面板，不佔用 K 線指標窗格的數量上限
+  if (key === 'majorRetailHolding') return 0;
 
   // 融資：marginBalance 和 marginChange 共用一個圖表
   if (key === 'marginBalance') {
