@@ -341,21 +341,13 @@ export function registerCustomIndicators() {
       // 大戶藍線已在上方自繪完成（return true 會蓋掉預設 figure → 散戶會消失）
       return false;
     },
-    createTooltipDataSource: ({ kLineDataList, crosshair }) => {
-      const i = crosshair?.dataIndex;
-      const d = i != null ? kLineDataList[i] : undefined;
-      const maj = d ? get(d, 'majorHolding') : null;
-      const san = d ? get(d, 'retailHolding') : null;
-      return {
-        name: '大戶散戶',
-        calcParamsText: '',
-        icons: [],
-        values: [
-          { title: { text: '大戶 ', color: '#3b82f6' }, value: { text: maj != null ? maj.toFixed(2) + '%' : '--', color: '#3b82f6' } },
-          { title: { text: '散戶 ', color: '#f59e0b' }, value: { text: san != null ? san.toFixed(2) + '%' : '--', color: '#f59e0b' } }
-        ]
-      };
-    }
+    // 左上角 legend 只保留標題；數值已顯示在滑鼠浮動資訊框，不重複
+    createTooltipDataSource: () => ({
+      name: '大戶散戶',
+      calcParamsText: '',
+      icons: [],
+      values: []
+    })
   });
 
   // MACD（用 store 已算好的值）
