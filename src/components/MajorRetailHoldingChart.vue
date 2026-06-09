@@ -142,8 +142,8 @@ const xLabels = computed(() => {
   return out.filter((_, idx) => idx % stepN === 0);
 });
 
-// Hover
-const hoverIdx = ref<number | null>(null);
+// Hover：本圖滑鼠 + 來自 K 線的同步 hover（store.syncedHoverTime）
+const localHoverIdx = ref<number | null>(null);
 const indexAtPixel = (px: number): number | null => {
   const n = series.value.length;
   if (!n) return null;
@@ -161,15 +161,41 @@ const indexAtPixel = (px: number): number | null => {
   const i = Math.round(((px - pad.left) / (plotW.value || 1)) * (n - 1));
   return Math.max(0, Math.min(n - 1, i));
 };
+// 找最接近某日期的週點（K 線是日頻、本圖是週頻，吸附到最近的一週）
+const nearestIdxToDate = (t: string): number | null => {
+  const s = series.value;
+  if (!s.length) return null;
+  const ts = tsOf(t);
+  let best = -1;
+  let bestD = Infinity;
+  for (let i = 0; i < s.length; i++) {
+    const dd = Math.abs(tsOf(s[i]!.time) - ts);
+    if (dd < bestD) { bestD = dd; best = i; }
+  }
+  return best >= 0 ? best : null;
+};
 const onMove = (e: MouseEvent) => {
   if (!svgEl.value) return;
   const rect = svgEl.value.getBoundingClientRect();
-  hoverIdx.value = indexAtPixel(e.clientX - rect.left);
+  const idx = indexAtPixel(e.clientX - rect.left);
+  localHoverIdx.value = idx;
+  // 反向同步：讓 K 線那邊（手機版 OHLC 列）也切到這一週
+  if (idx != null) store.setSyncedHoverTime(series.value[idx]!.time);
 };
-const onLeave = () => { hoverIdx.value = null; };
+const onLeave = () => {
+  localHoverIdx.value = null;
+  store.setSyncedHoverTime(null);
+};
+
+// 作用中的點：本圖滑鼠優先，否則跟隨 K 線同步 hover（取最接近的一週）
+const activeIdx = computed<number | null>(() => {
+  if (localHoverIdx.value != null) return localHoverIdx.value;
+  const t = store.syncedHoverTime;
+  return t ? nearestIdxToDate(t) : null;
+});
 
 const hover = computed(() => {
-  const i = hoverIdx.value;
+  const i = activeIdx.value;
   if (i == null) return null;
   const d = series.value[i];
   const x = xOf(i);
