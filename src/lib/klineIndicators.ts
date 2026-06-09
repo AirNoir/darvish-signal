@@ -25,6 +25,8 @@ export interface ExtraValues {
   macdHist?: number | null;
   foreignHoldingPct?: number | null;
   instiHoldingPct?: number | null;
+  majorHolding?: number | null;
+  retailHolding?: number | null;
 }
 
 const lookup = new Map<number, ExtraValues>();
@@ -49,6 +51,24 @@ const formatBig = (v: number | null | undefined): string => {
   return v.toFixed(0);
 };
 
+
+// 「漂亮刻度」：回傳落在 [min,max] 內的整齊刻度值
+function niceTicks(min: number, max: number, count = 4): number[] {
+  if (!isFinite(min) || !isFinite(max) || min === max) return isFinite(min) ? [min] : [];
+  const niceNum = (range: number, round: boolean): number => {
+    const exp = Math.floor(Math.log10(range));
+    const frac = range / Math.pow(10, exp);
+    let nf: number;
+    if (round) nf = frac < 1.5 ? 1 : frac < 3 ? 2 : frac < 7 ? 5 : 10;
+    else nf = frac <= 1 ? 1 : frac <= 2 ? 2 : frac <= 5 ? 5 : 10;
+    return nf * Math.pow(10, exp);
+  };
+  const step = niceNum((max - min) / (count - 1), true) || 1;
+  const out: number[] = [];
+  for (let v = Math.ceil(min / step) * step; v <= max + step * 0.001; v += step) out.push(Number(v.toFixed(4)));
+  return out;
+}
+const fmtPct = (v: number): string => (Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1));
 
 let registered = false;
 
@@ -258,6 +278,82 @@ export function registerCustomIndicators() {
       { key: 'value', type: 'line', styles: () => ({ color: '#f59e0b' }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'instiHoldingPct') }))
+  });
+
+  // 大戶 / 散戶持股 (%) — 雙軸交錯：
+  // 散戶走原生右軸(橘線)，大戶用 custom draw 換算到散戶範圍後疊上(藍線)+ 左側自繪刻度
+  registerIndicator<{ major: number | null; retail: number | null }>({
+    name: 'MRH',
+    shortName: '大戶散戶',
+    precision: 1,
+    figures: [
+      { key: 'retail', type: 'line', styles: () => ({ color: '#f59e0b' }) }
+    ],
+    calc: (dataList) => dataList.map((d) => ({ major: get(d, 'majorHolding'), retail: get(d, 'retailHolding') })),
+    draw: ({ ctx, kLineDataList, visibleRange, bounding, xAxis, yAxis }) => {
+      const { from, to } = visibleRange;
+      let majMin = Infinity, majMax = -Infinity, sanMin = Infinity, sanMax = -Infinity;
+      for (let i = from; i < to; i++) {
+        const d = kLineDataList[i];
+        if (!d) continue;
+        const maj = get(d, 'majorHolding');
+        const san = get(d, 'retailHolding');
+        if (maj != null) { if (maj < majMin) majMin = maj; if (maj > majMax) majMax = maj; }
+        if (san != null) { if (san < sanMin) sanMin = san; if (san > sanMax) sanMax = san; }
+      }
+      if (!isFinite(majMin) || !isFinite(sanMin)) return true;
+      if (majMin === majMax) { majMin -= 1; majMax += 1; }
+      if (sanMin === sanMax) { sanMin -= 1; sanMax += 1; }
+      // 把大戶值換算到散戶數值範圍 → 兩條線占同一個 pixel 區間，才會交錯
+      const toSan = (maj: number) => sanMin + ((maj - majMin) / (majMax - majMin)) * (sanMax - sanMin);
+
+      ctx.save();
+      // 大戶折線 (藍)
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      let started = false;
+      for (let i = from; i < to; i++) {
+        const d = kLineDataList[i];
+        if (!d) { started = false; continue; }
+        const maj = get(d, 'majorHolding');
+        if (maj == null) { started = false; continue; }
+        const x = xAxis.convertToPixel(i);
+        const y = yAxis.convertToPixel(toSan(maj));
+        if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // 大戶左側刻度（線貼到最左，標籤加底色避免被蓋住）
+      const left = bounding.left ?? 0;
+      ctx.font = '9px sans-serif';
+      ctx.textBaseline = 'middle';
+      for (const tv of niceTicks(majMin, majMax, 4)) {
+        const y = yAxis.convertToPixel(toSan(tv));
+        ctx.fillStyle = 'rgba(15,15,15,0.6)';
+        ctx.fillRect(left, y - 6, 24, 12);
+        ctx.fillStyle = '#7faaff';
+        ctx.textAlign = 'left';
+        ctx.fillText(fmtPct(tv), left + 2, y);
+      }
+      ctx.restore();
+      return true;
+    },
+    createTooltipDataSource: ({ kLineDataList, crosshair }) => {
+      const i = crosshair?.dataIndex;
+      const d = i != null ? kLineDataList[i] : undefined;
+      const maj = d ? get(d, 'majorHolding') : null;
+      const san = d ? get(d, 'retailHolding') : null;
+      return {
+        name: '大戶散戶',
+        calcParamsText: '',
+        icons: [],
+        values: [
+          { title: { text: '大戶 ', color: '#3b82f6' }, value: { text: maj != null ? maj.toFixed(2) + '%' : '--', color: '#3b82f6' } },
+          { title: { text: '散戶 ', color: '#f59e0b' }, value: { text: san != null ? san.toFixed(2) + '%' : '--', color: '#f59e0b' } }
+        ]
+      };
+    }
   });
 
   // MACD（用 store 已算好的值）

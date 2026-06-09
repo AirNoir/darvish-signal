@@ -51,6 +51,7 @@ const INDICATOR_NAME: Record<string, string> = {
   trustNet: 'TN',
   foreignHoldingPct: 'FHP',
   instiHoldingPct: 'IHP',
+  majorRetailHolding: 'MRH',
   margin: 'MARGIN',
   short: 'SHORT',
   shortMarginRatio: 'SMR',
@@ -70,6 +71,7 @@ const isVisible = (key: string, s: IndicatorSettings): boolean => {
     case 'trustNet': return s.trustNet;
     case 'foreignHoldingPct': return s.foreignHoldingPct;
     case 'instiHoldingPct': return s.instiHoldingPct;
+    case 'majorRetailHolding': return s.majorRetailHolding;
     case 'margin': return s.marginBalance || s.marginChange;
     case 'short': return s.shortBalance || s.shortChange;
     case 'shortMarginRatio': return s.shortMarginRatio;
@@ -111,6 +113,7 @@ const buildExtras = () => {
     const macd = store.macdData[i];
     const fhp = store.foreignHoldingPctData[i];
     const ihp = store.instiHoldingPctData[i];
+    const mrh = store.majorRetailHoldingData[i];
     records.push({
       timestamp: ts,
       values: {
@@ -136,7 +139,9 @@ const buildExtras = () => {
         macdSignal: macd?.signal,
         macdHist: macd?.histogram,
         foreignHoldingPct: fhp?.value,
-        instiHoldingPct: ihp?.value
+        instiHoldingPct: ihp?.value,
+        majorHolding: mrh?.major,
+        retailHolding: mrh?.retail
       }
     });
   });
@@ -204,6 +209,10 @@ const tipLinesForPane = (paneId: string, k: { open: number; close: number; volum
     case 'trustNet': return [`投信 ${formatBig(store.institutionalData[idx]?.trust)}`];
     case 'foreignHoldingPct': return [`外資持股 ${fmt(store.foreignHoldingPctData[idx]?.value)}%`];
     case 'instiHoldingPct': return [`法人持股 ${fmt(store.instiHoldingPctData[idx]?.value)}%`];
+    case 'majorRetailHolding': {
+      const m = store.majorRetailHoldingData[idx];
+      return [`大戶 ${fmt(m?.major)}%`, `散戶 ${fmt(m?.retail)}%`];
+    }
     case 'margin': {
       const m = store.marginData[idx];
       const lines: string[] = [];
@@ -252,34 +261,6 @@ const drawSignalOverlays = () => {
   }
 };
 
-// 把可視範圍內每根 K 棒的 timestamp→x 推到 store，供大戶/散戶獨立圖對齊時間軸
-let rafId = 0;
-const publishKlineXMap = () => {
-  if (!chart || !containerEl.value) return;
-  const klineData = chart.getDataList();
-  if (klineData.length === 0) { store.setKlineXMap(null); return; }
-  const vr = chart.getVisibleRange();
-  const from = Math.max(0, Math.floor(vr.from));
-  const to = Math.min(klineData.length, Math.ceil(vr.to));
-  const finderPoints: Array<{ dataIndex: number }> = [];
-  const idxList: number[] = [];
-  for (let i = from; i < to; i++) { finderPoints.push({ dataIndex: i }); idxList.push(i); }
-  if (finderPoints.length === 0) { store.setKlineXMap(null); return; }
-  const coords = chart.convertToPixel(finderPoints, { paneId: 'candle_pane', absolute: false }) as Array<{ x?: number }>;
-  const rootLeft = containerEl.value.getBoundingClientRect().left;
-  const points: { ts: number; x: number }[] = [];
-  coords.forEach((c, k) => {
-    const i = idxList[k]!;
-    const d = klineData[i];
-    if (c && typeof c.x === 'number' && d) points.push({ ts: d.timestamp, x: c.x });
-  });
-  store.setKlineXMap({ version: Date.now(), rootLeft, points });
-};
-const scheduleXMap = () => {
-  if (rafId) return;
-  rafId = requestAnimationFrame(() => { rafId = 0; publishKlineXMap(); });
-};
-
 const applyData = () => {
   if (!chart) return;
   setExtraDataMap(buildExtras());
@@ -287,7 +268,6 @@ const applyData = () => {
   if (data.length === 0) return;
   chart.applyNewData(data);
   drawSignalOverlays();
-  scheduleXMap();
 };
 
 onMounted(() => {
@@ -489,11 +469,7 @@ onMounted(() => {
     applyData();
     adjustCandlePaneHeight();
 
-    chart.subscribeAction(ActionType.OnVisibleRangeChange, scheduleXMap);
-    chart.subscribeAction(ActionType.OnScroll, scheduleXMap);
-    chart.subscribeAction(ActionType.OnZoom, scheduleXMap);
-
-    const ro = new ResizeObserver(() => { adjustCandlePaneHeight(); scheduleXMap(); });
+    const ro = new ResizeObserver(() => adjustCandlePaneHeight());
     ro.observe(containerEl.value);
     onUnmounted(() => ro.disconnect());
 
@@ -550,12 +526,7 @@ watch(
 onUnmounted(() => {
   if (chart) {
     chart.unsubscribeAction(ActionType.OnCrosshairChange);
-    chart.unsubscribeAction(ActionType.OnVisibleRangeChange);
-    chart.unsubscribeAction(ActionType.OnScroll);
-    chart.unsubscribeAction(ActionType.OnZoom);
   }
-  if (rafId) cancelAnimationFrame(rafId);
-  store.setKlineXMap(null);
   dispose(containerId);
   chart = null;
 });
