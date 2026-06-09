@@ -341,12 +341,15 @@ export function registerCustomIndicators() {
       // 大戶藍線已在上方自繪完成（return true 會蓋掉預設 figure → 散戶會消失）
       return false;
     },
-    // 左上角 legend 只保留標題；數值已顯示在滑鼠浮動資訊框，不重複
+    // 左上角 legend：保留顏色辨識（大戶藍 / 散戶橘），不顯示數值（數值在滑鼠浮動資訊框）
     createTooltipDataSource: () => ({
       name: '大戶散戶',
       calcParamsText: '',
       icons: [],
-      values: []
+      values: [
+        { title: { text: '大戶', color: '#3b82f6' }, value: { text: '', color: '#3b82f6' } },
+        { title: { text: '散戶', color: '#f59e0b' }, value: { text: '', color: '#f59e0b' } }
+      ]
     })
   });
 
