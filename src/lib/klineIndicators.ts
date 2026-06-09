@@ -301,7 +301,7 @@ export function registerCustomIndicators() {
         if (maj != null) { if (maj < majMin) majMin = maj; if (maj > majMax) majMax = maj; }
         if (san != null) { if (san < sanMin) sanMin = san; if (san > sanMax) sanMax = san; }
       }
-      if (!isFinite(majMin) || !isFinite(sanMin)) return true;
+      if (!isFinite(majMin) || !isFinite(sanMin)) return false;
       if (majMin === majMax) { majMin -= 1; majMax += 1; }
       if (sanMin === sanMax) { sanMin -= 1; sanMax += 1; }
       // 把大戶值換算到散戶數值範圍 → 兩條線占同一個 pixel 區間，才會交錯
@@ -337,7 +337,9 @@ export function registerCustomIndicators() {
         ctx.fillText(fmtPct(tv), left + 2, y);
       }
       ctx.restore();
-      return true;
+      // 回傳 false：讓 klinecharts 仍照常畫原生 figure（散戶橘線）；
+      // 大戶藍線已在上方自繪完成（return true 會蓋掉預設 figure → 散戶會消失）
+      return false;
     },
     createTooltipDataSource: ({ kLineDataList, crosshair }) => {
       const i = crosshair?.dataIndex;
