@@ -142,65 +142,100 @@ const xLabels = computed(() => {
   return out.filter((_, idx) => idx % stepN === 0);
 });
 
-// Hover：本圖滑鼠 + 來自 K 線的同步 hover（store.syncedHoverTime）
-const localHoverIdx = ref<number | null>(null);
-const indexAtPixel = (px: number): number | null => {
-  const n = series.value.length;
-  if (!n) return null;
-  if (useAligned.value) {
-    let best = -1;
-    let bestD = Infinity;
-    for (let i = 0; i < n; i++) {
-      const x = alignedX.value[i];
-      if (x == null) continue;
-      const dd = Math.abs(x - px);
-      if (dd < bestD) { bestD = dd; best = i; }
-    }
-    return best >= 0 ? best : null;
-  }
-  const i = Math.round(((px - pad.left) / (plotW.value || 1)) * (n - 1));
-  return Math.max(0, Math.min(n - 1, i));
-};
-// 找最接近某日期的週點（K 線是日頻、本圖是週頻，吸附到最近的一週）
-const nearestIdxToDate = (t: string): number | null => {
+// Hover：本圖滑鼠 + 來自 K 線的同步 hover；週間用線性內插，讓點落在折線上避免上下偏差
+const localHoverX = ref<number | null>(null);
+
+// 沿折線在 x 位置線性內插（依 x 比例平均相鄰兩週），回傳的點必在線上
+const interpAtX = (targetX: number): { x: number; major: number; retail: number } | null => {
   const s = series.value;
-  if (!s.length) return null;
-  const ts = tsOf(t);
-  let best = -1;
-  let bestD = Infinity;
+  const pts: { x: number; major: number; retail: number }[] = [];
   for (let i = 0; i < s.length; i++) {
-    const dd = Math.abs(tsOf(s[i]!.time) - ts);
-    if (dd < bestD) { bestD = dd; best = i; }
+    const x = xOf(i);
+    if (x == null) continue;
+    pts.push({ x, major: s[i]!.major, retail: s[i]!.retail });
   }
-  return best >= 0 ? best : null;
+  if (!pts.length) return null;
+  if (targetX <= pts[0]!.x) return { ...pts[0]! };
+  const last = pts[pts.length - 1]!;
+  if (targetX >= last.x) return { ...last };
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i]!;
+    const b = pts[i + 1]!;
+    if (targetX >= a.x && targetX <= b.x) {
+      const f = (targetX - a.x) / (b.x - a.x || 1);
+      return { x: targetX, major: a.major + (b.major - a.major) * f, retail: a.retail + (b.retail - a.retail) * f };
+    }
+  }
+  return { ...last };
 };
+
+// 時間戳 → 最接近的 K 棒 x（無 klineXMap 時退回最近週點）
+const candleXForTs = (ts: number): number | null => {
+  const m = store.klineXMap;
+  const rl = rectLeft.value;
+  if (!m || m.points.length === 0 || rl == null) {
+    const s = series.value;
+    let best = -1, bestD = Infinity;
+    for (let i = 0; i < s.length; i++) { const dd = Math.abs(tsOf(s[i]!.time) - ts); if (dd < bestD) { bestD = dd; best = i; } }
+    return best >= 0 ? xOf(best) : null;
+  }
+  const pts = m.points;
+  let lo = 0, hi = pts.length - 1, idx = -1;
+  while (lo <= hi) { const mid = (lo + hi) >> 1; if (pts[mid]!.ts <= ts) { idx = mid; lo = mid + 1; } else hi = mid - 1; }
+  if (idx < 0) idx = 0;
+  else if (idx + 1 < pts.length && Math.abs(pts[idx + 1]!.ts - ts) < Math.abs(pts[idx]!.ts - ts)) idx += 1;
+  const x = m.rootLeft + pts[idx]!.x - rl;
+  if (x < pad.left - 6 || x > width.value - pad.right + 8) return null;
+  return x;
+};
+
+// x → 日期字串（tooltip 與反向同步用，優先取 K 棒的日精度）
+const dateForX = (x: number): string | null => {
+  const m = store.klineXMap;
+  const rl = rectLeft.value;
+  if (m && m.points.length > 0 && rl != null) {
+    let best = -1, bestD = Infinity;
+    for (let k = 0; k < m.points.length; k++) { const px = m.rootLeft + m.points[k]!.x - rl; const dd = Math.abs(px - x); if (dd < bestD) { bestD = dd; best = k; } }
+    if (best >= 0) {
+      const dt = new Date(m.points[best]!.ts);
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    }
+  }
+  const s = series.value;
+  let best = -1, bestD = Infinity;
+  for (let i = 0; i < s.length; i++) { const xi = xOf(i); if (xi == null) continue; const dd = Math.abs(xi - x); if (dd < bestD) { bestD = dd; best = i; } }
+  return best >= 0 ? s[best]!.time : null;
+};
+
 const onMove = (e: MouseEvent) => {
   if (!svgEl.value) return;
   const rect = svgEl.value.getBoundingClientRect();
-  const idx = indexAtPixel(e.clientX - rect.left);
-  localHoverIdx.value = idx;
-  // 反向同步：讓 K 線那邊（手機版 OHLC 列）也切到這一週
-  if (idx != null) store.setSyncedHoverTime(series.value[idx]!.time);
+  const x = Math.max(pad.left, Math.min(width.value - pad.right, e.clientX - rect.left));
+  localHoverX.value = x;
+  // 反向同步：讓上方 K 線資訊列也切到對應日期
+  const date = dateForX(x);
+  if (date) store.setSyncedHoverTime(date);
 };
 const onLeave = () => {
-  localHoverIdx.value = null;
+  localHoverX.value = null;
   store.setSyncedHoverTime(null);
 };
 
-// 作用中的點：本圖滑鼠優先，否則跟隨 K 線同步 hover（取最接近的一週）
-const activeIdx = computed<number | null>(() => {
-  if (localHoverIdx.value != null) return localHoverIdx.value;
-  const t = store.syncedHoverTime;
-  return t ? nearestIdxToDate(t) : null;
-});
-
+// 作用中的點：本圖滑鼠優先，否則跟隨 K 線同步 hover
 const hover = computed(() => {
-  const i = activeIdx.value;
-  if (i == null) return null;
-  const d = series.value[i];
-  const x = xOf(i);
-  if (!d || x == null) return null;
-  return { x, yMajor: yMajor(d.major), yRetail: yRetail(d.retail), date: d.time, major: d.major, retail: d.retail };
+  let targetX: number | null = null;
+  let date = '';
+  if (localHoverX.value != null) {
+    targetX = localHoverX.value;
+    date = dateForX(targetX) ?? '';
+  } else if (store.syncedHoverTime) {
+    targetX = candleXForTs(tsOf(store.syncedHoverTime));
+    date = store.syncedHoverTime;
+  }
+  if (targetX == null) return null;
+  const v = interpAtX(targetX);
+  if (!v) return null;
+  return { x: v.x, yMajor: yMajor(v.major), yRetail: yRetail(v.retail), date, major: v.major, retail: v.retail };
 });
 
 const tipStyle = computed(() => {

@@ -505,7 +505,8 @@ onMounted(() => {
         store.setSyncedHoverTime(null);
         return;
       }
-      const iso = new Date(k.timestamp).toISOString().slice(0, 10);
+      const dt = new Date(k.timestamp);
+      const iso = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
       store.setSyncedHoverTime(iso);
       const dateLabel = new Date(k.timestamp).toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
