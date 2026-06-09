@@ -92,6 +92,13 @@ export interface HoldingPctData {
   value: number | null;
 }
 
+// 大戶 / 散戶持股 (%) — 週資料 forward-fill 對齊到日 K 線
+export interface MajorRetailHoldingData {
+  time: string;
+  major: number | null;
+  retail: number | null;
+}
+
 // Indicator settings for visibility control
 export interface IndicatorSettings {
   // 價量指標
@@ -104,6 +111,7 @@ export interface IndicatorSettings {
   trustNet: boolean;
   foreignHoldingPct: boolean;
   instiHoldingPct: boolean;
+  majorRetailHolding: boolean;
   // 融資融券
   marginBalance: boolean;
   marginChange: boolean;
