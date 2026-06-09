@@ -252,6 +252,34 @@ const drawSignalOverlays = () => {
   }
 };
 
+// 把可視範圍內每根 K 棒的 timestamp→x 推到 store，供大戶/散戶獨立圖對齊時間軸
+let rafId = 0;
+const publishKlineXMap = () => {
+  if (!chart || !containerEl.value) return;
+  const klineData = chart.getDataList();
+  if (klineData.length === 0) { store.setKlineXMap(null); return; }
+  const vr = chart.getVisibleRange();
+  const from = Math.max(0, Math.floor(vr.from));
+  const to = Math.min(klineData.length, Math.ceil(vr.to));
+  const finderPoints: Array<{ dataIndex: number }> = [];
+  const idxList: number[] = [];
+  for (let i = from; i < to; i++) { finderPoints.push({ dataIndex: i }); idxList.push(i); }
+  if (finderPoints.length === 0) { store.setKlineXMap(null); return; }
+  const coords = chart.convertToPixel(finderPoints, { paneId: 'candle_pane', absolute: false }) as Array<{ x?: number }>;
+  const rootLeft = containerEl.value.getBoundingClientRect().left;
+  const points: { ts: number; x: number }[] = [];
+  coords.forEach((c, k) => {
+    const i = idxList[k]!;
+    const d = klineData[i];
+    if (c && typeof c.x === 'number' && d) points.push({ ts: d.timestamp, x: c.x });
+  });
+  store.setKlineXMap({ version: Date.now(), rootLeft, points });
+};
+const scheduleXMap = () => {
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => { rafId = 0; publishKlineXMap(); });
+};
+
 const applyData = () => {
   if (!chart) return;
   setExtraDataMap(buildExtras());
@@ -259,6 +287,7 @@ const applyData = () => {
   if (data.length === 0) return;
   chart.applyNewData(data);
   drawSignalOverlays();
+  scheduleXMap();
 };
 
 onMounted(() => {
@@ -460,7 +489,11 @@ onMounted(() => {
     applyData();
     adjustCandlePaneHeight();
 
-    const ro = new ResizeObserver(() => adjustCandlePaneHeight());
+    chart.subscribeAction(ActionType.OnVisibleRangeChange, scheduleXMap);
+    chart.subscribeAction(ActionType.OnScroll, scheduleXMap);
+    chart.subscribeAction(ActionType.OnZoom, scheduleXMap);
+
+    const ro = new ResizeObserver(() => { adjustCandlePaneHeight(); scheduleXMap(); });
     ro.observe(containerEl.value);
     onUnmounted(() => ro.disconnect());
 
@@ -516,7 +549,12 @@ watch(
 onUnmounted(() => {
   if (chart) {
     chart.unsubscribeAction(ActionType.OnCrosshairChange);
+    chart.unsubscribeAction(ActionType.OnVisibleRangeChange);
+    chart.unsubscribeAction(ActionType.OnScroll);
+    chart.unsubscribeAction(ActionType.OnZoom);
   }
+  if (rafId) cancelAnimationFrame(rafId);
+  store.setKlineXMap(null);
   dispose(containerId);
   chart = null;
 });

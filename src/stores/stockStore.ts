@@ -46,6 +46,13 @@ export const useStockStore = defineStore('stock', () => {
     syncedHoverTime.value = time;
   };
 
+  // klinecharts X 軸對齊資訊：rootLeft = K 線容器螢幕左界，points = 可視 K 棒的 timestamp→x(相對容器)
+  // 供獨立的大戶/散戶雙軸圖把週點對齊到 K 線的同一時間欄位
+  const klineXMap = ref<{ version: number; rootLeft: number; points: { ts: number; x: number }[] } | null>(null);
+  const setKlineXMap = (m: { version: number; rootLeft: number; points: { ts: number; x: number }[] } | null) => {
+    klineXMap.value = m;
+  };
+
   const { computeIndicators } = useTechnicalAnalysis();
 
   // Computed: Candlestick data for K-line chart
@@ -437,6 +444,7 @@ export const useStockStore = defineStore('stock', () => {
     alphaPickDate,
     signalMarkers,
     syncedHoverTime,
+    klineXMap,
     // Computed
     candlestickData,
     volumeData,
@@ -467,5 +475,6 @@ export const useStockStore = defineStore('stock', () => {
     setApiSource,
     fetchSignalMarkers,
     setSyncedHoverTime,
+    setKlineXMap,
   };
 });

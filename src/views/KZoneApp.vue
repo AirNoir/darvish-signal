@@ -369,16 +369,16 @@ watch(() => store.stockId, (id) => {
             </div>
           </div>
 
-          <!-- 大戶 / 散戶持股（獨立雙軸週線圖） -->
-          <div v-if="indicatorSettings.majorRetailHolding" class="px-2 pb-2 flex-shrink-0">
-            <div class="border border-[#333] rounded-lg overflow-hidden">
+          <!-- 大戶 / 散戶持股（獨立雙軸週線圖，X 軸對齊 K 線）-->
+          <div v-if="indicatorSettings.majorRetailHolding" class="flex-shrink-0 pb-2">
+            <div class="border-y border-[#333] overflow-hidden">
               <div class="flex items-center gap-3 px-3 py-1.5 bg-[#1a1a1a] text-xs">
                 <span class="text-white font-bold">大戶 / 散戶持股</span>
-                <span class="text-[#f59e0b]">散戶持股%</span>
                 <span class="text-[#3b82f6]">大戶持股%</span>
+                <span class="text-[#f59e0b]">散戶持股%</span>
                 <span class="text-[#555] ml-auto">單位:% ・ 週</span>
               </div>
-              <div class="h-[170px]">
+              <div class="h-[180px]">
                 <MajorRetailHoldingChart />
               </div>
             </div>

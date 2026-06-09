@@ -11,8 +11,9 @@ const containerEl = ref<HTMLDivElement | null>(null);
 const svgEl = ref<SVGSVGElement | null>(null);
 const width = ref(0);
 const height = ref(0);
+const rectLeft = ref<number | null>(null); // svg 容器螢幕左界，用於和 K 線對齊
 
-const pad = { top: 16, right: 42, bottom: 22, left: 42 };
+const pad = { top: 16, right: 44, bottom: 22, left: 8 };
 const plotW = computed(() => Math.max(0, width.value - pad.left - pad.right));
 const plotH = computed(() => Math.max(0, height.value - pad.top - pad.bottom));
 
@@ -22,6 +23,8 @@ const series = computed(() =>
     (d) => d.major != null && !isNaN(d.major) && d.retail != null && !isNaN(d.retail)
   ) as { time: string; major: number; retail: number }[]
 );
+
+const tsOf = (time: string) => new Date(time + 'T00:00:00').getTime();
 
 // 「漂亮刻度」演算法：回傳 rounded 的 min/max/step + tick 陣列
 function niceNum(range: number, round: boolean): number {
@@ -53,11 +56,6 @@ const retailScale = computed(() => {
   return niceScale(Math.min(...vals), Math.max(...vals), 4);
 });
 
-const xAt = (i: number): number => {
-  const n = series.value.length;
-  if (n <= 1) return pad.left + plotW.value / 2;
-  return pad.left + (plotW.value * i) / (n - 1);
-};
 const yOf = (v: number, s: { min: number; max: number }): number => {
   const span = s.max - s.min || 1;
   return pad.top + plotH.value * (1 - (v - s.min) / span);
@@ -65,13 +63,53 @@ const yOf = (v: number, s: { min: number; max: number }): number => {
 const yMajor = (v: number) => yOf(v, majorScale.value);
 const yRetail = (v: number) => yOf(v, retailScale.value);
 
-const pathOf = (key: 'major' | 'retail', y: (v: number) => number): string =>
-  series.value
-    .map((d, i) => `${i ? 'L' : 'M'}${xAt(i).toFixed(1)},${y(d[key]).toFixed(1)}`)
-    .join(' ');
+// 後備：未對齊 K 線時的等寬 X
+const xUniform = (i: number): number => {
+  const n = series.value.length;
+  if (n <= 1) return pad.left + plotW.value / 2;
+  return pad.left + (plotW.value * i) / (n - 1);
+};
 
-const majorPath = computed(() => pathOf('major', yMajor));
-const retailPath = computed(() => pathOf('retail', yRetail));
+// 對齊 K 線：每個週點對應的 svg x（null = 落在可視範圍外 / 無法對齊）
+const alignedX = computed<(number | null)[]>(() => {
+  const m = store.klineXMap;
+  const rl = rectLeft.value;
+  if (!m || m.points.length === 0 || rl == null) return [];
+  const pts = m.points; // ts 升冪
+  return series.value.map((d) => {
+    const ts = tsOf(d.time);
+    // 找 ts <= 週點的最近一根 K 棒
+    let lo = 0, hi = pts.length - 1, idx = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (pts[mid]!.ts <= ts) { idx = mid; lo = mid + 1; } else hi = mid - 1;
+    }
+    if (idx < 0) return null;
+    const x = m.rootLeft + pts[idx]!.x - rl;
+    if (x < pad.left - 4 || x > width.value - pad.right + 6) return null;
+    return x;
+  });
+});
+const useAligned = computed(
+  () => alignedX.value.length === series.value.length && alignedX.value.some((x) => x != null)
+);
+const xOf = (i: number): number | null => (useAligned.value ? alignedX.value[i] ?? null : xUniform(i));
+
+// 折線（落在可視範圍外的點會斷線）
+const buildPath = (key: 'major' | 'retail'): string => {
+  const y = key === 'major' ? yMajor : yRetail;
+  let d = '';
+  let pen = false;
+  series.value.forEach((p, i) => {
+    const x = xOf(i);
+    if (x == null) { pen = false; return; }
+    d += `${pen ? 'L' : 'M'}${x.toFixed(1)},${y(p[key]).toFixed(1)}`;
+    pen = true;
+  });
+  return d;
+};
+const majorPath = computed(() => buildPath('major'));
+const retailPath = computed(() => buildPath('retail'));
 
 const fmtTick = (v: number, step: number) =>
   Number.isInteger(step) ? v.toFixed(0) : v.toFixed(1);
@@ -83,37 +121,50 @@ const rightTicks = computed(() =>
   retailScale.value.ticks.map((v) => ({ y: yRetail(v), label: fmtTick(v, retailScale.value.step) }))
 );
 
+// X 軸 by 月：每個月第一個資料點標一次
 const xLabels = computed(() => {
   const s = series.value;
   if (!s.length) return [] as { x: number; label: string }[];
-  // 週資料 → X 軸 by 月：每個月的第一個資料點標一次
-  const months: { x: number; label: string }[] = [];
+  const out: { x: number; label: string }[] = [];
   let prevYM = '';
   s.forEach((d, i) => {
-    const ym = d.time.slice(0, 7); // YYYY-MM
+    const ym = d.time.slice(0, 7);
     if (ym !== prevYM) {
       prevYM = ym;
-      const m = parseInt(d.time.slice(5, 7));
-      months.push({ x: xAt(i), label: `${m}月` });
+      const x = xOf(i);
+      if (x == null) return;
+      out.push({ x, label: `${parseInt(d.time.slice(5, 7))}月` });
     }
   });
-  // 寬度不夠時稀疏化，避免標籤重疊
   const maxLabels = Math.max(2, Math.floor(plotW.value / 34));
-  if (months.length <= maxLabels) return months;
-  const stepN = Math.ceil(months.length / maxLabels);
-  return months.filter((_, idx) => idx % stepN === 0);
+  if (out.length <= maxLabels) return out;
+  const stepN = Math.ceil(out.length / maxLabels);
+  return out.filter((_, idx) => idx % stepN === 0);
 });
 
 // Hover
 const hoverIdx = ref<number | null>(null);
-const onMove = (e: MouseEvent) => {
+const indexAtPixel = (px: number): number | null => {
   const n = series.value.length;
-  if (!n || !svgEl.value) return;
+  if (!n) return null;
+  if (useAligned.value) {
+    let best = -1;
+    let bestD = Infinity;
+    for (let i = 0; i < n; i++) {
+      const x = alignedX.value[i];
+      if (x == null) continue;
+      const dd = Math.abs(x - px);
+      if (dd < bestD) { bestD = dd; best = i; }
+    }
+    return best >= 0 ? best : null;
+  }
+  const i = Math.round(((px - pad.left) / (plotW.value || 1)) * (n - 1));
+  return Math.max(0, Math.min(n - 1, i));
+};
+const onMove = (e: MouseEvent) => {
+  if (!svgEl.value) return;
   const rect = svgEl.value.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  let i = Math.round(((x - pad.left) / (plotW.value || 1)) * (n - 1));
-  i = Math.max(0, Math.min(n - 1, i));
-  hoverIdx.value = i;
+  hoverIdx.value = indexAtPixel(e.clientX - rect.left);
 };
 const onLeave = () => { hoverIdx.value = null; };
 
@@ -121,15 +172,9 @@ const hover = computed(() => {
   const i = hoverIdx.value;
   if (i == null) return null;
   const d = series.value[i];
-  if (!d) return null;
-  return {
-    x: xAt(i),
-    yMajor: yMajor(d.major),
-    yRetail: yRetail(d.retail),
-    date: d.time,
-    major: d.major,
-    retail: d.retail,
-  };
+  const x = xOf(i);
+  if (!d || x == null) return null;
+  return { x, yMajor: yMajor(d.major), yRetail: yRetail(d.retail), date: d.time, major: d.major, retail: d.retail };
 });
 
 const tipStyle = computed(() => {
@@ -148,6 +193,7 @@ onMounted(() => {
     if (!containerEl.value) return;
     width.value = containerEl.value.clientWidth;
     height.value = containerEl.value.clientHeight;
+    rectLeft.value = containerEl.value.getBoundingClientRect().left;
   };
   measure();
   ro = new ResizeObserver(measure);
@@ -168,12 +214,24 @@ onUnmounted(() => { ro?.disconnect(); ro = null; });
     >
       <!-- 軸標題 -->
       <text :x="pad.left" :y="10" fill="#888" font-size="10" text-anchor="start">大戶 %</text>
-      <text :x="width - pad.right" :y="10" fill="#888" font-size="10" text-anchor="end">散戶 %</text>
+      <text :x="width - pad.right + 4" :y="10" fill="#888" font-size="10" text-anchor="start">散戶 %</text>
 
-      <!-- 水平格線 + 左軸刻度 (大戶) -->
+      <!-- 水平格線 -->
+      <line
+        v-for="t in leftTicks"
+        :key="'g' + t.label"
+        :x1="pad.left"
+        :y1="t.y"
+        :x2="width - pad.right"
+        :y2="t.y"
+        stroke="#1f1f1f"
+        stroke-width="1"
+      />
+
+      <!-- 左軸刻度 (大戶)：線對齊到 K 線最左側，標籤畫在圖內並加底色避免被線蓋住 -->
       <g v-for="t in leftTicks" :key="'l' + t.label">
-        <line :x1="pad.left" :y1="t.y" :x2="width - pad.right" :y2="t.y" stroke="#1f1f1f" stroke-width="1" />
-        <text :x="pad.left - 4" :y="t.y + 3" fill="#888" font-size="9" text-anchor="end">{{ t.label }}</text>
+        <rect :x="0" :y="t.y - 7" width="26" height="12" fill="#0f0f0f" opacity="0.6" />
+        <text :x="pad.left + 18" :y="t.y + 3" fill="#9aa" font-size="9" text-anchor="end">{{ t.label }}</text>
       </g>
 
       <!-- 右軸刻度 (散戶) -->
@@ -182,12 +240,12 @@ onUnmounted(() => { ro?.disconnect(); ro = null; });
         :key="'r' + t.label"
         :x="width - pad.right + 4"
         :y="t.y + 3"
-        fill="#888"
+        fill="#9aa"
         font-size="9"
         text-anchor="start"
       >{{ t.label }}</text>
 
-      <!-- X 軸日期 -->
+      <!-- X 軸日期 (by 月) -->
       <text
         v-for="l in xLabels"
         :key="l.label + l.x"
