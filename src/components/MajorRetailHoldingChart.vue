@@ -84,17 +84,24 @@ const rightTicks = computed(() =>
 );
 
 const xLabels = computed(() => {
-  const n = series.value.length;
-  if (!n) return [] as { x: number; label: string }[];
-  const want = Math.min(6, n);
-  const out: { x: number; label: string }[] = [];
-  for (let k = 0; k < want; k++) {
-    const i = want === 1 ? 0 : Math.round(((n - 1) * k) / (want - 1));
-    const t = series.value[i]!.time;
-    const parts = t.split('-');
-    out.push({ x: xAt(i), label: `${parseInt(parts[1] ?? '0')}/${parseInt(parts[2] ?? '0')}` });
-  }
-  return out;
+  const s = series.value;
+  if (!s.length) return [] as { x: number; label: string }[];
+  // 週資料 → X 軸 by 月：每個月的第一個資料點標一次
+  const months: { x: number; label: string }[] = [];
+  let prevYM = '';
+  s.forEach((d, i) => {
+    const ym = d.time.slice(0, 7); // YYYY-MM
+    if (ym !== prevYM) {
+      prevYM = ym;
+      const m = parseInt(d.time.slice(5, 7));
+      months.push({ x: xAt(i), label: `${m}月` });
+    }
+  });
+  // 寬度不夠時稀疏化，避免標籤重疊
+  const maxLabels = Math.max(2, Math.floor(plotW.value / 34));
+  if (months.length <= maxLabels) return months;
+  const stepN = Math.ceil(months.length / maxLabels);
+  return months.filter((_, idx) => idx % stepN === 0);
 });
 
 // Hover
