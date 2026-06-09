@@ -36,6 +36,7 @@ const enabledChartCount = computed(() => {
   if (v.trustNet) count++;
   if (v.foreignHoldingPct) count++;
   if (v.instiHoldingPct) count++;
+  if (v.majorRetailHolding) count++;
   if (v.marginBalance || v.marginChange) count++;
   if (v.shortBalance || v.shortChange) count++;
   if (v.shortMarginRatio) count++;
@@ -93,6 +94,7 @@ const indicatorGroups = [
       { key: 'foreignNet', label: '外資買賣超', description: '外資買賣超張數' },
       { key: 'foreignNetMA', label: '外資買超均線', description: '外資買超 5/10/15/30 日均線' },
       { key: 'trustNet', label: '投信買賣超', description: '投信買賣超張數' },
+      { key: 'majorRetailHolding', label: '大戶散戶持股', description: '大戶與散戶持股比例 (%)' },
       // 等後端 /api/daily/stock/{symbol} 補上 foreign_holding_pct / insti_holding_pct 後解除註解：
       // { key: 'foreignHoldingPct', label: '外資持股占比', description: '外資持股占發行股數比例 (%)' },
       // { key: 'instiHoldingPct', label: '三大法人持股占比', description: '三大法人合計持股比例 (%)' },

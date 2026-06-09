@@ -36,15 +36,19 @@ const closeMobileAlphaPanel = () => {
   showMobileAlphaPick.value = false;
 };
 
-const indicatorSettings = ref<IndicatorSettings>({
+const SETTINGS_STORAGE_KEY = 'kzone:indicator-settings';
+
+// 預設只開：成交量、外資、投信
+const defaultIndicatorSettings = (): IndicatorSettings => ({
   volume: true,
   turnoverRate: false,
   volumeMA: false,
   foreignNet: true,
-  foreignNetMA: true,
-  trustNet: false,
+  foreignNetMA: false,
+  trustNet: true,
   foreignHoldingPct: false,
   instiHoldingPct: false,
+  majorRetailHolding: false,
   marginBalance: false,
   marginChange: false,
   shortBalance: false,
@@ -56,6 +60,33 @@ const indicatorSettings = ref<IndicatorSettings>({
   kd: false
 });
 
+// 載入使用者上次的指標設定；合併預設值，讓未來新增的指標自動帶預設、舊殘留鍵被忽略
+const loadIndicatorSettings = (): IndicatorSettings => {
+  const base = defaultIndicatorSettings();
+  try {
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (!raw) return base;
+    const saved = JSON.parse(raw) as Partial<Record<keyof IndicatorSettings, unknown>>;
+    for (const key of Object.keys(base) as (keyof IndicatorSettings)[]) {
+      if (typeof saved[key] === 'boolean') base[key] = saved[key] as boolean;
+    }
+    return base;
+  } catch {
+    return base;
+  }
+};
+
+const indicatorSettings = ref<IndicatorSettings>(loadIndicatorSettings());
+
+// 使用者調整指標後寫回 localStorage（無痕模式 / 配額滿時忽略錯誤）
+watch(indicatorSettings, (val) => {
+  try {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(val));
+  } catch {
+    /* ignore */
+  }
+}, { deep: true });
+
 const indicatorOrder = ref<string[]>([
   'volume',
   'foreignNet',
@@ -65,6 +96,7 @@ const indicatorOrder = ref<string[]>([
   'trustNet',
   'foreignHoldingPct',
   'instiHoldingPct',
+  'majorRetailHolding',
   'margin',
   'short',
   'shortMarginRatio',
@@ -336,6 +368,7 @@ watch(() => store.stockId, (id) => {
               <MultiPaneChart :settings="indicatorSettings" :indicator-order="indicatorOrder" />
             </div>
           </div>
+
         </div>
       </div>
     </main>

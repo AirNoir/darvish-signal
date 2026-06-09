@@ -187,6 +187,15 @@ export interface TradeRecordsResponse {
   win_rate: number
 }
 
+// --- 大戶 / 散戶持股 (週頻，集保戶股權分散) ---
+export interface PeriodHoldingItem {
+  symbol: string
+  name: string
+  trade_date: string
+  major_ratio: number | null
+  retail_ratio: number | null
+}
+
 async function apiFetch<T>(url: string): Promise<T> {
   const res = await fetch(url)
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`)
@@ -265,6 +274,11 @@ export const stockApi = {
   // Market - TAIEX 大盤資料
   async getMarket(limit = 60): Promise<MarketData[]> {
     return apiFetch<MarketData[]>(`${API_BASE_URL}/api/market?limit=${limit}`)
+  },
+
+  // 大戶 / 散戶持股 (週頻)
+  async getPeriodHolding(symbol: string): Promise<PeriodHoldingItem[]> {
+    return apiFetch<PeriodHoldingItem[]>(`${API_BASE_URL}/api/period/holding/${symbol}`)
   },
 }
 
