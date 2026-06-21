@@ -2,6 +2,9 @@
 import { computed, ref } from 'vue';
 import type { IndicatorSettings } from '../types';
 import { trackEvent } from '../lib/analytics';
+import { useStockStore, MARKET_SUPPORTED_SETTING_KEYS } from '../stores/stockStore';
+
+const store = useStockStore();
 
 const props = defineProps<{
   modelValue: IndicatorSettings;
@@ -24,49 +27,41 @@ const showWarning = (message: string) => {
   }, 3000);
 };
 
-// 計算目前啟用的指標數量（以圖表為單位）
-const enabledChartCount = computed(() => {
+// setting key → 指標窗格（融資餘額/增減 共用一格、融券同理）
+const PANE_OF: Record<string, string> = {
+  volume: 'volume', turnoverRate: 'turnoverRate', volumeMA: 'volumeMA',
+  foreignNet: 'foreignNet', foreignNetMA: 'foreignNetMA', trustNet: 'trustNet',
+  foreignHoldingPct: 'foreignHoldingPct', instiHoldingPct: 'instiHoldingPct',
+  majorRetailHolding: 'majorRetailHolding',
+  marginBalance: 'margin', marginChange: 'margin',
+  shortBalance: 'short', shortChange: 'short',
+  shortMarginRatio: 'shortMarginRatio',
+  rsi: 'rsi', macd: 'macd', bollinger: 'bollinger', kd: 'kd',
+};
+
+// 某個指標在目前模式下是否計入上限：大盤模式只計有支援（可見）的指標，
+// 避免被隱藏但仍開啟的指標（如預設開的投信）佔掉額度
+const isCountable = (key: string): boolean =>
+  !store.isMarketView || MARKET_SUPPORTED_SETTING_KEYS.has(key);
+
+// 目前已開啟且可見的指標所佔的「窗格」集合
+const enabledPanes = computed(() => {
   const v = props.modelValue;
-  let count = 0;
-  if (v.volume) count++;
-  if (v.turnoverRate) count++;
-  if (v.volumeMA) count++;
-  if (v.foreignNet) count++;
-  if (v.foreignNetMA) count++;
-  if (v.trustNet) count++;
-  if (v.foreignHoldingPct) count++;
-  if (v.instiHoldingPct) count++;
-  if (v.majorRetailHolding) count++;
-  if (v.marginBalance || v.marginChange) count++;
-  if (v.shortBalance || v.shortChange) count++;
-  if (v.shortMarginRatio) count++;
-  if (v.macd) count++;
-  if (v.kd) count++;
-  if (v.rsi) count++;
-  if (v.bollinger) count++;
-  return count;
+  const panes = new Set<string>();
+  for (const key of Object.keys(PANE_OF)) {
+    if (v[key as keyof IndicatorSettings] && isCountable(key)) panes.add(PANE_OF[key]!);
+  }
+  return panes;
 });
 
-// 計算開啟某個指標後會新增多少圖表
-const getChartDelta = (key: string): number => {
-  const v = props.modelValue;
+// 計算目前啟用的指標數量（以圖表/窗格為單位）
+const enabledChartCount = computed(() => enabledPanes.value.size);
 
-  // 融資：marginBalance 和 marginChange 共用一個圖表
-  if (key === 'marginBalance') {
-    return (!v.marginBalance && !v.marginChange) ? 1 : 0;
-  }
-  if (key === 'marginChange') {
-    return (!v.marginBalance && !v.marginChange) ? 1 : 0;
-  }
-  // 融券：shortBalance 和 shortChange 共用一個圖表
-  if (key === 'shortBalance') {
-    return (!v.shortBalance && !v.shortChange) ? 1 : 0;
-  }
-  if (key === 'shortChange') {
-    return (!v.shortBalance && !v.shortChange) ? 1 : 0;
-  }
-  // 其他指標都是獨立圖表
-  return 1;
+// 計算開啟某個指標後會新增多少圖表（窗格已存在則為 0）
+const getChartDelta = (key: string): number => {
+  const pane = PANE_OF[key];
+  if (!pane) return 1;
+  return enabledPanes.value.has(pane) ? 0 : 1;
 };
 
 // 檢查某個指標是否可以被開啟
@@ -123,17 +118,25 @@ const indicatorGroups = [
   },
 ];
 
-// Get all indicator keys
-const allKeys = indicatorGroups.flatMap(g => g.items.map(i => i.key));
+// 大盤模式只顯示有資料的指標；個股顯示全部
+const visibleGroups = computed(() => {
+  if (!store.isMarketView) return indicatorGroups;
+  return indicatorGroups
+    .map(g => ({ ...g, items: g.items.filter(i => MARKET_SUPPORTED_SETTING_KEYS.has(i.key)) }))
+    .filter(g => g.items.length > 0);
+});
+
+// Get all indicator keys (大盤模式只計入可顯示的，全開/全關才不會誤觸隱藏指標)
+const allKeys = computed(() => visibleGroups.value.flatMap(g => g.items.map(i => i.key)));
 
 // Check if all indicators are on
 const isAllOn = computed(() => {
-  return allKeys.every(key => props.modelValue[key as keyof IndicatorSettings]);
+  return allKeys.value.every(key => props.modelValue[key as keyof IndicatorSettings]);
 });
 
 // Check if all indicators are off
 const isAllOff = computed(() => {
-  return allKeys.every(key => !props.modelValue[key as keyof IndicatorSettings]);
+  return allKeys.value.every(key => !props.modelValue[key as keyof IndicatorSettings]);
 });
 
 // Check group state: 'all' | 'none' | 'partial'
@@ -171,7 +174,7 @@ const toggleAll = (on: boolean) => {
     showWarning(`最多只能同時觀看 ${MAX_INDICATORS} 個指標，將只開啟前 ${MAX_INDICATORS} 個`);
   }
   const newValue = { ...props.modelValue };
-  for (const key of allKeys) {
+  for (const key of allKeys.value) {
     (newValue as Record<string, boolean>)[key] = on;
   }
   emit('update:modelValue', newValue as IndicatorSettings);
@@ -253,7 +256,7 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
 
       <!-- Indicator List -->
       <div class="p-4 space-y-4 overflow-y-auto max-h-[65vh]">
-        <div v-for="group in indicatorGroups" :key="group.id">
+        <div v-for="group in visibleGroups" :key="group.id">
           <!-- Group Header with Toggle -->
           <div
             class="flex items-center justify-between mb-2 cursor-pointer group"

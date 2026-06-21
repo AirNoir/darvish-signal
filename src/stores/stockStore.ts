@@ -7,6 +7,14 @@ import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock, type Mark
 
 const FINMIND_API_BASE = 'https://api.finmindtrade.com/api/v4/data';
 
+// 大盤（加權指數）以這個哨符 symbol 走和個股相同的載入/路由流程
+export const MARKET_SYMBOL = 'TAIEX';
+
+// 大盤 (getMarket) 僅提供 OHLC / 成交量 / 外資 / 融資；KD 由價格自算。
+// 其餘指標大盤無資料 → 在大盤模式下從圖表與「指標設定」面板一併隱藏。
+export const MARKET_SUPPORTED_PANE_KEYS = new Set<string>(['volume', 'foreignNet', 'margin', 'kd']);
+export const MARKET_SUPPORTED_SETTING_KEYS = new Set<string>(['volume', 'foreignNet', 'marginBalance', 'marginChange', 'kd']);
+
 export type ApiSource = 'finmind' | 'darvish'
 
 export interface SignalMarker {
@@ -144,8 +152,70 @@ export const useStockStore = defineStore('stock', () => {
   const instiHoldingPctData = ref<HoldingPctData[]>([]);
   const majorRetailHoldingData = ref<MajorRetailHoldingData[]>([]);
 
+  // 大盤是否為目前主圖檢視的標的
+  const isMarketView = computed(() => stockId.value === MARKET_SYMBOL);
+
+  // 載入大盤（加權指數）到主圖，沿用個股的 stockData / 指標陣列結構，
+  // 只填大盤有資料的欄位（OHLC、量、外資、融資），其餘清空。
+  const loadMarketView = async () => {
+    isLoading.value = true;
+    error.value = null;
+    signalMarkers.value = [];
+    stockName.value = '加權指數';
+    try {
+      const data = await stockApi.getMarket(250); // newest-first
+      const sorted = [...data].reverse();
+      stockData.value = sorted.map((m) => ({
+        time: m.trade_date,
+        open: m.taiex_open,
+        high: m.taiex_high,
+        low: m.taiex_low,
+        close: m.taiex_close,
+        volume: m.total_volume
+      }));
+      stockId.value = MARKET_SYMBOL;
+      indicators.value = computeIndicators(stockData.value);
+
+      // 外資買賣超（金額）、融資餘額/增減 — 大盤有資料
+      institutionalData.value = sorted.map((m) => ({
+        time: m.trade_date,
+        foreign: m.foreign_net ?? 0,
+        trust: 0,
+        dealer: 0
+      }));
+      marginData.value = sorted.map((m) => ({
+        time: m.trade_date,
+        balance: m.margin_balance ?? null,
+        change: m.margin_balance_change ?? null
+      }));
+
+      // 大盤無資料的指標 → 清空（窗格與設定面板會一併隱藏）
+      rsiData.value = [];
+      macdData.value = [];
+      bollingerData.value = [];
+      turnoverRateData.value = [];
+      volumeMAData.value = [];
+      foreignNetMAData.value = [];
+      shortData.value = [];
+      shortMarginRatioData.value = [];
+      foreignHoldingPctData.value = [];
+      instiHoldingPctData.value = [];
+      majorRetailHoldingData.value = [];
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch market data';
+      console.error('Error loading market view:', err);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   // Actions
   const fetchStockData = async (id: string, startDate?: string) => {
+    if (id === MARKET_SYMBOL) {
+      await loadMarketView();
+      return;
+    }
+
     isLoading.value = true;
     error.value = null;
     signalMarkers.value = [];
@@ -452,6 +522,7 @@ export const useStockStore = defineStore('stock', () => {
     alphaPickDate,
     signalMarkers,
     syncedHoverTime,
+    isMarketView,
     // Computed
     candlestickData,
     volumeData,

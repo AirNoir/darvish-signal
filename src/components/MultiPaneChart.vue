@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { init, dispose, registerOverlay, registerLocale, ActionType, PolygonType, LineType, TooltipShowRule, TooltipShowType } from 'klinecharts';
 import type { Chart } from 'klinecharts';
-import { useStockStore, type SignalMarker } from '../stores/stockStore';
+import { useStockStore, type SignalMarker, MARKET_SUPPORTED_PANE_KEYS } from '../stores/stockStore';
 import type { IndicatorSettings } from '../types';
 import { registerCustomIndicators, setExtraDataMap, formatBig, type ExtraValues } from '../lib/klineIndicators';
 
@@ -170,7 +170,10 @@ const reconcileIndicators = () => {
   }
   paneIndicatorMap.clear();
 
-  const visible = props.indicatorOrder.filter(k => isVisible(k, props.settings)).slice(0, 6);
+  const visible = props.indicatorOrder
+    .filter(k => isVisible(k, props.settings))
+    .filter(k => !store.isMarketView || MARKET_SUPPORTED_PANE_KEYS.has(k))
+    .slice(0, 6);
   for (const key of visible) {
     const name = INDICATOR_NAME[key];
     if (!name) continue;
@@ -522,6 +525,8 @@ onMounted(() => {
 
 watch(() => store.stockData, () => applyData(), { deep: false });
 watch(() => store.signalMarkers, () => drawSignalOverlays(), { deep: false });
+// 切換大盤/個股時，支援的指標清單會變 → 重建指標窗格
+watch(() => store.isMarketView, () => reconcileIndicators());
 watch(
   () => [props.settings, props.indicatorOrder] as const,
   () => reconcileIndicators(),
