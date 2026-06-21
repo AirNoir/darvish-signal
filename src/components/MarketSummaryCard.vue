@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useStockStore } from '../stores/stockStore';
+import { useRouter } from 'vue-router';
+import { useStockStore, MARKET_SYMBOL } from '../stores/stockStore';
 
+const router = useRouter();
 const store = useStockStore();
 const expanded = ref(false);
+
+// 點「看 K 線」→ 導向 /app/TAIEX，主圖以個股相同方式載入大盤
+const viewMarketChart = () => {
+  router.push({ name: 'app', params: { symbol: MARKET_SYMBOL } });
+};
 
 onMounted(() => {
   if (store.marketData.length === 0) {
@@ -125,6 +132,20 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
     >
       <span class="label">加權指數 TAIEX</span>
       <span class="header-right">
+        <button
+          class="kline-btn"
+          :class="{ 'kline-btn-active': store.isMarketView }"
+          :title="store.isMarketView ? '主圖已顯示大盤 K 線' : '在主圖顯示大盤 K 線'"
+          @click.stop="viewMarketChart"
+        >
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
+            <path d="M2 14V2M2 14h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            <rect x="4.5" y="6" width="2" height="5" rx="0.4" fill="currentColor" />
+            <rect x="8" y="3.5" width="2" height="7.5" rx="0.4" fill="currentColor" />
+            <rect x="11.5" y="8" width="2" height="3" rx="0.4" fill="currentColor" />
+          </svg>
+          K 線
+        </button>
         <span class="date">{{ formatDate(current.trade_date) }}</span>
         <svg
           class="chevron"
@@ -258,6 +279,33 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.kline-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: #b8c4d4;
+  background: rgba(15, 52, 96, 0.35);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.kline-btn:hover {
+  color: #fff;
+  background: rgba(59, 130, 246, 0.35);
+  border-color: #3b82f6;
+}
+
+.kline-btn-active {
+  color: #fff;
+  background: #3b82f6;
+  border-color: #3b82f6;
 }
 
 .label {

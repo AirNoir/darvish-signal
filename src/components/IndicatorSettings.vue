@@ -2,6 +2,9 @@
 import { computed, ref } from 'vue';
 import type { IndicatorSettings } from '../types';
 import { trackEvent } from '../lib/analytics';
+import { useStockStore, MARKET_SUPPORTED_SETTING_KEYS } from '../stores/stockStore';
+
+const store = useStockStore();
 
 const props = defineProps<{
   modelValue: IndicatorSettings;
@@ -123,17 +126,25 @@ const indicatorGroups = [
   },
 ];
 
-// Get all indicator keys
-const allKeys = indicatorGroups.flatMap(g => g.items.map(i => i.key));
+// 大盤模式只顯示有資料的指標；個股顯示全部
+const visibleGroups = computed(() => {
+  if (!store.isMarketView) return indicatorGroups;
+  return indicatorGroups
+    .map(g => ({ ...g, items: g.items.filter(i => MARKET_SUPPORTED_SETTING_KEYS.has(i.key)) }))
+    .filter(g => g.items.length > 0);
+});
+
+// Get all indicator keys (大盤模式只計入可顯示的，全開/全關才不會誤觸隱藏指標)
+const allKeys = computed(() => visibleGroups.value.flatMap(g => g.items.map(i => i.key)));
 
 // Check if all indicators are on
 const isAllOn = computed(() => {
-  return allKeys.every(key => props.modelValue[key as keyof IndicatorSettings]);
+  return allKeys.value.every(key => props.modelValue[key as keyof IndicatorSettings]);
 });
 
 // Check if all indicators are off
 const isAllOff = computed(() => {
-  return allKeys.every(key => !props.modelValue[key as keyof IndicatorSettings]);
+  return allKeys.value.every(key => !props.modelValue[key as keyof IndicatorSettings]);
 });
 
 // Check group state: 'all' | 'none' | 'partial'
@@ -171,7 +182,7 @@ const toggleAll = (on: boolean) => {
     showWarning(`最多只能同時觀看 ${MAX_INDICATORS} 個指標，將只開啟前 ${MAX_INDICATORS} 個`);
   }
   const newValue = { ...props.modelValue };
-  for (const key of allKeys) {
+  for (const key of allKeys.value) {
     (newValue as Record<string, boolean>)[key] = on;
   }
   emit('update:modelValue', newValue as IndicatorSettings);
@@ -253,7 +264,7 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
 
       <!-- Indicator List -->
       <div class="p-4 space-y-4 overflow-y-auto max-h-[65vh]">
-        <div v-for="group in indicatorGroups" :key="group.id">
+        <div v-for="group in visibleGroups" :key="group.id">
           <!-- Group Header with Toggle -->
           <div
             class="flex items-center justify-between mb-2 cursor-pointer group"
