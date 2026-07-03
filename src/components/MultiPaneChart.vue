@@ -187,16 +187,17 @@ const fmt = (v: number | null | undefined, digits = 2) =>
   v == null || isNaN(v) ? '--' : v.toFixed(digits);
 
 const tipLinesForPane = (paneId: string, k: { open: number; close: number; volume?: number }, ts: number, settings: IndicatorSettings): string[] => {
+  const idx = store.stockData.findIndex(d => new Date(d.time + 'T00:00:00').getTime() === ts);
   if (paneId === 'candle_pane') {
-    const change = k.close - k.open;
-    const changePct = k.open !== 0 ? (change / k.open) * 100 : 0;
+    const prevClose = idx > 0 ? store.stockData[idx - 1]?.close : undefined;
+    const change = prevClose != null ? k.close - prevClose : 0;
+    const changePct = prevClose != null && prevClose !== 0 ? (change / prevClose) * 100 : 0;
     return [
       `${fmt(k.close)}  (${change >= 0 ? '+' : ''}${fmt(change)} / ${change >= 0 ? '+' : ''}${fmt(changePct)}%)`
     ];
   }
   const key = paneIndicatorMap.get(paneId);
   if (!key) return [];
-  const idx = store.stockData.findIndex(d => new Date(d.time + 'T00:00:00').getTime() === ts);
   if (idx < 0) return [];
   switch (key) {
     case 'volume': return [`成交量 ${formatBig(store.stockData[idx]?.volume)}`];
