@@ -15,7 +15,9 @@ const route = useRoute();
 const store = useStockStore();
 const showMobileAlphaPick = ref(false);
 const showSettings = ref(false);
-const showMobileMenu = ref(false);
+// 手機版進站預設展開搜尋面板，讓使用者能直接輸入股票代碼
+const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+const showMobileMenu = ref(isMobileViewport);
 
 const openIndicatorSettings = (source: 'desktop' | 'mobile') => {
   showSettings.value = true;
@@ -263,7 +265,7 @@ watch(() => store.stockId, (id) => {
       v-if="showMobileMenu"
       class="md:hidden absolute top-10 left-0 right-0 bg-[#1a1a1a] border-b border-[#333] z-50 p-3 flex flex-col gap-2"
     >
-      <SearchBar @stock-selected="showMobileMenu = false" />
+      <SearchBar autofocus @stock-selected="showMobileMenu = false" />
       <button
         @click="openIndicatorSettings('mobile')"
         class="w-full px-3 py-1.5 text-xs font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444] text-left"
