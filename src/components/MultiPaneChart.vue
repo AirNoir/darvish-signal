@@ -264,7 +264,7 @@ const drawSignalOverlays = () => {
       name: 'signal_marker',
       groupId: 'signals',
       points: [{ timestamp: tsOf(m.date), value }],
-      extendData: m.type,
+      extendData: { type: m.type, pickType: m.pickType },
       lock: true
     });
   }
@@ -304,10 +304,13 @@ onMounted(() => {
     createPointFigures: ({ overlay, coordinates }) => {
       const c = coordinates[0];
       if (!c) return [];
-      const isBuy = overlay.extendData === 'buy';
+      const { type, pickType } = (overlay.extendData ?? {}) as { type?: 'buy' | 'sell'; pickType?: string };
+      const isBuy = type === 'buy';
+      // dip 訊號維持藍底，僅以字母 D 區隔
+      const isDip = isBuy && pickType === 'dip';
       const color = isBuy ? '#00BFFF' : '#FF8C00';
       const textColor = '#1a1a1a';
-      const label = isBuy ? 'B' : 'S';
+      const label = isDip ? 'D' : isBuy ? 'B' : 'S';
       const dir = isBuy ? 1 : -1;
 
       const gap = 14;

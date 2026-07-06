@@ -46,9 +46,12 @@ export interface DailyDataItem {
   insti_holding_pct?: number
 }
 
+export type PickType = 'breakout' | 're_entry' | 'dip'
+
 export interface AlphaPickItem {
   symbol: string
   trade_date: string
+  pick_type?: PickType
   name: string
   close: number
   volume: number

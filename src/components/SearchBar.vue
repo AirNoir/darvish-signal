@@ -3,6 +3,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { useStockStore } from '../stores/stockStore';
 import { trackEvent } from '../lib/analytics';
 
+const props = defineProps<{ autofocus?: boolean }>();
 const emit = defineEmits<{ stockSelected: [] }>();
 
 const store = useStockStore();
@@ -99,7 +100,12 @@ const handleClickOutside = (e: MouseEvent) => {
   }
 };
 
-onMounted(() => document.addEventListener('mousedown', handleClickOutside));
+onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside);
+  if (props.autofocus) {
+    nextTick(() => inputRef.value?.focus());
+  }
+});
 onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside));
 </script>
 

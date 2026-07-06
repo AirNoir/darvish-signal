@@ -3,7 +3,7 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, ForeignNetMAData, MarginData, ShortData, ShortMarginRatioData, HoldingPctData, MajorRetailHoldingData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
-import { stockApi, type AlphaPickItem, type SellAlertItem, type Stock, type MarketData, type PeriodHoldingItem } from '../api/stockApi';
+import { stockApi, type AlphaPickItem, type PickType, type SellAlertItem, type Stock, type MarketData, type PeriodHoldingItem } from '../api/stockApi';
 
 const FINMIND_API_BASE = 'https://api.finmindtrade.com/api/v4/data';
 
@@ -20,6 +20,7 @@ export type ApiSource = 'finmind' | 'darvish'
 export interface SignalMarker {
   date: string
   type: 'buy' | 'sell'
+  pickType?: PickType
 }
 
 // 週頻大戶/散戶持股 forward-fill 對齊到日 K 線：
@@ -399,7 +400,7 @@ export const useStockStore = defineStore('stock', () => {
       // Use Map to deduplicate by date (sell takes priority if both exist on same date)
       const markerMap = new Map<string, SignalMarker>();
       for (const p of picks) {
-        markerMap.set(p.trade_date, { date: p.trade_date, type: 'buy' });
+        markerMap.set(p.trade_date, { date: p.trade_date, type: 'buy', pickType: p.pick_type });
       }
       for (const s of sells) {
         // Sell overwrites buy if on same date (sell is more urgent)
