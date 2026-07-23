@@ -8,6 +8,7 @@ import MultiPaneChart from '../components/MultiPaneChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
+import WatchlistStarButton from '../components/WatchlistStarButton.vue';
 import { trackEvent } from '../lib/analytics';
 
 const router = useRouter();
@@ -220,6 +221,7 @@ watch(() => store.stockId, (id) => {
           class="text-[#f5b840] font-semibold text-base"
           style="text-shadow: 0 0 8px rgba(245, 184, 64, 0.35);"
         >{{ store.stockName }}</span>
+        <WatchlistStarButton v-if="!store.isMarketView" :symbol="store.stockId" />
         <span class="text-white text-sm font-medium">{{ formatPrice(latestData.close) }}</span>
         <span
           v-if="priceChange"
