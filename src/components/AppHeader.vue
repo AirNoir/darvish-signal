@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { trackEvent } from '../lib/analytics';
+import UserMenu from './UserMenu.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -9,6 +10,7 @@ const mobileOpen = ref(false);
 
 const navItems = [
   { label: '最新動態', to: '/feed' },
+  { label: '我的自選股', to: '/watchlist' },
   { label: '關於我', to: '/about' },
 ];
 
@@ -63,9 +65,15 @@ const enterApp = () => {
         >
           進入 K-Zone
         </button>
+        <div class="ml-2">
+          <UserMenu />
+        </div>
       </nav>
 
-      <!-- Mobile hamburger -->
+      <!-- Mobile: 使用者選單 + hamburger -->
+      <div class="sm:hidden flex items-center gap-2">
+        <UserMenu />
+      </div>
       <button
         class="sm:hidden text-gray-400 hover:text-white transition-colors p-1"
         @click="mobileOpen = !mobileOpen"
