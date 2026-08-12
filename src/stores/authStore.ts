@@ -3,70 +3,67 @@ import { ref, computed } from 'vue';
 import {
   GOOGLE_CLIENT_ID,
   loadGoogleIdentity,
-  decodeJwtPayload,
   type GoogleCredentialResponse
 } from '../lib/googleAuth';
+import { accountApi, type AccountUser } from '../api/accountApi';
 import { trackEvent } from '../lib/analytics';
 
-export interface AuthUser {
-  sub: string;
-  email?: string;
-  name?: string;
-  picture?: string;
-}
+// 使用者身分來自 AccountService（後端驗證後回傳），不再前端 decode。
+export type AuthUser = AccountUser;
 
-const STORAGE_KEY = 'kzone:auth-user';
+const USER_KEY = 'kzone:auth-user';
+const TOKEN_KEY = 'kzone:auth-token';
 
 function loadPersistedUser(): AuthUser | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(USER_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<AuthUser>;
-    if (typeof parsed.sub !== 'string' || !parsed.sub) return null;
-    return {
-      sub: parsed.sub,
-      email: typeof parsed.email === 'string' ? parsed.email : undefined,
-      name: typeof parsed.name === 'string' ? parsed.name : undefined,
-      picture: typeof parsed.picture === 'string' ? parsed.picture : undefined
-    };
+    if (typeof parsed.email !== 'string' || !parsed.email) return null;
+    return parsed as AuthUser;
   } catch {
     return null;
   }
 }
 
 export const useAuthStore = defineStore('auth', () => {
+  // 樂觀還原：重整頁面時先用 localStorage 的身分，validate() 再跟後端確認。
   const user = ref<AuthUser | null>(loadPersistedUser());
+  const token = ref<string | null>(localStorage.getItem(TOKEN_KEY));
   const showLoginModal = ref(false);
   const authError = ref<string | null>(null);
 
-  const isLoggedIn = computed(() => user.value !== null);
+  const isLoggedIn = computed(() => user.value !== null && token.value !== null);
   const isConfigured = computed(() => GOOGLE_CLIENT_ID.length > 0);
 
   const persist = () => {
     try {
-      if (user.value) localStorage.setItem(STORAGE_KEY, JSON.stringify(user.value));
-      else localStorage.removeItem(STORAGE_KEY);
+      if (user.value) localStorage.setItem(USER_KEY, JSON.stringify(user.value));
+      else localStorage.removeItem(USER_KEY);
+      if (token.value) localStorage.setItem(TOKEN_KEY, token.value);
+      else localStorage.removeItem(TOKEN_KEY);
     } catch {
       /* 無痕模式 / 配額滿時忽略 */
     }
   };
 
-  const handleCredential = (response: GoogleCredentialResponse) => {
-    const payload = decodeJwtPayload(response.credential);
-    if (!payload?.sub) {
-      authError.value = '無法解析 Google 登入資訊，請再試一次';
-      return;
+  // GIS callback：把 Google credential 交給 AccountService 換取後端 JWT。
+  const handleCredential = async (response: GoogleCredentialResponse) => {
+    try {
+      const { token: jwt, user: u } = await accountApi.loginWithGoogle(response.credential);
+      token.value = jwt;
+      user.value = u;
+      authError.value = null;
+      persist();
+      showLoginModal.value = false;
+      trackEvent('login_success', { method: 'google' });
+    } catch (e) {
+      authError.value =
+        (e as { status?: number }).status === 401
+          ? 'Google 登入驗證失敗，請再試一次'
+          : '登入服務暫時無法連線，請稍後再試';
+      trackEvent('login_error', { method: 'google' });
     }
-    user.value = {
-      sub: payload.sub,
-      email: payload.email,
-      name: payload.name,
-      picture: payload.picture
-    };
-    authError.value = null;
-    persist();
-    showLoginModal.value = false;
-    trackEvent('login_success', { method: 'google' });
   };
 
   let initialized = false;
@@ -110,13 +107,31 @@ export const useAuthStore = defineStore('auth', () => {
 
   const signOut = () => {
     user.value = null;
+    token.value = null;
     persist();
     window.google?.accounts?.id?.disableAutoSelect();
     trackEvent('logout', { method: 'google' });
   };
 
+  // 頁面載入時用保存的 JWT 驗證登入是否仍有效；只有 401 才登出，其他錯誤保留樂觀狀態。
+  const validate = async () => {
+    if (!token.value) return;
+    try {
+      const { user: u } = await accountApi.fetchMe(token.value);
+      user.value = u;
+      persist();
+    } catch (e) {
+      if ((e as { status?: number }).status === 401) {
+        user.value = null;
+        token.value = null;
+        persist();
+      }
+    }
+  };
+
   return {
     user,
+    token,
     isLoggedIn,
     isConfigured,
     showLoginModal,
@@ -124,6 +139,7 @@ export const useAuthStore = defineStore('auth', () => {
     renderGoogleButton,
     openLogin,
     closeLogin,
-    signOut
+    signOut,
+    validate
   };
 });

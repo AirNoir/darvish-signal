@@ -1,6 +1,5 @@
-// Google Identity Services (GIS) 載入與 ID token 解析
-// 純前端 SPA：只用 ID token 取得使用者身分（sub / email / name / picture），
-// 不做後端 session；自選股等個人資料以 sub 作為 localStorage 分隔鍵。
+// Google Identity Services (GIS) 載入。
+// 取得 Google credential (ID token) 後交給 AccountService 後端驗證，前端不自行 decode。
 
 export const GOOGLE_CLIENT_ID: string = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
 
@@ -56,30 +55,4 @@ export function loadGoogleIdentity(): Promise<GoogleIdApi> {
     document.head.appendChild(script);
   });
   return loadPromise;
-}
-
-export interface GoogleIdTokenPayload {
-  sub: string;
-  email?: string;
-  name?: string;
-  picture?: string;
-  exp?: number;
-}
-
-// 解析 JWT payload（base64url）。僅用於前端顯示身分，非安全驗證。
-export function decodeJwtPayload(token: string): GoogleIdTokenPayload | null {
-  try {
-    const part = token.split('.')[1];
-    if (!part) return null;
-    const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
-    const json = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(json) as GoogleIdTokenPayload;
-  } catch {
-    return null;
-  }
 }

@@ -17,7 +17,8 @@ interface PersistedWatchlist {
   groups: WatchlistGroup[];
 }
 
-const storageKeyFor = (sub: string | null) => `kzone:watchlist:${sub ?? 'guest'}`;
+// 以使用者身分（AccountService user 的 email）分隔各帳號的自選股；未登入為 guest。
+const storageKeyFor = (identity: string | null) => `kzone:watchlist:${identity ?? 'guest'}`;
 
 const genId = (): string =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -63,7 +64,7 @@ export const useWatchlistStore = defineStore('watchlist', () => {
   const activeGroupId = ref<string>('');
 
   const load = () => {
-    const persisted = loadFromStorage(storageKeyFor(auth.user?.sub ?? null));
+    const persisted = loadFromStorage(storageKeyFor(auth.user?.email ?? null));
     if (persisted) {
       groups.value = persisted.groups;
       activeGroupId.value = persisted.activeGroupId;
@@ -77,7 +78,7 @@ export const useWatchlistStore = defineStore('watchlist', () => {
   const persist = () => {
     try {
       localStorage.setItem(
-        storageKeyFor(auth.user?.sub ?? null),
+        storageKeyFor(auth.user?.email ?? null),
         JSON.stringify({ activeGroupId: activeGroupId.value, groups: groups.value })
       );
     } catch {
@@ -88,7 +89,7 @@ export const useWatchlistStore = defineStore('watchlist', () => {
   load();
 
   // 換帳號（登入 / 登出）時切換到該帳號自己的自選股資料
-  watch(() => auth.user?.sub ?? null, () => load());
+  watch(() => auth.user?.email ?? null, () => load());
 
   watch([groups, activeGroupId], persist, { deep: true });
 
