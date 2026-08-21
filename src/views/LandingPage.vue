@@ -97,7 +97,7 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
           </div>
           <div class="flex flex-wrap items-center justify-center gap-3">
             <a
-              href="https://www.threads.com/@darvishkzone?hl=zh-tw"
+              href="https://www.threads.com/@scout.darvi?hl=zh-tw"
               target="_blank"
               rel="noopener noreferrer"
               @click="trackSocial('threads')"
