@@ -82,7 +82,7 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
               </a>
 
               <a
-                href="https://www.threads.com/@darvishkzone?hl=zh-tw"
+                href="https://www.threads.com/@scout.darvi?hl=zh-tw"
                 target="_blank"
                 rel="noopener noreferrer"
                 @click="trackSocial('threads')"
@@ -95,7 +95,7 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
                 </div>
                 <div class="flex-1 text-left">
                   <div class="text-sm font-semibold text-white group-hover:text-[#7700ff] transition-colors">Threads</div>
-                  <div class="text-xs text-[#606080]">@darvishkzone</div>
+                  <div class="text-xs text-[#606080]">@scout.darvi</div>
                 </div>
               </a>
             </div>
