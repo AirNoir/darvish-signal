@@ -6,6 +6,8 @@ export interface StockData {
   low: number;
   close: number;
   volume: number;
+  price_limit_up?: boolean;   // 當日漲停
+  price_limit_down?: boolean; // 當日跌停
 }
 
 // Technical analysis results

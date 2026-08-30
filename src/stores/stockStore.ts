@@ -242,7 +242,9 @@ export const useStockStore = defineStore('stock', () => {
           high: item.high,
           low: item.low,
           close: item.close,
-          volume: item.volume
+          volume: item.volume,
+          price_limit_up: item.price_limit_up,
+          price_limit_down: item.price_limit_down
         }));
         stockId.value = id;
         indicators.value = computeIndicators(stockData.value);

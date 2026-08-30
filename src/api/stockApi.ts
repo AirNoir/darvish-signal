@@ -44,6 +44,8 @@ export interface DailyDataItem {
   bb_bandwidth?: number
   foreign_holding_pct?: number
   insti_holding_pct?: number
+  price_limit_up?: boolean
+  price_limit_down?: boolean
 }
 
 export type PickType = 'breakout' | 're_entry' | 'dip'
