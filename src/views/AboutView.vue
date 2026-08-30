@@ -111,6 +111,9 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
                   <p class="text-xs text-[#a0b0c0] leading-relaxed font-noto">
                     手機開啟 LINE 掃描左側 QR Code，或在電腦版直接點上方「LINE 社群」連結加入。
                   </p>
+                  <p class="text-sm text-white mt-3 font-noto">
+                    加入密碼：<span class="font-bold tracking-[0.3em] text-[#06C755]">50000</span>
+                  </p>
                 </div>
               </div>
 
