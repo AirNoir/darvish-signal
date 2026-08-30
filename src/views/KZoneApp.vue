@@ -229,6 +229,11 @@ watch(() => store.stockId, (id) => {
           {{ priceChange.isPositive ? '+' : '' }}{{ priceChange.value.toFixed(2) }}
           ({{ priceChange.percent.toFixed(2) }}%)
         </span>
+        <span
+          v-if="latestData.price_limit_up || latestData.price_limit_down"
+          class="text-xs font-bold px-1.5 py-0.5 rounded text-white leading-none"
+          :class="latestData.price_limit_up ? 'bg-[#ef5350]' : 'bg-[#26a69a]'"
+        >{{ latestData.price_limit_up ? '漲停' : '跌停' }}</span>
       </div>
 
       <div :class="['hidden md:flex items-center gap-2', !latestData && 'ml-auto']">
