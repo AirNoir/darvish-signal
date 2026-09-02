@@ -1,10 +1,84 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import AppHeader from '../components/AppHeader.vue';
 import { trackEvent } from '../lib/analytics';
+
+type AboutSection = 'line_community' | 'telegram_bot';
+
+const lineSection = ref<HTMLElement | null>(null);
+const telegramSection = ref<HTMLElement | null>(null);
+
+const enteredAt = Date.now();
+const seenSections = new Set<AboutSection>();
+let leaveSent = false;
+let observer: IntersectionObserver | null = null;
 
 const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
   trackEvent('social_click', { social_platform: platform, social_location: 'about' });
 };
+
+// 只留 hostname（例如 threads.com、line.me），避免把完整 referrer URL 送進 GA
+const referrerHost = (): string => {
+  try {
+    return document.referrer ? new URL(document.referrer).hostname : '';
+  } catch {
+    return '';
+  }
+};
+
+// 進站：區分站內導覽（header 點「關於我」）與直接進站（外部連結 / 直接輸入網址）
+const trackAboutView = () => {
+  const backPath = (window.history.state as { back?: string | null } | null)?.back ?? null;
+  trackEvent('about_view', {
+    entry_type: backPath ? 'internal' : 'direct',
+    from_path: backPath ?? 'direct',
+    referrer_host: referrerHost(),
+  });
+};
+
+// 離開：停留秒數 + 有沒有捲到 LINE / Telegram 兩個 CTA 區塊
+const trackAboutLeave = () => {
+  if (leaveSent) return;
+  leaveSent = true;
+  trackEvent('about_leave', {
+    duration_sec: Math.round((Date.now() - enteredAt) / 1000),
+    reached_line: seenSections.has('line_community'),
+    reached_telegram_bot: seenSections.has('telegram_bot'),
+  });
+};
+
+// 區塊曝光：每個區塊在畫面露出 40% 以上時送一次
+const observeSections = () => {
+  if (!('IntersectionObserver' in window)) return;
+  observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const section = (entry.target as HTMLElement).dataset.section as AboutSection | undefined;
+        if (!section || seenSections.has(section)) continue;
+        seenSections.add(section);
+        trackEvent('about_section_view', { section });
+        observer?.unobserve(entry.target);
+      }
+    },
+    { threshold: 0.4 }
+  );
+  for (const el of [lineSection.value, telegramSection.value]) {
+    if (el) observer.observe(el);
+  }
+};
+
+onMounted(() => {
+  trackAboutView();
+  observeSections();
+  window.addEventListener('pagehide', trackAboutLeave);
+});
+
+onBeforeUnmount(() => {
+  observer?.disconnect();
+  window.removeEventListener('pagehide', trackAboutLeave);
+  trackAboutLeave();
+});
 </script>
 
 <template>
@@ -100,7 +174,7 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
               </a>
             </div>
 
-            <div class="mt-6 p-5 border border-[#06C755]/30 bg-[#06C755]/[0.04]">
+            <div ref="lineSection" data-section="line_community" class="mt-6 p-5 border border-[#06C755]/30 bg-[#06C755]/[0.04]">
               <div class="flex flex-col sm:flex-row items-center gap-5">
                 <div class="flex-shrink-0 p-2 bg-white">
                   <img src="/images/line-qr.png" alt="LINE 社群 QR Code" class="w-32 h-32 block" />
@@ -122,7 +196,7 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
               </p>
             </div>
 
-            <div class="mt-6 p-5 border border-[#00d4ff]/30 bg-[#00d4ff]/[0.04]">
+            <div ref="telegramSection" data-section="telegram_bot" class="mt-6 p-5 border border-[#00d4ff]/30 bg-[#00d4ff]/[0.04]">
               <div class="text-xs text-[#00d4ff] tracking-widest mb-2 uppercase">// daily telegram bot</div>
               <h4 class="text-base font-semibold text-white mb-2 font-noto">訂閱 Telegram 機器人</h4>
               <p class="text-sm text-[#a0b0c0] leading-relaxed font-noto mb-5">
