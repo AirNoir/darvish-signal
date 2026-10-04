@@ -164,7 +164,7 @@ export const useStockStore = defineStore('stock', () => {
     signalMarkers.value = [];
     stockName.value = '加權指數';
     try {
-      const data = await stockApi.getMarket(250); // newest-first
+      const data = await stockApi.getMarket(500); // newest-first
       const sorted = [...data].reverse();
       stockData.value = sorted.map((m) => ({
         time: m.trade_date,
@@ -224,10 +224,10 @@ export const useStockStore = defineStore('stock', () => {
 
     if (apiSource.value === 'darvish') {
       try {
-        // Fetch stock info and history in parallel (250 days for more data)
+        // Fetch stock info and history in parallel (500 days for more data)
         const [stockInfo, data, holdingRaw] = await Promise.all([
           stockApi.getStockBySymbol(id).catch(() => null),
-          stockApi.getStockHistory(id, 250),
+          stockApi.getStockHistory(id, 500),
           stockApi.getPeriodHolding(id).catch(() => [] as PeriodHoldingItem[])
         ]);
 
