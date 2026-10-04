@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
+import { isFoundingMember } from '../lib/badges';
+import FoundingBadge from './FoundingBadge.vue';
 
 const auth = useAuthStore();
 const router = useRouter();
+const isFounder = computed(() => isFoundingMember(auth.user?.email));
 const menuOpen = ref(false);
 const rootRef = ref<HTMLDivElement | null>(null);
 
@@ -51,11 +54,13 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
           :src="auth.user.picture"
           :alt="auth.user?.name ?? '使用者'"
           referrerpolicy="no-referrer"
-          class="w-8 h-8 rounded-full border border-white/20"
+          class="w-8 h-8 rounded-full border"
+          :class="isFounder ? 'border-[#d8ab52]' : 'border-white/20'"
         />
         <span
           v-else
           class="w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center"
+          :class="isFounder ? 'ring-1 ring-[#d8ab52]' : ''"
         >
           {{ (auth.user?.name ?? auth.user?.email ?? '?').charAt(0).toUpperCase() }}
         </span>
@@ -66,7 +71,10 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
         class="absolute right-0 top-full mt-2 w-56 bg-[#161616] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
       >
         <div class="px-4 py-3 border-b border-white/5">
-          <p class="text-white text-sm font-medium truncate">{{ auth.user?.name ?? '使用者' }}</p>
+          <p class="text-white text-sm font-medium truncate flex items-center gap-1.5">
+            <span class="truncate">{{ auth.user?.name ?? '使用者' }}</span>
+            <FoundingBadge v-if="isFounder" class="shrink-0" />
+          </p>
           <p class="text-gray-500 text-xs truncate">{{ auth.user?.email }}</p>
         </div>
         <button
