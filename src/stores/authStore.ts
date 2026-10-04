@@ -113,6 +113,22 @@ export const useAuthStore = defineStore('auth', () => {
     trackEvent('logout', { method: 'google' });
   };
 
+  // TWStockAPI 回 401 時由 apiFetch 呼叫：清掉憑證、提示原因、引導重新登入。
+  // 多個 request 同時 401 時只開一次 modal。
+  const handleUnauthorized = (reason: 'token expired' | 'unauthorized') => {
+    const wasLoggedIn = token.value !== null;
+    user.value = null;
+    token.value = null;
+    persist();
+    if (wasLoggedIn) {
+      authError.value =
+        reason === 'token expired' ? '登入已過期，請重新登入' : '登入狀態失效，請重新登入';
+    }
+    if (!showLoginModal.value) {
+      openLogin(reason === 'token expired' ? 'token_expired' : 'api_unauthorized');
+    }
+  };
+
   // 頁面載入時用保存的 JWT 驗證登入是否仍有效；只有 401 才登出，其他錯誤保留樂觀狀態。
   const validate = async () => {
     if (!token.value) return;
@@ -140,6 +156,7 @@ export const useAuthStore = defineStore('auth', () => {
     openLogin,
     closeLogin,
     signOut,
-    validate
+    validate,
+    handleUnauthorized
   };
 });

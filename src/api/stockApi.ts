@@ -1,4 +1,8 @@
 // Stock API Service for DarvishSignal
+// 驗證方式見 frontend-api-auth-integration.md：每個 /api/* request 帶
+// Authorization: Bearer <token>，token 即 AccountService 登入回傳的 JWT。
+import { useAuthStore } from '../stores/authStore'
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.darvishkzone.com'
 
 // --- Types ---
@@ -201,8 +205,31 @@ export interface PeriodHoldingItem {
   retail_ratio: number | null
 }
 
+// 401 專用錯誤：呼叫端可用 instanceof 區分「需要重新登入」與一般失敗。
+// reason 對應後端 body：'token expired'（過期）| 'unauthorized'（沒帶 / 無效）。
+export class AuthError extends Error {
+  reason: 'token expired' | 'unauthorized'
+  constructor(reason: 'token expired' | 'unauthorized') {
+    super(reason)
+    this.name = 'AuthError'
+    this.reason = reason
+  }
+}
+
 async function apiFetch<T>(url: string): Promise<T> {
-  const res = await fetch(url)
+  const auth = useAuthStore()
+  const headers = new Headers()
+  // 沒 token 時不送 header，避免送出 "Bearer null"（後端一律回 401 unauthorized）
+  if (auth.token) headers.set('Authorization', `Bearer ${auth.token}`)
+
+  const res = await fetch(url, { headers })
+
+  if (res.status === 401) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
+    const reason = body.error === 'token expired' ? 'token expired' : 'unauthorized'
+    auth.handleUnauthorized(reason)
+    throw new AuthError(reason)
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`)
   return res.json()
 }
