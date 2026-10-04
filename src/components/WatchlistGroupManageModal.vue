@@ -34,6 +34,13 @@ const handleAdd = () => {
   if (group) newGroupName.value = '';
 };
 
+// 中文輸入法組字中按 Enter 是「選字」不是「送出」：此時 v-model 還沒同步組字文字，
+// 直接觸發會用空值新增 / 改名。isComposing（舊 Safari 用 keyCode 229）時略過。
+const guardIme = (e: KeyboardEvent, action: () => void) => {
+  if (e.isComposing || e.keyCode === 229) return;
+  action();
+};
+
 const handleRemove = (id: string, name: string, count: number) => {
   const msg = count > 0
     ? `確定要刪除「${name}」嗎？群組內的 ${count} 檔個股將一併移除。`
@@ -77,7 +84,7 @@ const handleRemove = (id: string, name: string, count: number) => {
                 v-focus
                 type="text"
                 maxlength="12"
-                @keydown.enter="confirmEdit"
+                @keydown.enter="(e) => guardIme(e, confirmEdit)"
                 @keydown.escape="editingId = null"
                 class="flex-1 px-2 py-1 bg-[#1e1e1e] border border-[#3b82f6] rounded text-sm text-white focus:outline-none"
               />
@@ -118,7 +125,7 @@ const handleRemove = (id: string, name: string, count: number) => {
               type="text"
               maxlength="12"
               placeholder="新群組名稱（可留空）"
-              @keydown.enter="handleAdd"
+              @keydown.enter="(e) => guardIme(e, handleAdd)"
               class="flex-1 px-3 py-2 bg-[#1e1e1e] border border-[#333] rounded-lg text-base md:text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#3b82f6] transition-colors"
             />
             <button

@@ -3,17 +3,20 @@ import { onMounted, computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import type { IndicatorSettings } from '../types';
 import { useStockStore } from '../stores/stockStore';
+import { useAuthStore } from '../stores/authStore';
 import SearchBar from '../components/SearchBar.vue';
 import MultiPaneChart from '../components/MultiPaneChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
 import WatchlistStarButton from '../components/WatchlistStarButton.vue';
+import WatchlistQuickPanel from '../components/WatchlistQuickPanel.vue';
 import { trackEvent } from '../lib/analytics';
 
 const router = useRouter();
 const route = useRoute();
 const store = useStockStore();
+const auth = useAuthStore();
 const showMobileAlphaPick = ref(false);
 const showSettings = ref(false);
 // 手機版進站預設展開搜尋面板，讓使用者能直接輸入股票代碼
@@ -186,13 +189,21 @@ const routeSymbol = computed(() => {
   return typeof s === 'string' && s.trim() ? s.trim() : null;
 });
 
+// 後端 API 已全面要求登入（401），未登入時不發請求、改顯示登入引導。
 onMounted(() => {
-  store.fetchStockData(routeSymbol.value ?? '2330');
+  if (auth.isLoggedIn) store.fetchStockData(routeSymbol.value ?? '2330');
+});
+
+// 在本頁登入成功後開始載入資料
+watch(() => auth.isLoggedIn, (loggedIn) => {
+  if (loggedIn && store.stockData.length === 0) {
+    store.fetchStockData(routeSymbol.value ?? '2330');
+  }
 });
 
 // URL → store：使用者直接改網址 / 上一頁下一頁
 watch(routeSymbol, (s) => {
-  if (s && s !== store.stockId) {
+  if (auth.isLoggedIn && s && s !== store.stockId) {
     store.fetchStockData(s);
   }
 });
@@ -206,7 +217,25 @@ watch(() => store.stockId, (id) => {
 </script>
 
 <template>
-  <div class="relative flex flex-col h-screen bg-[#0f0f0f] overflow-hidden" style="height: 100vh; font-family: 'Noto Sans TC', system-ui, sans-serif;">
+  <!-- 未登入：登入引導（API 已全面需要登入，不先擋會滿版 401 錯誤） -->
+  <div
+    v-if="!auth.isLoggedIn"
+    class="h-screen bg-[#0f0f0f] flex flex-col items-center justify-center gap-4 px-6 text-center"
+    style="font-family: 'Noto Sans TC', system-ui, sans-serif;"
+  >
+    <img src="/logo.png" alt="達比 K-Zone" class="w-14 h-14 rounded-full" />
+    <h1 class="text-white text-xl font-bold">登入達比 K-Zone</h1>
+    <p class="text-gray-400 text-sm">K 線圖、技術訊號與自選股為會員功能，登入後即可使用</p>
+    <button
+      @click="auth.openLogin('app_page')"
+      class="mt-2 px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors shadow-lg shadow-blue-600/20"
+    >
+      使用 Google 帳號登入
+    </button>
+    <button @click="goToHome" class="text-gray-500 text-xs hover:text-white transition-colors">← 回首頁</button>
+  </div>
+
+  <div v-else class="relative flex flex-col h-screen bg-[#0f0f0f] overflow-hidden" style="height: 100vh; font-family: 'Noto Sans TC', system-ui, sans-serif;">
     <!-- Header -->
     <header class="h-14 min-h-[56px] md:h-10 md:min-h-[40px] flex items-center px-3 border-b border-[#333] bg-[#1a1a1a] flex-shrink-0 gap-2">
       <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity" @click="goToHome">
@@ -318,6 +347,7 @@ watch(() => store.stockId, (id) => {
       >
         <MarketSummaryCard />
         <div class="flex-1 overflow-y-auto min-h-0">
+          <WatchlistQuickPanel @stock-selected="onAlphaStockSelected" />
           <AlphaPickPanel @stock-selected="onAlphaStockSelected" />
         </div>
       </div>
