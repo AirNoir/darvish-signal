@@ -29,6 +29,12 @@ const openIndicatorSettings = (source: 'desktop' | 'mobile') => {
   trackEvent('indicator_settings_open', { source });
 };
 
+const openIndustryMap = () => {
+  showMobileMenu.value = false;
+  trackEvent('nav_click', { nav_label: 'AI 產業地圖', nav_to: '/industry-map', nav_location: 'kzone' });
+  router.push('/industry-map');
+};
+
 const goToHome = () => {
   router.push('/');
 };
@@ -266,6 +272,10 @@ watch(() => store.stockId, (id) => {
 
       <div :class="['hidden md:flex items-center gap-2', !latestData && 'ml-auto']">
         <button
+          @click="openIndustryMap"
+          class="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-medium rounded border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#7ee8ff] hover:bg-[#00d4ff]/20 transition-colors"
+        >AI 產業地圖</button>
+        <button
           @click="openIndicatorSettings('desktop')"
           class="px-2 py-1 text-xs font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444]"
         >
@@ -282,6 +292,8 @@ watch(() => store.stockId, (id) => {
 
       <button
         @click="showMobileMenu = !showMobileMenu"
+        aria-label="選單"
+        :aria-expanded="showMobileMenu"
         class="md:hidden p-1 text-[#aaa] hover:text-white transition-colors"
       >
         <svg v-if="!showMobileMenu" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,8 +308,12 @@ watch(() => store.stockId, (id) => {
     <!-- Mobile Menu Dropdown -->
     <div
       v-if="showMobileMenu"
-      class="md:hidden absolute top-10 left-0 right-0 bg-[#1a1a1a] border-b border-[#333] z-50 p-3 flex flex-col gap-2"
+      class="md:hidden absolute top-14 left-0 right-0 bg-[#1a1a1a] border-b border-[#333] z-50 p-3 flex flex-col gap-2"
     >
+      <button
+        @click="openIndustryMap"
+        class="w-full px-3 py-2 text-sm font-medium rounded border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#7ee8ff] hover:bg-[#00d4ff]/20 transition-colors text-left"
+      >AI 產業地圖</button>
       <SearchBar autofocus @stock-selected="showMobileMenu = false" />
       <button
         @click="openIndicatorSettings('mobile')"
