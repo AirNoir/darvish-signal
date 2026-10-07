@@ -208,8 +208,8 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 
 .panel-notice {
   padding: 8px 16px;
-  font-size: 0.7rem;
-  line-height: 1.5;
+  font-size: 0.8125rem;
+  line-height: 1.7;
   color: #c0a060;
   background: rgba(245, 158, 11, 0.06);
   border-bottom: 1px solid rgba(245, 158, 11, 0.15);
@@ -240,7 +240,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
   padding: 10px;
   font-size: 0.85rem;
   background: transparent;
-  color: #888;
+  color: #b0bdcc;
   border: none;
   cursor: pointer;
   transition: all 0.2s;
@@ -328,7 +328,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 
 .name {
   font-size: 0.8rem;
-  color: #888;
+  color: #b0bdcc;
 }
 
 .price-group {
@@ -346,7 +346,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 .signal-badge {
   padding: 2px 8px;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -372,22 +372,22 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 .indicator {
   background: #0f1923;
   color: #aaa;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   padding: 2px 6px;
   border-radius: 4px;
 }
 
 .reasons {
-  font-size: 0.75rem;
-  color: #777;
-  line-height: 1.5;
+  font-size: 0.8125rem;
+  color: #b5c0cf;
+  line-height: 1.7;
   word-break: break-all;
 }
 
 .footer {
   padding: 10px 16px;
-  font-size: 0.75rem;
-  color: #555;
+  font-size: 0.8125rem;
+  color: #a9b6c8;
   border-top: 1px solid #0f3460;
   text-align: center;
 }

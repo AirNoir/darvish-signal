@@ -14,3 +14,26 @@ body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,san
 
 /* Display typography stays branded; reading surfaces use a neutral sans serif. */
 .intro h1,.section-heading h2,.architecture h2{font-family:GuanHei,system-ui,sans-serif}.intro p,.section-heading p{line-height:1.9}.part-description{font-size:14px;line-height:1.9}.chain-companies span{font-size:12px;line-height:1.7}.company-brief{font-size:14px;line-height:1.8}#company-history p{font-size:16px;line-height:1.95}.chain-detail .part-subtitle{font-size:12px}.lab-model-note{font-size:12px;line-height:1.8}
+
+/* Readability: body 16px, controls 14px, supporting metadata 12–13px. */
+body{font-size:1rem;line-height:1.7}
+.atlas-nav,.lab-tabs button,.lab-toolbar button,.lab-caption button,.mode-switch button,.scene-caption button{font-size:.875rem}
+.intro p,.section-heading p,.details p,.part-description,.architecture p{font-size:1rem;line-height:1.85;color:#becce0}
+.layer strong,.stock,.chain-node strong,.chain-companies strong,.chain-stock-heading strong{font-size:.9375rem}
+.layer small,.section-label,.details .english,.tech-tags span,.related-label,.detail-foot,.visual-top,.visual-bottom,.scene-caption,.guide p,.model-reference a,.model-reference small{font-size:.8125rem;line-height:1.7;color:#aabed4}
+.model-reference>div,.details .tag,.eyebrow{font-size:.75rem}
+.stock{gap:10px}.stock code{font-size:.875rem;white-space:nowrap}
+.chain-node{min-height:112px}.chain-node small,.chain-index{font-size:.8125rem;color:#adc1d9}.chain-node strong{line-height:1.5}
+.lab-tabs button span{font-size:.75rem;color:#91b1cb}.lab-toolbar>span{font-size:1rem}
+.lab-part-label{font-size:.8125rem;line-height:1.45}.model-label{font-size:.8125rem!important}
+.chain-detail .part-subtitle,.chain-companies span,.lab-caption,.lab-model-note,.shape-source,.chain-note,.subsidiary-note,.sketch-note{font-size:.875rem;line-height:1.8;color:#abc0d8}
+.chain-stock-heading{flex-wrap:wrap}.chain-stock-heading span{font-size:.8125rem;color:#afc3dc}.chain-companies code{font-size:.875rem;white-space:nowrap}.chain-companies button{padding:12px;gap:8px}
+.company-top,.company .en,.company-link,.company-name code,.history-category,.history-mappings span,.product-list span{font-size:.875rem}
+.company-brief{font-size:1rem;line-height:1.8;color:#b6c8dd}.company .en{overflow-wrap:anywhere}.company-top{gap:8px;flex-wrap:wrap}.company-name{gap:8px;flex-wrap:wrap}
+.company-facts dt{font-size:.875rem;color:#a8c3da}.company-facts dd{font-size:1rem;line-height:1.8;overflow-wrap:anywhere}
+#company-history h3{font-size:1.125rem}#company-history .english{font-size:.875rem;color:#a9bfd7}.registry-date,.history-source small,.history-sketch figcaption,.source,footer,.chart-link span{font-size:.8125rem;line-height:1.8;color:#a9bdd5}
+.history-source a{font-size:.9375rem}.history-mappings span,.product-list span{line-height:1.7}
+.fab-flow span,.fab-flow small{font-size:.8125rem;color:#aac3db}.fab-flow strong{font-size:.875rem}.filter{font-size:.875rem;padding:9px 16px}.search-box input{font-size:1rem}#company-count{font-size:.875rem;color:#abc6df}
+@media(min-width:1101px){.lab-shell{grid-template-columns:220px minmax(0,1fr)}.industry-workspace{grid-template-columns:minmax(0,1fr) 320px}.explorer{grid-template-columns:235px minmax(300px,1fr) 290px}}
+@media(min-width:801px) and (max-width:1100px){.lab-shell{grid-template-columns:180px minmax(0,1fr)}.industry-workspace{grid-template-columns:minmax(0,1fr) 275px}.chain-node{grid-template-columns:20px 40px 1fr}.chain-node strong{font-size:.875rem}}
+@media(max-width:800px){.atlas-nav{gap:14px;font-size:.875rem;flex-wrap:wrap}.lab-tabs button{font-size:.875rem;gap:6px;flex-wrap:wrap;padding:12px}.lab-tabs button span{font-size:.75rem}.chain-node{grid-template-columns:20px 45px 1fr;padding:12px 8px;min-height:124px}.chain-node strong{font-size:.875rem}.chain-node small{font-size:.75rem}.lab-part-label{font-size:.75rem}.company-grid{grid-template-columns:1fr}.company-facts{gap:18px 12px}.company-facts dt{font-size:.8125rem}.company-facts dd{font-size:.9375rem}.lab-caption{flex-wrap:wrap;gap:10px}.chain-companies button{padding:12px 10px}.chain-companies code{font-size:.8125rem}.visual-bottom{flex-wrap:wrap;gap:8px}}
