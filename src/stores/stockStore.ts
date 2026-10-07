@@ -3,7 +3,7 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, ForeignNetMAData, MarginData, ShortData, ShortMarginRatioData, HoldingPctData, MajorRetailHoldingData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
-import { stockApi, type AlphaPickItem, type PickType, type SellAlertItem, type Stock, type MarketData, type PeriodHoldingItem } from '../api/stockApi';
+import { stockApi, CHART_HISTORY_LIMIT, type AlphaPickItem, type PickType, type SellAlertItem, type Stock, type MarketData, type PeriodHoldingItem } from '../api/stockApi';
 
 const FINMIND_API_BASE = 'https://api.finmindtrade.com/api/v4/data';
 
@@ -164,7 +164,7 @@ export const useStockStore = defineStore('stock', () => {
     signalMarkers.value = [];
     stockName.value = '加權指數';
     try {
-      const data = await stockApi.getMarket(500); // newest-first
+      const data = await stockApi.getMarket(CHART_HISTORY_LIMIT); // newest-first
       const sorted = [...data].reverse();
       stockData.value = sorted.map((m) => ({
         time: m.trade_date,
@@ -224,10 +224,10 @@ export const useStockStore = defineStore('stock', () => {
 
     if (apiSource.value === 'darvish') {
       try {
-        // Fetch stock info and history in parallel (500 days for more data)
+        // Fetch up to 500 trading records with stock info and holdings in parallel.
         const [stockInfo, data, holdingRaw] = await Promise.all([
           stockApi.getStockBySymbol(id).catch(() => null),
-          stockApi.getStockHistory(id, 500),
+          stockApi.getStockHistory(id, CHART_HISTORY_LIMIT),
           stockApi.getPeriodHolding(id).catch(() => [] as PeriodHoldingItem[])
         ]);
 

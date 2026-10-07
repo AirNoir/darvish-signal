@@ -9,3 +9,5 @@ body{font-family:GuanHei,system-ui,sans-serif;background:#00000a;color:#e7edf8;b
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
 
 .fab-flow{margin:0 16px;padding:12px 0;border-top:1px solid #234359;border-bottom:1px solid #234359;display:grid;gap:6px}.fab-flow[hidden]{display:none}.fab-flow span{font-size:12px;color:#db87b8}.fab-flow strong{font-size:13px;font-weight:400;color:#9fdef0}.fab-flow small{font-size:11px;color:#839db8}
+
+.chart-link{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:20px 0;padding:14px 18px;background:#053f57;border:1px solid #00d4ff;color:#b6f5ff;font-size:16px;text-decoration:none;box-shadow:0 0 20px #00d4ff12}.chart-link span{font-size:12px;color:#7cc8e1}.chart-link:hover{background:#07536d;box-shadow:0 0 24px #00d4ff30}
