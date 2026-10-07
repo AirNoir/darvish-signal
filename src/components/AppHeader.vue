@@ -9,6 +9,7 @@ const route = useRoute();
 const mobileOpen = ref(false);
 
 const navItems = [
+  { label: 'AI 產業地圖', to: '/industry-map' },
   { label: '最新動態', to: '/feed' },
   { label: '我的自選股', to: '/watchlist' },
   { label: '關於我', to: '/about' },
