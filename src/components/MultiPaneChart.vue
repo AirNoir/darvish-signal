@@ -349,7 +349,7 @@ onMounted(() => {
           },
           styles: {
             color: textColor,
-            size: 11,
+            size: 12,
             weight: 'bold',
             family: 'sans-serif',
             backgroundColor: 'transparent',
@@ -424,7 +424,7 @@ onMounted(() => {
           text: {
             show: true,
             color: '#fff',
-            size: 11,
+            size: 12,
             family: 'sans-serif',
             weight: 'normal',
             backgroundColor: '#3b82f6',
@@ -443,7 +443,7 @@ onMounted(() => {
           text: {
             show: true,
             color: '#fff',
-            size: 11,
+            size: 12,
             family: 'sans-serif',
             weight: 'normal',
             backgroundColor: '#3b82f6',
@@ -578,7 +578,7 @@ onUnmounted(() => {
   border: 1px solid #333;
   border-radius: 4px;
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.4;
   color: #e0e0e0;
   white-space: nowrap;
@@ -587,7 +587,7 @@ onUnmounted(() => {
 }
 .tip-date {
   color: #888;
-  font-size: 10px;
+  font-size: 12px;
   margin-bottom: 2px;
 }
 .tip-line {

@@ -273,11 +273,11 @@ watch(() => store.stockId, (id) => {
       <div :class="['hidden md:flex items-center gap-2', !latestData && 'ml-auto']">
         <button
           @click="openIndustryMap"
-          class="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-medium rounded border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#7ee8ff] hover:bg-[#00d4ff]/20 transition-colors"
+          class="shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#7ee8ff] hover:bg-[#00d4ff]/20 transition-colors"
         >AI 產業地圖</button>
         <button
           @click="openIndicatorSettings('desktop')"
-          class="px-2 py-1 text-xs font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444]"
+          class="px-2 py-1 text-sm font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444]"
         >
           <span class="flex items-center gap-1">
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@ watch(() => store.stockId, (id) => {
       <SearchBar autofocus @stock-selected="showMobileMenu = false" />
       <button
         @click="openIndicatorSettings('mobile')"
-        class="w-full px-3 py-1.5 text-xs font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444] text-left"
+        class="w-full px-3 py-1.5 text-sm font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444] text-left"
       >
         <span class="flex items-center gap-2">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -330,7 +330,7 @@ watch(() => store.stockId, (id) => {
       <button
         @click="showMobileAlphaPick = !showMobileAlphaPick; showMobileMenu = false"
         :class="[
-          'w-full px-3 py-1.5 text-xs font-medium rounded transition-colors text-left',
+          'w-full px-3 py-1.5 text-sm font-medium rounded transition-colors text-left',
           showMobileAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
         ]"
       >
@@ -394,22 +394,22 @@ watch(() => store.stockId, (id) => {
           <!-- Mobile OHLC + MA strip (dynamic: updates with klinecharts crosshair on long-press) -->
           <div
             v-if="displayedData"
-            class="md:hidden flex items-center gap-x-3 gap-y-0 flex-wrap px-3 py-1.5 bg-[#1a1a1a] border-b border-[#333] text-xs flex-shrink-0"
+            class="md:hidden flex items-center gap-x-3 gap-y-0 flex-wrap px-3 py-1.5 bg-[#1a1a1a] border-b border-[#333] text-sm flex-shrink-0"
           >
             <span class="flex items-center gap-1">
-              <span class="text-[#888]">時間</span>
+              <span class="text-[#b2bdcb]">時間</span>
               <span class="tabular-nums" :class="isLatestBar ? 'text-white' : 'text-[#f5b840]'">{{ displayedData.time }}</span>
               <button
                 v-if="!isLatestBar"
                 @click="store.setSyncedHoverTime(null)"
-                class="ml-0.5 text-[10px] text-[#3b82f6] px-1.5 py-px border border-[#3b82f6]/60 rounded hover:bg-[#3b82f6]/10 transition-colors"
+                class="ml-0.5 text-xs text-[#3b82f6] px-1.5 py-px border border-[#3b82f6]/60 rounded hover:bg-[#3b82f6]/10 transition-colors"
               >↩ 最新</button>
             </span>
-            <span><span class="text-[#888]">開</span> <span class="text-white tabular-nums">{{ formatPrice(displayedData.open) }}</span></span>
-            <span><span class="text-[#888]">高</span> <span class="text-[#ef5350] tabular-nums">{{ formatPrice(displayedData.high) }}</span></span>
-            <span><span class="text-[#888]">低</span> <span class="text-[#26a69a] tabular-nums">{{ formatPrice(displayedData.low) }}</span></span>
-            <span><span class="text-[#888]">收</span> <span class="text-white tabular-nums">{{ formatPrice(displayedData.close) }}</span></span>
-            <span><span class="text-[#888]">量</span> <span class="text-white tabular-nums">{{ formatMobileVolume(displayedData.volume) }}</span></span>
+            <span><span class="text-[#b2bdcb]">開</span> <span class="text-white tabular-nums">{{ formatPrice(displayedData.open) }}</span></span>
+            <span><span class="text-[#b2bdcb]">高</span> <span class="text-[#ef5350] tabular-nums">{{ formatPrice(displayedData.high) }}</span></span>
+            <span><span class="text-[#b2bdcb]">低</span> <span class="text-[#26a69a] tabular-nums">{{ formatPrice(displayedData.low) }}</span></span>
+            <span><span class="text-[#b2bdcb]">收</span> <span class="text-white tabular-nums">{{ formatPrice(displayedData.close) }}</span></span>
+            <span><span class="text-[#b2bdcb]">量</span> <span class="text-white tabular-nums">{{ formatMobileVolume(displayedData.volume) }}</span></span>
             <span v-if="displayedMA5 !== null"><span class="text-[#f5b840]">MA5</span> <span class="text-white tabular-nums">{{ displayedMA5.toFixed(2) }}</span></span>
             <span v-if="displayedMA10 !== null"><span class="text-[#22d3ee]">MA10</span> <span class="text-white tabular-nums">{{ displayedMA10.toFixed(2) }}</span></span>
             <span v-if="displayedMA20 !== null"><span class="text-[#b388ff]">MA20</span> <span class="text-white tabular-nums">{{ displayedMA20.toFixed(2) }}</span></span>
