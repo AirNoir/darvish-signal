@@ -9,6 +9,11 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/industry-map',
+      name: 'industry-map',
+      component: () => import('../views/IndustryAtlasView.vue')
+    },
+    {
       path: '/',
       name: 'home',
       component: LandingPage
