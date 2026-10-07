@@ -1,6 +1,8 @@
 // Stock API Service for DarvishSignal
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.darvishkzone.com'
 
+export const CHART_HISTORY_LIMIT = 500
+
 // --- Types ---
 
 export interface Stock {
@@ -229,7 +231,7 @@ export const stockApi = {
     return apiFetch<DailyDataItem[]>(`${API_BASE_URL}/api/daily/${date}`)
   },
 
-  async getStockHistory(symbol: string, limit = 60): Promise<DailyDataItem[]> {
+  async getStockHistory(symbol: string, limit = CHART_HISTORY_LIMIT): Promise<DailyDataItem[]> {
     return apiFetch<DailyDataItem[]>(`${API_BASE_URL}/api/daily/stock/${symbol}?limit=${limit}`)
   },
 
