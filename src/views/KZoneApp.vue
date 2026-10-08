@@ -8,6 +8,7 @@ import MultiPaneChart from '../components/MultiPaneChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
+import ThemeToggle from '../components/ThemeToggle.vue';
 import { trackEvent } from '../lib/analytics';
 
 const router = useRouter();
@@ -211,28 +212,28 @@ watch(() => store.stockId, (id) => {
 </script>
 
 <template>
-  <div class="relative flex flex-col h-screen bg-[#0f0f0f] overflow-hidden" style="height: 100vh; font-family: 'Noto Sans TC', system-ui, sans-serif;">
+  <div class="relative flex flex-col h-screen bg-canvas overflow-hidden" style="height: 100vh; font-family: 'Noto Sans TC', system-ui, sans-serif;">
     <!-- Header -->
-    <header class="h-14 min-h-[56px] md:h-10 md:min-h-[40px] flex items-center px-3 border-b border-[#333] bg-[#1a1a1a] flex-shrink-0 gap-2">
+    <header class="h-14 min-h-[56px] md:h-10 md:min-h-[40px] flex items-center px-3 border-b border-line bg-surface flex-shrink-0 gap-2">
       <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity" @click="goToHome">
         <img src="/logo.png" alt="達比 K-Zone" class="w-7 h-7 rounded-full" />
-        <h1 class="text-sm font-semibold text-white hidden sm:block">達比 K-Zone</h1>
+        <h1 class="text-sm font-semibold text-fg-strong hidden sm:block">達比 K-Zone</h1>
       </div>
 
       <div v-if="latestData" class="ml-auto flex items-center gap-x-2 gap-y-0 flex-wrap justify-end min-w-0">
-        <span class="text-[#3b82f6] font-semibold text-sm">{{ store.stockId }}</span>
+        <span class="text-accent font-semibold text-sm">{{ store.stockId }}</span>
         <span
           v-if="store.stockName"
-          class="text-[#f5b840] font-semibold text-base"
-          style="text-shadow: 0 0 8px rgba(245, 184, 64, 0.35);"
+          class="text-series-gold font-semibold text-base"
+          style="text-shadow: 0 0 8px color-mix(in srgb, var(--ds-brand-gold) 35%, transparent);"
         >{{ store.stockName }}</span>
-        <span class="text-white text-sm font-medium">{{ formatPrice(latestData.close) }}</span>
+        <span class="text-fg-strong text-sm font-medium">{{ formatPrice(latestData.close) }}</span>
         <span
           v-if="priceChange"
           class="text-sm font-medium"
           :class="(latestData.price_limit_up || latestData.price_limit_down)
-            ? ['px-1.5 py-0.5 rounded text-white', latestData.price_limit_up ? 'bg-[#ef5350]' : 'bg-[#26a69a]']
-            : (priceChange.isPositive ? 'text-[#ef5350]' : 'text-[#26a69a]')"
+            ? ['px-1.5 py-0.5 rounded text-fg-on-accent', latestData.price_limit_up ? 'bg-market-up' : 'bg-market-down']
+            : (priceChange.isPositive ? 'text-market-up' : 'text-market-down')"
         >
           {{ priceChange.isPositive ? '+' : '' }}{{ priceChange.value.toFixed(2) }}
           ({{ priceChange.percent.toFixed(2) }}%)
@@ -242,11 +243,12 @@ watch(() => store.stockId, (id) => {
       <div :class="['hidden md:flex items-center gap-2', !latestData && 'ml-auto']">
         <button
           @click="openIndustryMap"
-          class="shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#7ee8ff] hover:bg-[#00d4ff]/20 transition-colors"
+          class="shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors"
         >AI 產業地圖</button>
+        <ThemeToggle source="kzone" />
         <button
           @click="openIndicatorSettings('desktop')"
-          class="px-2 py-1 text-sm font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444]"
+          class="px-2 py-1 text-sm font-medium rounded transition-colors bg-control text-fg-secondary hover:bg-control-hover"
         >
           <span class="flex items-center gap-1">
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,7 +265,7 @@ watch(() => store.stockId, (id) => {
         @click="showMobileMenu = !showMobileMenu"
         aria-label="選單"
         :aria-expanded="showMobileMenu"
-        class="md:hidden p-1 text-[#aaa] hover:text-white transition-colors"
+        class="md:hidden p-1 text-fg-secondary hover:text-fg-strong transition-colors"
       >
         <svg v-if="!showMobileMenu" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -277,16 +279,16 @@ watch(() => store.stockId, (id) => {
     <!-- Mobile Menu Dropdown -->
     <div
       v-if="showMobileMenu"
-      class="md:hidden absolute top-14 left-0 right-0 bg-[#1a1a1a] border-b border-[#333] z-50 p-3 flex flex-col gap-2"
+      class="md:hidden absolute top-14 left-0 right-0 bg-surface border-b border-line z-50 p-3 flex flex-col gap-2"
     >
       <button
         @click="openIndustryMap"
-        class="w-full px-3 py-2 text-sm font-medium rounded border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#7ee8ff] hover:bg-[#00d4ff]/20 transition-colors text-left"
+        class="w-full px-3 py-2 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors text-left"
       >AI 產業地圖</button>
       <SearchBar autofocus @stock-selected="showMobileMenu = false" />
       <button
         @click="openIndicatorSettings('mobile')"
-        class="w-full px-3 py-1.5 text-sm font-medium rounded transition-colors bg-[#333] text-[#aaa] hover:bg-[#444] text-left"
+        class="w-full px-3 py-1.5 text-sm font-medium rounded transition-colors bg-control text-fg-secondary hover:bg-control-hover text-left"
       >
         <span class="flex items-center gap-2">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,15 +302,17 @@ watch(() => store.stockId, (id) => {
         @click="showMobileAlphaPick = !showMobileAlphaPick; showMobileMenu = false"
         :class="[
           'w-full px-3 py-1.5 text-sm font-medium rounded transition-colors text-left',
-          showMobileAlphaPick ? 'bg-[#e94560] text-white' : 'bg-[#333] text-[#aaa] hover:bg-[#444]'
+          showMobileAlphaPick ? 'bg-brand-rose text-fg-on-accent' : 'bg-control text-fg-secondary hover:bg-control-hover'
         ]"
       >
         技術條件清單
       </button>
 
+      <ThemeToggle source="kzone_mobile" with-label class="w-full px-3 py-1.5 rounded bg-control hover:bg-control-hover text-left" />
+
       <button
         @click="showMobileMenu = false"
-        class="w-full mt-1 px-4 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm font-medium rounded-lg transition-colors"
+        class="w-full mt-1 px-4 py-2 bg-accent hover:bg-accent-hover text-fg-on-accent text-sm font-medium rounded-lg transition-colors"
       >
         完成
       </button>
@@ -319,14 +323,14 @@ watch(() => store.stockId, (id) => {
       <!-- Mobile Backdrop -->
       <div
         v-if="showMobileAlphaPick"
-        class="md:hidden fixed inset-0 z-30 bg-black/40"
+        class="md:hidden fixed inset-0 z-30 bg-scrim"
         @click="closeMobileAlphaPanel"
       ></div>
 
       <!-- Alpha Pick Panel -->
       <div
         :class="[
-          'w-72 border-r border-[#333] flex-col flex-shrink-0 md:flex relative z-40 bg-[#0f0f0f]',
+          'w-72 border-r border-line flex-col flex-shrink-0 md:flex relative z-40 bg-canvas',
           showMobileAlphaPick ? 'flex' : 'hidden'
         ]"
       >
@@ -340,7 +344,7 @@ watch(() => store.stockId, (id) => {
       <div class="flex-1 flex flex-col overflow-hidden relative">
         <div
           v-if="store.error"
-          class="mx-2 mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-xs"
+          class="mx-2 mt-2 p-2 bg-danger/10 border border-danger/30 rounded text-danger-fg text-xs"
         >
           {{ store.error }}
         </div>
@@ -350,11 +354,11 @@ watch(() => store.stockId, (id) => {
           class="flex-1 flex items-center justify-center"
         >
           <div class="flex flex-col items-center gap-2">
-            <svg class="w-6 h-6 text-[#3b82f6] animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-accent animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span class="text-[#a0a0a0] text-xs">Loading...</span>
+            <span class="text-fg-secondary text-xs">Loading...</span>
           </div>
         </div>
 
@@ -362,29 +366,29 @@ watch(() => store.stockId, (id) => {
           <!-- Mobile OHLC + MA strip (dynamic: updates with klinecharts crosshair on long-press) -->
           <div
             v-if="displayedData"
-            class="md:hidden flex items-center gap-x-3 gap-y-0 flex-wrap px-3 py-1.5 bg-[#1a1a1a] border-b border-[#333] text-sm flex-shrink-0"
+            class="md:hidden flex items-center gap-x-3 gap-y-0 flex-wrap px-3 py-1.5 bg-surface border-b border-line text-sm flex-shrink-0"
           >
             <span class="flex items-center gap-1">
-              <span class="text-[#b2bdcb]">時間</span>
-              <span class="tabular-nums" :class="isLatestBar ? 'text-white' : 'text-[#f5b840]'">{{ displayedData.time }}</span>
+              <span class="text-fg-label">時間</span>
+              <span class="tabular-nums" :class="isLatestBar ? 'text-fg-strong' : 'text-series-gold'">{{ displayedData.time }}</span>
               <button
                 v-if="!isLatestBar"
                 @click="store.setSyncedHoverTime(null)"
-                class="ml-0.5 text-xs text-[#3b82f6] px-1.5 py-px border border-[#3b82f6]/60 rounded hover:bg-[#3b82f6]/10 transition-colors"
+                class="ml-0.5 text-xs text-accent px-1.5 py-px border border-accent/60 rounded hover:bg-accent/10 transition-colors"
               >↩ 最新</button>
             </span>
-            <span><span class="text-[#b2bdcb]">開</span> <span class="text-white tabular-nums">{{ formatPrice(displayedData.open) }}</span></span>
-            <span><span class="text-[#b2bdcb]">高</span> <span class="text-[#ef5350] tabular-nums">{{ formatPrice(displayedData.high) }}</span></span>
-            <span><span class="text-[#b2bdcb]">低</span> <span class="text-[#26a69a] tabular-nums">{{ formatPrice(displayedData.low) }}</span></span>
-            <span><span class="text-[#b2bdcb]">收</span> <span class="text-white tabular-nums">{{ formatPrice(displayedData.close) }}</span></span>
-            <span><span class="text-[#b2bdcb]">量</span> <span class="text-white tabular-nums">{{ formatMobileVolume(displayedData.volume) }}</span></span>
-            <span v-if="displayedMA5 !== null"><span class="text-[#f5b840]">MA5</span> <span class="text-white tabular-nums">{{ displayedMA5.toFixed(2) }}</span></span>
-            <span v-if="displayedMA10 !== null"><span class="text-[#22d3ee]">MA10</span> <span class="text-white tabular-nums">{{ displayedMA10.toFixed(2) }}</span></span>
-            <span v-if="displayedMA20 !== null"><span class="text-[#b388ff]">MA20</span> <span class="text-white tabular-nums">{{ displayedMA20.toFixed(2) }}</span></span>
+            <span><span class="text-fg-label">開</span> <span class="text-fg-strong tabular-nums">{{ formatPrice(displayedData.open) }}</span></span>
+            <span><span class="text-fg-label">高</span> <span class="text-market-up tabular-nums">{{ formatPrice(displayedData.high) }}</span></span>
+            <span><span class="text-fg-label">低</span> <span class="text-market-down tabular-nums">{{ formatPrice(displayedData.low) }}</span></span>
+            <span><span class="text-fg-label">收</span> <span class="text-fg-strong tabular-nums">{{ formatPrice(displayedData.close) }}</span></span>
+            <span><span class="text-fg-label">量</span> <span class="text-fg-strong tabular-nums">{{ formatMobileVolume(displayedData.volume) }}</span></span>
+            <span v-if="displayedMA5 !== null"><span class="text-series-gold">MA5</span> <span class="text-fg-strong tabular-nums">{{ displayedMA5.toFixed(2) }}</span></span>
+            <span v-if="displayedMA10 !== null"><span class="text-series-cyan">MA10</span> <span class="text-fg-strong tabular-nums">{{ displayedMA10.toFixed(2) }}</span></span>
+            <span v-if="displayedMA20 !== null"><span class="text-series-lavender">MA20</span> <span class="text-fg-strong tabular-nums">{{ displayedMA20.toFixed(2) }}</span></span>
           </div>
 
           <div class="flex-1 py-2 overflow-hidden min-h-0">
-            <div class="border-y border-[#333] overflow-hidden h-full">
+            <div class="border-y border-line overflow-hidden h-full">
               <MultiPaneChart :settings="indicatorSettings" :indicator-order="indicatorOrder" />
             </div>
           </div>

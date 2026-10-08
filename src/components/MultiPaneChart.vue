@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { init, dispose, registerOverlay, registerLocale, ActionType, PolygonType, LineType, TooltipShowRule, TooltipShowType } from 'klinecharts';
-import type { Chart } from 'klinecharts';
+import type { Chart, DeepPartial, Styles } from 'klinecharts';
 import { useStockStore, type SignalMarker, MARKET_SUPPORTED_PANE_KEYS } from '../stores/stockStore';
 import type { IndicatorSettings } from '../types';
 import { registerCustomIndicators, setExtraDataMap, formatBig, type ExtraValues } from '../lib/klineIndicators';
+import { themeColor } from '../theme/palette';
+import { useTheme } from '../theme/useTheme';
 
 const props = defineProps<{
   settings: IndicatorSettings;
@@ -12,6 +14,7 @@ const props = defineProps<{
 }>();
 
 const store = useStockStore();
+const { theme } = useTheme();
 const wrapperEl = ref<HTMLDivElement | null>(null);
 const containerEl = ref<HTMLDivElement | null>(null);
 const containerId = `kline-${Math.random().toString(36).slice(2, 10)}`;
@@ -249,7 +252,103 @@ const tipLinesForPane = (paneId: string, k: { open: number; close: number; volum
 
 // 浮動資訊框的逐行顏色（目前只有大戶散戶需要：大戶藍 / 散戶橘），其餘維持預設色
 const tipColorsForPane = (key: string | undefined): (string | undefined)[] | undefined =>
-  key === 'majorRetailHolding' ? ['#3b82f6', '#f59e0b'] : undefined;
+  key === 'majorRetailHolding' ? [themeColor('series-blue'), themeColor('series-amber')] : undefined;
+
+const currentTooltipRule = (): TooltipShowRule =>
+  typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+    ? TooltipShowRule.None
+    : TooltipShowRule.Always;
+
+// klinecharts 樣式：顏色全部取自 theme token，切換主題時重新呼叫並 setStyles
+const buildChartStyles = (tooltipRule: TooltipShowRule): DeepPartial<Styles> => ({
+    grid: {
+      horizontal: { color: themeColor('chart-grid') },
+      vertical: { color: themeColor('chart-grid') }
+    },
+    candle: {
+      bar: {
+        upColor: themeColor('market-up'),
+        downColor: themeColor('market-down'),
+        upBorderColor: themeColor('market-up'),
+        downBorderColor: themeColor('market-down'),
+        upWickColor: themeColor('market-up'),
+        downWickColor: themeColor('market-down')
+      },
+      priceMark: {
+        high: { color: themeColor('chart-text') },
+        low: { color: themeColor('chart-text') },
+        last: {
+          upColor: themeColor('market-up'),
+          downColor: themeColor('market-down'),
+          noChangeColor: themeColor('market-flat')
+        }
+      },
+      tooltip: {
+        showRule: tooltipRule,
+        showType: TooltipShowType.Standard
+      }
+    },
+    indicator: {
+      bars: [{ style: PolygonType.Fill }],
+      lines: [{ size: 1 }],
+      tooltip: {
+        showRule: TooltipShowRule.Always,
+        showType: TooltipShowType.Standard
+      }
+    },
+    xAxis: {
+      axisLine: { color: themeColor('chart-axis') },
+      tickLine: { color: themeColor('chart-axis') },
+      tickText: { color: themeColor('chart-text') }
+    },
+    yAxis: {
+      axisLine: { color: themeColor('chart-axis') },
+      tickLine: { color: themeColor('chart-axis') },
+      tickText: { color: themeColor('chart-text') }
+    },
+    separator: { color: themeColor('chart-grid') },
+    crosshair: {
+      show: true,
+      horizontal: {
+        show: true,
+        line: { show: true, color: themeColor('chart-crosshair'), size: 1, style: LineType.Dashed, dashedValue: [4, 2] },
+        text: {
+          show: true,
+          color: themeColor('fg-on-accent'),
+          size: 12,
+          family: 'sans-serif',
+          weight: 'normal',
+          backgroundColor: themeColor('accent'),
+          borderColor: themeColor('accent'),
+          borderSize: 1,
+          borderRadius: 2,
+          paddingLeft: 4,
+          paddingRight: 4,
+          paddingTop: 2,
+          paddingBottom: 2
+        }
+      },
+      vertical: {
+        show: true,
+        line: { show: true, color: themeColor('chart-crosshair'), size: 1, style: LineType.Dashed, dashedValue: [4, 2] },
+        text: {
+          show: true,
+          color: themeColor('fg-on-accent'),
+          size: 12,
+          family: 'sans-serif',
+          weight: 'normal',
+          backgroundColor: themeColor('accent'),
+          borderColor: themeColor('accent'),
+          borderSize: 1,
+          borderRadius: 2,
+          paddingLeft: 4,
+          paddingRight: 4,
+          paddingTop: 2,
+          paddingBottom: 2
+        }
+      }
+    },
+  });
 
 const drawSignalOverlays = () => {
   if (!chart) return;
@@ -308,8 +407,8 @@ onMounted(() => {
       const isBuy = type === 'buy';
       // dip 訊號維持藍底，僅以字母 D 區隔
       const isDip = isBuy && pickType === 'dip';
-      const color = isBuy ? '#00BFFF' : '#FF8C00';
-      const textColor = '#1a1a1a';
+      const color = isBuy ? themeColor('chart-buy') : themeColor('chart-sell');
+      const textColor = themeColor('fg-on-brand');
       const label = isDip ? 'D' : isBuy ? 'B' : 'S';
       const dir = isBuy ? 1 : -1;
 
@@ -334,7 +433,7 @@ onMounted(() => {
           styles: {
             style: PolygonType.StrokeFill,
             color,
-            borderColor: '#ffffff',
+            borderColor: themeColor('chart-marker-border'),
             borderSize: 2
           }
         },
@@ -365,100 +464,9 @@ onMounted(() => {
     }
   });
 
-  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
-  const tooltipRule = isMobile ? TooltipShowRule.None : TooltipShowRule.Always;
+  const tooltipRule = currentTooltipRule();
 
-  chart = init(containerId, {
-    styles: {
-      grid: {
-        horizontal: { color: '#1a1a1a' },
-        vertical: { color: '#1a1a1a' }
-      },
-      candle: {
-        bar: {
-          upColor: '#ef5350',
-          downColor: '#26a69a',
-          upBorderColor: '#ef5350',
-          downBorderColor: '#26a69a',
-          upWickColor: '#ef5350',
-          downWickColor: '#26a69a'
-        },
-        priceMark: {
-          high: { color: '#a0a0a0' },
-          low: { color: '#a0a0a0' },
-          last: {
-            upColor: '#ef5350',
-            downColor: '#26a69a',
-            noChangeColor: '#888'
-          }
-        },
-        tooltip: {
-          showRule: tooltipRule,
-          showType: TooltipShowType.Standard
-        }
-      },
-      indicator: {
-        bars: [{ style: PolygonType.Fill }],
-        lines: [{ size: 1 }],
-        tooltip: {
-          showRule: TooltipShowRule.Always,
-          showType: TooltipShowType.Standard
-        }
-      },
-      xAxis: {
-        axisLine: { color: '#333' },
-        tickLine: { color: '#333' },
-        tickText: { color: '#a0a0a0' }
-      },
-      yAxis: {
-        axisLine: { color: '#333' },
-        tickLine: { color: '#333' },
-        tickText: { color: '#a0a0a0' }
-      },
-      separator: { color: '#1a1a1a' },
-      crosshair: {
-        show: true,
-        horizontal: {
-          show: true,
-          line: { show: true, color: '#888', size: 1, style: LineType.Dashed, dashedValue: [4, 2] },
-          text: {
-            show: true,
-            color: '#fff',
-            size: 12,
-            family: 'sans-serif',
-            weight: 'normal',
-            backgroundColor: '#3b82f6',
-            borderColor: '#3b82f6',
-            borderSize: 1,
-            borderRadius: 2,
-            paddingLeft: 4,
-            paddingRight: 4,
-            paddingTop: 2,
-            paddingBottom: 2
-          }
-        },
-        vertical: {
-          show: true,
-          line: { show: true, color: '#888', size: 1, style: LineType.Dashed, dashedValue: [4, 2] },
-          text: {
-            show: true,
-            color: '#fff',
-            size: 12,
-            family: 'sans-serif',
-            weight: 'normal',
-            backgroundColor: '#3b82f6',
-            borderColor: '#3b82f6',
-            borderSize: 1,
-            borderRadius: 2,
-            paddingLeft: 4,
-            paddingRight: 4,
-            paddingTop: 2,
-            paddingBottom: 2
-          }
-        }
-      },
-    }
-  });
+  chart = init(containerId, { styles: buildChartStyles(tooltipRule) });
 
   if (chart) {
     chart.setLocale('zh-TW');
@@ -527,6 +535,11 @@ onMounted(() => {
   }
 });
 
+watch(theme, () => {
+  if (!chart) return;
+  chart.setStyles(buildChartStyles(currentTooltipRule()));
+  drawSignalOverlays();
+});
 watch(() => store.stockData, () => applyData(), { deep: false });
 watch(() => store.signalMarkers, () => drawSignalOverlays(), { deep: false });
 // 切換大盤/個股時，支援的指標清單會變 → 重建指標窗格
@@ -574,23 +587,23 @@ onUnmounted(() => {
 .hover-tip {
   position: absolute;
   pointer-events: none;
-  background: rgba(20, 20, 20, 0.95);
-  border: 1px solid #333;
+  background: var(--ds-bg-tooltip);
+  border: 1px solid var(--ds-border);
   border-radius: 4px;
   padding: 6px 10px;
   font-size: 13px;
   line-height: 1.4;
-  color: #e0e0e0;
+  color: var(--ds-fg);
   white-space: nowrap;
   z-index: 50;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 12px var(--ds-bg-scrim);
 }
 .tip-date {
-  color: #888;
+  color: var(--ds-fg-muted);
   font-size: 12px;
   margin-bottom: 2px;
 }
 .tip-line {
-  color: #e0e0e0;
+  color: var(--ds-fg);
 }
 </style>

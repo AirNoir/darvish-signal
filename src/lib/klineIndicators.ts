@@ -1,5 +1,6 @@
 import { registerIndicator } from 'klinecharts';
 import type { KLineData } from 'klinecharts';
+import { themeColor } from '../theme/palette';
 
 export interface ExtraValues {
   foreignNet?: number | null;
@@ -41,7 +42,7 @@ const get = (d: KLineData, key: keyof ExtraValues): number | null => {
   return v == null ? null : v;
 };
 
-const histColor = (v: number | null | undefined) => ((v ?? 0) >= 0 ? '#ef5350' : '#26a69a');
+const histColor = (v: number | null | undefined) => ((v ?? 0) >= 0 ? themeColor('market-up') : themeColor('market-down'));
 
 const formatBig = (v: number | null | undefined): string => {
   if (v == null || isNaN(v)) return '--';
@@ -89,7 +90,7 @@ export function registerCustomIndicators() {
         type: 'bar',
         baseValue: 0,
         styles: ({ current }) => ({
-          color: (current.kLineData?.close ?? 0) >= (current.kLineData?.open ?? 0) ? '#ef5350' : '#26a69a'
+          color: (current.kLineData?.close ?? 0) >= (current.kLineData?.open ?? 0) ? themeColor('market-up') : themeColor('market-down')
         })
       }
     ],
@@ -104,9 +105,9 @@ export function registerCustomIndicators() {
     minValue: 0,
     shouldFormatBigNumber: true,
     figures: [
-      { key: 'ma5', type: 'line', styles: () => ({ color: '#f59e0b' }) },
-      { key: 'ma10', type: 'line', styles: () => ({ color: '#3b82f6' }) },
-      { key: 'ma20', type: 'line', styles: () => ({ color: '#8b5cf6' }) }
+      { key: 'ma5', type: 'line', styles: () => ({ color: themeColor('series-amber') }) },
+      { key: 'ma10', type: 'line', styles: () => ({ color: themeColor('series-blue') }) },
+      { key: 'ma20', type: 'line', styles: () => ({ color: themeColor('series-violet') }) }
     ],
     calc: (dataList) =>
       dataList.map((d) => ({
@@ -122,7 +123,7 @@ export function registerCustomIndicators() {
     shortName: '週轉率',
     precision: 2,
     figures: [
-      { key: 'value', type: 'bar', styles: () => ({ color: '#8b5cf6' }) }
+      { key: 'value', type: 'bar', styles: () => ({ color: themeColor('series-violet') }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'turnoverRate') }))
   });
@@ -151,10 +152,10 @@ export function registerCustomIndicators() {
     precision: 0,
     shouldFormatBigNumber: true,
     figures: [
-      { key: 'avg5', type: 'line', styles: () => ({ color: '#f59e0b' }) },
-      { key: 'avg10', type: 'line', styles: () => ({ color: '#3b82f6' }) },
-      { key: 'avg15', type: 'line', styles: () => ({ color: '#8b5cf6' }) },
-      { key: 'avg30', type: 'line', styles: () => ({ color: '#ec4899' }) }
+      { key: 'avg5', type: 'line', styles: () => ({ color: themeColor('series-amber') }) },
+      { key: 'avg10', type: 'line', styles: () => ({ color: themeColor('series-blue') }) },
+      { key: 'avg15', type: 'line', styles: () => ({ color: themeColor('series-violet') }) },
+      { key: 'avg30', type: 'line', styles: () => ({ color: themeColor('series-pink') }) }
     ],
     calc: (dataList) =>
       dataList.map((d) => ({
@@ -189,7 +190,7 @@ export function registerCustomIndicators() {
     precision: 0,
     shouldFormatBigNumber: true,
     figures: [
-      { key: 'balance', type: 'line', styles: () => ({ color: '#3b82f6' }) },
+      { key: 'balance', type: 'line', styles: () => ({ color: themeColor('series-blue') }) },
       {
         key: 'change',
         type: 'bar',
@@ -208,7 +209,7 @@ export function registerCustomIndicators() {
     precision: 0,
     shouldFormatBigNumber: true,
     figures: [
-      { key: 'balance', type: 'line', styles: () => ({ color: '#ec4899' }) },
+      { key: 'balance', type: 'line', styles: () => ({ color: themeColor('series-pink') }) },
       {
         key: 'change',
         type: 'bar',
@@ -226,7 +227,7 @@ export function registerCustomIndicators() {
     shortName: '券資比',
     precision: 2,
     figures: [
-      { key: 'value', type: 'line', styles: () => ({ color: '#ec4899' }) }
+      { key: 'value', type: 'line', styles: () => ({ color: themeColor('series-pink') }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'shortMarginRatio') }))
   });
@@ -239,7 +240,7 @@ export function registerCustomIndicators() {
     minValue: -0.5,
     maxValue: 1.5,
     figures: [
-      { key: 'value', type: 'line', styles: () => ({ color: '#a855f7' }) }
+      { key: 'value', type: 'line', styles: () => ({ color: themeColor('series-purple') }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'bbPercentB') }))
   });
@@ -252,8 +253,8 @@ export function registerCustomIndicators() {
     minValue: 0,
     maxValue: 100,
     figures: [
-      { key: 'rsi9', type: 'line', styles: () => ({ color: '#22c55e' }) },
-      { key: 'rsi14', type: 'line', styles: () => ({ color: '#ef4444' }) }
+      { key: 'rsi9', type: 'line', styles: () => ({ color: themeColor('series-green') }) },
+      { key: 'rsi14', type: 'line', styles: () => ({ color: themeColor('series-red') }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ rsi9: get(d, 'rsi9'), rsi14: get(d, 'rsi14') }))
   });
@@ -264,7 +265,7 @@ export function registerCustomIndicators() {
     shortName: '外資持股',
     precision: 2,
     figures: [
-      { key: 'value', type: 'line', styles: () => ({ color: '#3b82f6' }) }
+      { key: 'value', type: 'line', styles: () => ({ color: themeColor('series-blue') }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'foreignHoldingPct') }))
   });
@@ -275,7 +276,7 @@ export function registerCustomIndicators() {
     shortName: '法人持股',
     precision: 2,
     figures: [
-      { key: 'value', type: 'line', styles: () => ({ color: '#f59e0b' }) }
+      { key: 'value', type: 'line', styles: () => ({ color: themeColor('series-amber') }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ value: get(d, 'instiHoldingPct') }))
   });
@@ -287,7 +288,7 @@ export function registerCustomIndicators() {
     shortName: '大戶散戶',
     precision: 1,
     figures: [
-      { key: 'retail', type: 'line', styles: () => ({ color: '#f59e0b' }) }
+      { key: 'retail', type: 'line', styles: () => ({ color: themeColor('series-amber') }) }
     ],
     calc: (dataList) => dataList.map((d) => ({ major: get(d, 'majorHolding'), retail: get(d, 'retailHolding') })),
     draw: ({ ctx, kLineDataList, visibleRange, bounding, xAxis, yAxis }) => {
@@ -309,7 +310,7 @@ export function registerCustomIndicators() {
 
       ctx.save();
       // 大戶折線 (藍)
-      ctx.strokeStyle = '#3b82f6';
+      ctx.strokeStyle = themeColor('series-blue');
       ctx.lineWidth = 1;
       ctx.beginPath();
       let started = false;
@@ -330,9 +331,9 @@ export function registerCustomIndicators() {
       ctx.textBaseline = 'middle';
       for (const tv of niceTicks(majMin, majMax, 4)) {
         const y = yAxis.convertToPixel(toSan(tv));
-        ctx.fillStyle = 'rgba(15,15,15,0.6)';
+        ctx.fillStyle = themeColor('chart-label-bg');
         ctx.fillRect(left, y - 6, 24, 12);
-        ctx.fillStyle = '#7faaff';
+        ctx.fillStyle = themeColor('series-blue-soft');
         ctx.textAlign = 'left';
         ctx.fillText(fmtPct(tv), left + 2, y);
       }
@@ -347,8 +348,8 @@ export function registerCustomIndicators() {
       calcParamsText: '',
       icons: [],
       values: [
-        { title: { text: '大戶', color: '#3b82f6' }, value: { text: '', color: '#3b82f6' } },
-        { title: { text: '散戶', color: '#f59e0b' }, value: { text: '', color: '#f59e0b' } }
+        { title: { text: '大戶', color: themeColor('series-blue') }, value: { text: '', color: themeColor('series-blue') } },
+        { title: { text: '散戶', color: themeColor('series-amber') }, value: { text: '', color: themeColor('series-amber') } }
       ]
     })
   });
@@ -365,8 +366,8 @@ export function registerCustomIndicators() {
         baseValue: 0,
         styles: ({ current }) => ({ color: histColor(current.indicatorData?.hist) })
       },
-      { key: 'dif', type: 'line', styles: () => ({ color: '#3b82f6' }) },
-      { key: 'dea', type: 'line', styles: () => ({ color: '#f59e0b' }) }
+      { key: 'dif', type: 'line', styles: () => ({ color: themeColor('series-blue') }) },
+      { key: 'dea', type: 'line', styles: () => ({ color: themeColor('series-amber') }) }
     ],
     calc: (dataList) =>
       dataList.map((d) => ({ dif: get(d, 'macd'), dea: get(d, 'macdSignal'), hist: get(d, 'macdHist') }))

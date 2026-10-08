@@ -118,8 +118,8 @@ const formatDate = (dateStr: string) => {
   return date.toLocaleDateString('zh-TW');
 };
 
-const upColor = '#ef5350';
-const downColor = '#26a69a';
+const upColor = 'var(--ds-market-up)';
+const downColor = 'var(--ds-market-down)';
 const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 </script>
 
@@ -175,13 +175,13 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
       <svg :viewBox="`0 0 ${SPARK_W} ${SPARK_H}`" :width="SPARK_W" :height="SPARK_H" preserveAspectRatio="none">
         <path
           :d="sparkline.areaPath"
-          :fill="sparkline.trendUp ? upColor : downColor"
+          :style="{ fill: sparkline.trendUp ? upColor : downColor }"
           opacity="0.12"
         />
         <polyline
           :points="sparkline.polyline"
           fill="none"
-          :stroke="sparkline.trendUp ? upColor : downColor"
+          :style="{ stroke: sparkline.trendUp ? upColor : downColor }"
           stroke-width="1.5"
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -252,10 +252,10 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 
 <style scoped>
 .market-card {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-bottom: 1px solid #0f3460;
+  background: linear-gradient(135deg, var(--ds-bg-brand-panel-alt) 0%, var(--ds-bg-brand-panel) 100%);
+  border-bottom: 1px solid var(--ds-border-brand);
   padding: 12px 16px;
-  color: #e0e0e0;
+  color: var(--ds-fg);
   flex-shrink: 0;
 }
 
@@ -272,7 +272,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 }
 
 .card-header.clickable:hover .label {
-  color: #f5b840;
+  color: var(--ds-brand-gold);
 }
 
 .header-right {
@@ -288,29 +288,29 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
   padding: 2px 7px;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #b8c4d4;
-  background: rgba(15, 52, 96, 0.35);
-  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: var(--ds-fg-label);
+  background: color-mix(in srgb, var(--ds-bg-brand-deep) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ds-accent) 40%, transparent);
   border-radius: 4px;
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 .kline-btn:hover {
-  color: #fff;
-  background: rgba(59, 130, 246, 0.35);
-  border-color: #3b82f6;
+  color: var(--ds-fg-strong);
+  background: color-mix(in srgb, var(--ds-accent) 35%, transparent);
+  border-color: var(--ds-accent);
 }
 
 .kline-btn-active {
-  color: #fff;
-  background: #3b82f6;
-  border-color: #3b82f6;
+  color: var(--ds-fg-on-accent);
+  background: var(--ds-accent);
+  border-color: var(--ds-accent);
 }
 
 .label {
   font-size: 0.8125rem;
-  color: #c0a060;
+  color: var(--ds-fg-gold-muted);
   letter-spacing: 0.05em;
   font-weight: 600;
   transition: color 0.15s;
@@ -318,11 +318,11 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 
 .date {
   font-size: 0.8125rem;
-  color: #b8c4d4;
+  color: var(--ds-fg-label);
 }
 
 .chevron {
-  color: #b8c4d4;
+  color: var(--ds-fg-label);
   transition: transform 0.2s;
 }
 
@@ -341,7 +341,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 .price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ds-fg-strong);
   font-variant-numeric: tabular-nums;
 }
 
@@ -372,7 +372,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
   bottom: 0;
   right: 0;
   font-size: 0.8125rem;
-  color: #a0aab8;
+  color: var(--ds-fg-secondary);
   white-space: nowrap;
 }
 
@@ -382,8 +382,8 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
   gap: 4px 12px;
   padding: 8px 0;
   margin-bottom: 4px;
-  border-top: 1px solid rgba(15, 52, 96, 0.5);
-  border-bottom: 1px solid rgba(15, 52, 96, 0.5);
+  border-top: 1px solid color-mix(in srgb, var(--ds-border-brand) 50%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ds-border-brand) 50%, transparent);
 }
 
 .ohlc-row {
@@ -397,7 +397,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border-top: 1px solid rgba(15, 52, 96, 0.5);
+  border-top: 1px solid color-mix(in srgb, var(--ds-border-brand) 50%, transparent);
   padding-top: 8px;
 }
 
@@ -409,11 +409,11 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 }
 
 .stat-label {
-  color: #b8c4d4;
+  color: var(--ds-fg-label);
 }
 
 .stat-value {
-  color: #d0d0d0;
+  color: var(--ds-fg);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   display: inline-flex;
@@ -427,7 +427,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 
 .stat-value .unit {
   font-size: 0.8125rem;
-  color: #a0aab8;
+  color: var(--ds-fg-secondary);
   font-weight: 400;
   min-width: 1.5em;
   text-align: left;
@@ -439,7 +439,7 @@ const flowColor = (v: number) => (v >= 0 ? upColor : downColor);
 
 .loading-text {
   font-size: 0.8rem;
-  color: #a0aab8;
+  color: var(--ds-fg-secondary);
   padding: 8px 0;
 }
 </style>

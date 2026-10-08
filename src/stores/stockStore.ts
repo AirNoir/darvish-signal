@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import type { StockData, FinMindResponse, TechnicalIndicators, CandlestickData, LineData, VolumeData, KDData, RSIData, MACDData, BollingerData, InstitutionalData, TurnoverRateData, VolumeMAData, ForeignNetMAData, MarginData, ShortData, ShortMarginRatioData, HoldingPctData, MajorRetailHoldingData } from '../types';
 import { useTechnicalAnalysis } from '../composables/useTechnicalAnalysis';
+import { themeColor } from '../theme/palette';
 import { stockApi, CHART_HISTORY_LIMIT, type AlphaPickItem, type PickType, type SellAlertItem, type Stock, type MarketData, type PeriodHoldingItem } from '../api/stockApi';
 
 const FINMIND_API_BASE = 'https://api.finmindtrade.com/api/v4/data';
@@ -107,7 +108,7 @@ export const useStockStore = defineStore('stock', () => {
       .map((d) => ({
         time: d.time,
         value: d.volume,
-        color: d.close >= d.open ? '#26a69a' : '#ef5350'
+        color: d.close >= d.open ? themeColor('market-down') : themeColor('market-up')
       }));
   });
 

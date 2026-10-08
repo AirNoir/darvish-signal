@@ -121,11 +121,11 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
         @click="openDropdown"
         @keydown="handleKeydown"
         @input="highlightedIndex = -1"
-        class="w-48 px-3 py-1 bg-[#1a1a1a] border border-[#333] rounded text-base md:text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#3b82f6] transition-colors"
+        class="w-48 px-3 py-1 bg-surface border border-line rounded text-base md:text-sm text-fg-strong placeholder-fg-subtle focus:outline-none focus:border-accent transition-colors"
       />
       <svg
         v-if="store.isLoading"
-        class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3b82f6] animate-spin"
+        class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent animate-spin"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -142,9 +142,9 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
       <div
         v-if="showDropdown"
         ref="dropdownRef"
-        class="absolute top-full left-0 mt-1 w-64 max-h-64 overflow-y-auto bg-[#1a1a1a] border border-[#333] rounded shadow-lg z-50"
+        class="absolute top-full left-0 mt-1 w-64 max-h-64 overflow-y-auto bg-surface border border-line rounded shadow-lg z-50"
       >
-        <div v-if="filteredStocks.length === 0" class="px-3 py-2 text-xs text-[#666]">
+        <div v-if="filteredStocks.length === 0" class="px-3 py-2 text-xs text-fg-subtle">
           找不到符合的股票
         </div>
         <button
@@ -154,9 +154,9 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
           @mousedown.prevent="selectStock(stock.symbol)"
           @mouseenter="highlightedIndex = index"
           class="w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
-          :class="index === highlightedIndex ? 'bg-[#2a2a2a] text-white' : 'text-[#ccc] hover:bg-[#222] hover:text-white'"
+          :class="index === highlightedIndex ? 'bg-hover text-fg-strong' : 'text-fg hover:bg-hover hover:text-fg-strong'"
         >
-          <span class="font-mono text-[#3b82f6] w-12 shrink-0">{{ stock.symbol }}</span>
+          <span class="font-mono text-accent w-12 shrink-0">{{ stock.symbol }}</span>
           <span class="truncate">{{ stock.name }}</span>
         </button>
       </div>
@@ -165,7 +165,7 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
     <button
       @click="handleSearch"
       :disabled="store.isLoading"
-      class="px-3 py-1 bg-[#3b82f6] hover:bg-[#2563eb] disabled:bg-[#1e40af] disabled:cursor-not-allowed text-white text-sm rounded transition-colors"
+      class="px-3 py-1 bg-accent hover:bg-accent-hover disabled:bg-accent-strong disabled:cursor-not-allowed text-fg-on-accent text-sm rounded transition-colors"
     >
       搜尋
     </button>
