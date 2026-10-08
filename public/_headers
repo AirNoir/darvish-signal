@@ -1,0 +1,5 @@
+# Cloudflare Workers Static Assets：套用到所有頁面與檔案
+# 禁止其他網站以 iframe 嵌入（產業地圖只允許在本站自己的頁面中顯示）
+/*
+  Content-Security-Policy: frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN
