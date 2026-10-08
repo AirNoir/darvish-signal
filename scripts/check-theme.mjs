@@ -7,7 +7,7 @@
 //  3. 禁止寫死色碼：src/ 底下（tokens.css 除外）不得出現 #hex、rgb()、hsl()、
 //     Tailwind 調色盤 class（text-white、bg-gray-800、bg-[#123] …）
 //     Vue scoped CSS 不得寫 `:global(...) .x`（會被編譯成只剩 :global 內的 selector）
-//  4. 產業地圖（public/industry-atlas/darvish.css）同樣規則，色碼只能出現在其 token 區塊
+//  4. 產業地圖（public/*/darvish.css）同樣規則，色碼只能出現在其 token 區塊
 //
 // 真的需要例外時，在同一行加上註解 `theme-ignore`，並說明原因。
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -16,7 +16,10 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const TOKENS = join(ROOT, 'src/styles/tokens.css');
-const ATLAS_CSS = join(ROOT, 'public/industry-atlas/darvish.css');
+// 每一張產業地圖（public/<atlas>/darvish.css）都要有自己的 --at-* dark / light token
+const ATLAS_CSS_FILES = readdirSync(join(ROOT, 'public'))
+  .map((d) => join(ROOT, 'public', d, 'darvish.css'))
+  .filter((p) => { try { return statSync(p).isFile(); } catch { return false; } });
 
 const errors = [];
 const fail = (file, line, msg) => errors.push(`${relative(ROOT, file)}:${line}  ${msg}`);
@@ -119,26 +122,28 @@ if (!dark || !light) {
 }
 
 // ---------- 4. 產業地圖 ----------
-const atlasCss = readFileSync(ATLAS_CSS, 'utf8');
-const atlasDark = blockOf(atlasCss, /:root,\s*:root\[data-theme='dark'\]\s*\{/);
-const atlasLight = blockOf(atlasCss, /:root\[data-theme='light'\]\s*\{/);
-if (!atlasDark || !atlasLight) {
-  fail(ATLAS_CSS, 1, '找不到產業地圖 dark 或 light token 區塊');
-} else {
-  const d = tokenNames(atlasDark.body, 'at-');
-  const l = tokenNames(atlasLight.body, 'at-');
-  for (const t of diffSets(d, l)) fail(ATLAS_CSS, lineOf(atlasCss, atlasLight.start), `${t} 只有 dark，缺 light 值`);
-  for (const t of diffSets(l, d)) fail(ATLAS_CSS, lineOf(atlasCss, atlasDark.start), `${t} 只有 light，缺 dark 值`);
-  const defined = new Set([...d, ...l]);
-  for (const m of atlasCss.matchAll(/var\((--at-[a-z0-9-]+)/g)) {
-    if (!defined.has(m[1])) fail(ATLAS_CSS, lineOf(atlasCss, m.index), `未定義的 token ${m[1]}`);
+for (const ATLAS_CSS of ATLAS_CSS_FILES) {
+  const atlasCss = readFileSync(ATLAS_CSS, 'utf8');
+  const atlasDark = blockOf(atlasCss, /:root,\s*:root\[data-theme='dark'\]\s*\{/);
+  const atlasLight = blockOf(atlasCss, /:root\[data-theme='light'\]\s*\{/);
+  if (!atlasDark || !atlasLight) {
+    fail(ATLAS_CSS, 1, '找不到產業地圖 dark 或 light token 區塊');
+  } else {
+    const d = tokenNames(atlasDark.body, 'at-');
+    const l = tokenNames(atlasLight.body, 'at-');
+    for (const t of diffSets(d, l)) fail(ATLAS_CSS, lineOf(atlasCss, atlasLight.start), `${t} 只有 dark，缺 light 值`);
+    for (const t of diffSets(l, d)) fail(ATLAS_CSS, lineOf(atlasCss, atlasDark.start), `${t} 只有 light，缺 dark 值`);
+    const defined = new Set([...d, ...l]);
+    for (const m of atlasCss.matchAll(/var\((--at-[a-z0-9-]+)/g)) {
+      if (!defined.has(m[1])) fail(ATLAS_CSS, lineOf(atlasCss, m.index), `未定義的 token ${m[1]}`);
+    }
+    scanText(ATLAS_CSS, atlasCss, {
+      allowRanges: [
+        [atlasDark.start, atlasDark.end],
+        [atlasLight.start, atlasLight.end]
+      ]
+    });
   }
-  scanText(ATLAS_CSS, atlasCss, {
-    allowRanges: [
-      [atlasDark.start, atlasDark.end],
-      [atlasLight.start, atlasLight.end]
-    ]
-  });
 }
 
 if (errors.length) {
