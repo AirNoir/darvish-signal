@@ -26,10 +26,18 @@ const openIndicatorSettings = (source: 'desktop' | 'mobile') => {
   trackEvent('indicator_settings_open', { source });
 };
 
-const openIndustryMap = () => {
+const industryMaps = [
+  { label: 'AI 產業地圖', short: 'AI 地圖', to: '/industry-map' },
+  { label: '低軌衛星地圖', short: '衛星地圖', to: '/leo-map' }
+];
+// 平板寬度（md–lg）header 放不下兩顆地圖按鈕，收成一顆「產業地圖」下拉
+const showMapMenu = ref(false);
+
+const openIndustryMap = (map: { label: string; to: string }) => {
   showMobileMenu.value = false;
-  trackEvent('nav_click', { nav_label: 'AI 產業地圖', nav_to: '/industry-map', nav_location: 'kzone' });
-  router.push('/industry-map');
+  showMapMenu.value = false;
+  trackEvent('nav_click', { nav_label: map.label, nav_to: map.to, nav_location: 'kzone' });
+  router.push(map.to);
 };
 
 const goToHome = () => {
@@ -217,7 +225,7 @@ watch(() => store.stockId, (id) => {
     <header class="h-14 min-h-[56px] md:h-10 md:min-h-[40px] flex items-center px-3 border-b border-line bg-surface flex-shrink-0 gap-2">
       <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity" @click="goToHome">
         <img src="/logo.png" alt="達比 K-Zone" class="w-7 h-7 rounded-full" />
-        <h1 class="text-sm font-semibold text-fg-strong hidden sm:block">達比 K-Zone</h1>
+        <h1 class="text-sm font-semibold text-fg-strong whitespace-nowrap hidden sm:block md:hidden lg:block">達比 K-Zone</h1>
       </div>
 
       <div v-if="latestData" class="ml-auto flex items-center gap-x-2 gap-y-0 flex-wrap justify-end min-w-0">
@@ -242,13 +250,34 @@ watch(() => store.stockId, (id) => {
 
       <div :class="['hidden md:flex items-center gap-2', !latestData && 'ml-auto']">
         <button
-          @click="openIndustryMap"
-          class="shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors"
-        >AI 產業地圖</button>
+          v-for="map in industryMaps"
+          :key="map.to"
+          @click="openIndustryMap(map)"
+          class="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors"
+        ><span class="xl:hidden">{{ map.short }}</span><span class="hidden xl:inline">{{ map.label }}</span></button>
+        <div class="relative lg:hidden">
+          <button
+            @click="showMapMenu = !showMapMenu"
+            :aria-expanded="showMapMenu"
+            class="shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors"
+          >產業地圖 ▾</button>
+          <div v-if="showMapMenu" class="fixed inset-0 z-40" @click="showMapMenu = false"></div>
+          <div
+            v-if="showMapMenu"
+            class="absolute right-0 top-full mt-1 z-50 w-36 py-1 bg-surface border border-line rounded shadow-lg"
+          >
+            <button
+              v-for="map in industryMaps"
+              :key="map.to"
+              @click="openIndustryMap(map)"
+              class="w-full px-3 py-2 text-left text-sm text-fg hover:bg-hover hover:text-fg-strong transition-colors"
+            >{{ map.label }}</button>
+          </div>
+        </div>
         <ThemeToggle source="kzone" />
         <button
           @click="openIndicatorSettings('desktop')"
-          class="px-2 py-1 text-sm font-medium rounded transition-colors bg-control text-fg-secondary hover:bg-control-hover"
+          class="shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded transition-colors bg-control text-fg-secondary hover:bg-control-hover"
         >
           <span class="flex items-center gap-1">
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -281,10 +310,14 @@ watch(() => store.stockId, (id) => {
       v-if="showMobileMenu"
       class="md:hidden absolute top-14 left-0 right-0 bg-surface border-b border-line z-50 p-3 flex flex-col gap-2"
     >
-      <button
-        @click="openIndustryMap"
-        class="w-full px-3 py-2 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors text-left"
-      >AI 產業地圖</button>
+      <div class="grid grid-cols-2 gap-2">
+        <button
+          v-for="map in industryMaps"
+          :key="map.to"
+          @click="openIndustryMap(map)"
+          class="px-3 py-2 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors text-left"
+        >{{ map.label }}</button>
+      </div>
       <SearchBar autofocus @stock-selected="showMobileMenu = false" />
       <button
         @click="openIndicatorSettings('mobile')"
