@@ -60,6 +60,8 @@ const handleSearch = () => {
 };
 
 const handleKeydown = (e: KeyboardEvent) => {
+  // 中文輸入法選字時按的 Enter 只是確認組字，不能當成送出
+  if (e.isComposing || e.keyCode === 229) return;
   if (!showDropdown.value) {
     if (e.key === 'Enter') handleSearch();
     return;
@@ -121,7 +123,7 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
         @click="openDropdown"
         @keydown="handleKeydown"
         @input="highlightedIndex = -1"
-        class="w-48 px-3 py-1 bg-surface border border-line rounded text-base md:text-sm text-fg-strong placeholder-fg-subtle focus:outline-none focus:border-accent transition-colors"
+        class="w-48 md:w-36 lg:w-48 px-3 py-1 bg-surface border border-line rounded text-base md:text-sm text-fg-strong placeholder-fg-subtle focus:outline-none focus:border-accent transition-colors"
       />
       <svg
         v-if="store.isLoading"
@@ -165,7 +167,7 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
     <button
       @click="handleSearch"
       :disabled="store.isLoading"
-      class="px-3 py-1 bg-accent hover:bg-accent-hover disabled:bg-accent-strong disabled:cursor-not-allowed text-fg-on-accent text-sm rounded transition-colors"
+      class="shrink-0 whitespace-nowrap px-3 py-1 bg-accent hover:bg-accent-hover disabled:bg-accent-strong disabled:cursor-not-allowed text-fg-on-accent text-sm rounded transition-colors"
     >
       搜尋
     </button>

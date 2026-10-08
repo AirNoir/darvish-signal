@@ -577,6 +577,8 @@ onUnmounted(() => {
 <style scoped>
 .chart-wrapper {
   position: relative;
+  /* 自成堆疊層：浮動資訊框的 z-index 只在圖表內比較，不會蓋住頁首搜尋下拉與手機選單 */
+  isolation: isolate;
   width: 100%;
   height: 100%;
 }

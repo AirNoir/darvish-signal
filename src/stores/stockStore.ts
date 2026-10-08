@@ -211,8 +211,28 @@ export const useStockStore = defineStore('stock', () => {
     }
   };
 
+  // 把使用者輸入（代碼或中文名稱，例如「東元」）解析成股票代碼。
+  // 代碼直接回傳；名稱以收錄清單比對：完全相同 > 開頭相符 > 包含，找不到回傳 null。
+  const resolveSymbol = async (query: string): Promise<string | null> => {
+    const q = query.trim();
+    if (!q) return null;
+    if (q === MARKET_SYMBOL || /^[0-9A-Za-z]+$/.test(q)) return q.toUpperCase();
+    if (stockList.value.length === 0) await fetchStockList();
+    const list = stockList.value;
+    const hit =
+      list.find((s) => s.name === q) ??
+      list.find((s) => s.name.startsWith(q)) ??
+      list.find((s) => s.name.includes(q));
+    return hit?.symbol ?? null;
+  };
+
   // Actions
-  const fetchStockData = async (id: string, startDate?: string) => {
+  const fetchStockData = async (rawId: string, startDate?: string) => {
+    const id = await resolveSymbol(rawId);
+    if (!id) {
+      error.value = `找不到「${rawId.trim()}」，請輸入股票代碼或完整名稱`;
+      return;
+    }
     if (id === MARKET_SYMBOL) {
       await loadMarketView();
       return;
@@ -381,10 +401,9 @@ export const useStockStore = defineStore('stock', () => {
     }
   };
 
-  const searchStock = async (id: string) => {
-    const trimmedId = id.trim();
-    if (!trimmedId) return;
-    await fetchStockData(trimmedId);
+  const searchStock = async (query: string) => {
+    if (!query.trim()) return;
+    await fetchStockData(query);
   };
 
   // Fetch buy/sell signal markers for the K-line chart
@@ -550,6 +569,7 @@ export const useStockStore = defineStore('stock', () => {
     fetchStockData,
     searchStock,
     fetchStockList,
+    resolveSymbol,
     fetchAlphaPicks,
     fetchSellAlerts,
     fetchAvailableDates,
