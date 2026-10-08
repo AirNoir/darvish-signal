@@ -3,7 +3,7 @@
  * Theme tokens — the ONLY place colours may appear in this file (enforced by scripts/check-theme.mjs).
  * Every --at-* token must exist in both blocks. Default theme is dark; <html data-theme="light"> switches.
  */
-:root,:root[data-theme='dark']{color-scheme:dark;
+:root,:root[data-theme='dark']{--at-line-brand:#06c755;--at-on-line-brand:#ffffff;--at-qr-bg:#ffffff;color-scheme:dark;
 /* surfaces */
 --at-bg:#00000a;
 --at-nav-bg:#040815;
@@ -46,7 +46,7 @@
 --at-pink-ink:#ff5c9b;
 --at-pink-soft:#db87b8;
 }
-:root[data-theme='light']{color-scheme:light;
+:root[data-theme='light']{--at-line-brand:#06a346;--at-on-line-brand:#ffffff;--at-qr-bg:#ffffff;color-scheme:light;
 --at-bg:#f5f7fc;
 --at-nav-bg:#ffffff;
 --at-panel:#ffffff;
@@ -151,3 +151,5 @@ body{font-size:1rem;line-height:1.7}
 #company-history .history-source a{display:block;padding:10px 12px;border:1px solid var(--at-line-strong);border-radius:6px;background:var(--at-raised);line-height:1.7}
 #company-history .history-source small{margin-top:2px}
 @media(max-width:800px){#company-history .archive-section{padding:18px 16px}#company-history .archive-section h3{font-size:17px;margin-bottom:16px}#company-history .archive-body{gap:20px}#company-history .company-facts{column-gap:16px}#company-history .history-source a{width:100%}}
+/* 許願收錄（wish.js） */
+.wish{margin:20px 0;border:1px dashed var(--at-pink);background:color-mix(in srgb,var(--at-pink) 6%,transparent)}.wish-btn{display:flex;width:100%;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;background:none;border:0;color:var(--at-pink-ink);font-size:16px;text-align:left}.wish-btn span{font-size:.8125rem;color:var(--at-muted)}.wish-btn:hover{background:color-mix(in srgb,var(--at-pink) 10%,transparent)}.wish-panel{display:flex;gap:18px;align-items:flex-start;padding:4px 18px 18px}.wish-panel[hidden]{display:none}.wish-panel img{flex:none;background:var(--at-qr-bg);padding:6px}.wish-panel p{margin:0 0 12px;color:var(--at-body);font-size:14px;line-height:1.8}.wish-panel b{color:var(--at-ink-strong)}.wish-line{display:inline-block;padding:8px 14px;background:var(--at-line-brand);color:var(--at-on-line-brand);font-size:14px;text-decoration:none}.wish-line:hover{filter:brightness(1.08)}.wish-password{margin-top:10px;font-size:14px;color:var(--at-muted)}.wish-password strong{color:var(--at-line-brand);letter-spacing:.3em}@media (max-width:600px){.wish-panel{flex-direction:column}}

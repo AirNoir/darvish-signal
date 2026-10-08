@@ -42,6 +42,8 @@
   function classify(t) {
     var el;
     if ((el = t.closest('.atlas-nav a'))) return { map_action: 'nav_anchor', map_target: text(el) };
+    if ((el = t.closest('.wish-btn'))) return { map_action: 'wish_toggle', map_target: el.getAttribute('aria-expanded') === 'true' ? 'close' : 'open', stock_code: el.closest('.wish').dataset.wishCode };
+    if ((el = t.closest('.wish-line'))) return { map_action: 'wish_line_click', stock_code: el.closest('.wish').dataset.wishCode };
     if ((el = t.closest('.chart-link'))) return { map_action: 'company_chart_link', map_target: text(el.firstChild), stock_code: el.getAttribute('href').split('/').pop() };
     if ((el = t.closest('#layers .layer'))) return { map_action: 'chip_layer_select', map_target: text(el.querySelector('strong')) };
     if ((el = t.closest('#model-labels .model-label'))) return { map_action: 'chip_label_select', map_target: (text(el) || '').replace(/^\d+\s*/, '') };
