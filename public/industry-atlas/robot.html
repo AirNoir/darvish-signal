@@ -1,0 +1,13 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>機器人產業地圖｜達比 K-Zone</title><meta name="description" content="從減速機、伺服驅動到 AI 視覺，拆開一台機器人，找到關節裡的台灣企業。"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232b302c'/%3E%3Cpath d='M7 11l9-5 9 5-9 5zM7 16l9 5 9-5M7 21l9 5 9-5' fill='none' stroke='%23d4b886' stroke-width='2'/%3E%3C/svg%3E"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="darvish.css"><link rel="stylesheet" href="sector.css"></head><body>
+<nav class="atlas-nav" aria-label="產業地圖章節"><a href="#chain">產業鏈拆解</a><a href="#supply">台灣企業</a></nav>
+<main>
+<section class="intro"><div class="eyebrow"><span></span> DARVISH LAB / ROBOTICS ATLAS</div><h1>機器人產業<em>地圖</em></h1><p>從減速機、伺服驅動到 AI 視覺，拆開一台機器人，找到關節裡的台灣企業。</p>
+<div class="map-switch" role="navigation" aria-label="切換產業地圖"><a href="/industry-map" target="_top"><span>01</span>AI 晶片</a><a href="/industry-map/drone" target="_top"><span>02</span>無人機</a><a class="current" aria-current="page"><span>03</span>機器人</a></div></section>
+
+<section class="supply" id="chain"><div class="section-heading"><div><div class="eyebrow">ANATOMY OF A ROBOT</div><h2>一台機器人，八個環節。</h2></div><p>點公司名稱看產業角色與達比訊號。<br>環節為代表性整理，非特定機種供應鏈。</p></div><div id="chain-grid" class="chain-grid"></div></section>
+
+<section class="supply" id="supply"><div class="section-heading"><div><div class="eyebrow">THE TAIWAN CONNECTION</div><h2>機器人的關節，台灣製造。</h2></div><p>沿著產業鏈，找到機器人供應鏈中的台股企業。<br>股票代碼標示所屬交易市場。</p></div><div class="company-tools"><label class="search-box">⌕ <input id="company-search" type="search" placeholder="搜尋公司或股票代碼" aria-label="搜尋公司或股票代碼"></label><span id="company-count" aria-live="polite"></span></div><div class="filters" id="filters"></div><div class="company-grid" id="companies"></div><div class="source">整理產業鏈代表性公司，並非全部台股或特定機種供應商名單。TWSE = 上市；TPEx = 上櫃。 <a href="https://isin.twse.com.tw/isin/C_public.jsp?strMode=2" target="_blank" rel="noopener">上市代碼：TWSE ↗</a> <a href="https://isin.twse.com.tw/isin/C_public.jsp?strMode=4" target="_blank" rel="noopener">上櫃代碼：TPEx ↗</a></div></section>
+
+<dialog id="company-dialog" aria-labelledby="history-title"><button id="history-close" aria-label="關閉公司簡介">×</button><div id="company-history"></div></dialog>
+</main><footer><span>達比 K-Zone / 機器人產業地圖</span><small>產業教育用途 · 不含即時行情或投資建議</small></footer>
+<script src="robot-data.js"></script><script src="sector-app.js"></script></body></html>

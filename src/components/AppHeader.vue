@@ -9,11 +9,15 @@ const route = useRoute();
 const mobileOpen = ref(false);
 
 const navItems = [
-  { label: 'AI 產業地圖', to: '/industry-map' },
+  { label: '產業地圖', to: '/industry-map' },
   { label: '最新動態', to: '/feed' },
-  { label: '我的自選股', to: '/watchlist' },
+  { label: '我的最愛', to: '/watchlist' },
   { label: '關於我', to: '/about' },
 ];
+
+// 子路由（如 /industry-map/drone）也算在對應導覽項目內
+const isActive = (item: { to: string }) =>
+  route.path === item.to || route.path.startsWith(item.to + '/');
 
 const goHome = () => {
   mobileOpen.value = false;
@@ -53,7 +57,7 @@ const enterApp = () => {
           @click="navigate(item)"
           :class="[
             'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-            route.path === item.to
+            isActive(item)
               ? 'bg-blue-600/20 text-blue-400'
               : 'text-gray-400 hover:text-white hover:bg-white/5'
           ]"
@@ -97,7 +101,7 @@ const enterApp = () => {
         @click="navigate(item)"
         :class="[
           'w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-          route.path === item.to
+          isActive(item)
             ? 'bg-blue-600/20 text-blue-400'
             : 'text-gray-400 hover:text-white hover:bg-white/5'
         ]"

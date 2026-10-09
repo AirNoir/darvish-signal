@@ -25,6 +25,18 @@ const router = createRouter({
       component: KZoneApp
     },
     {
+      path: '/industry-map/drone',
+      name: 'industry-map-drone',
+      component: () => import('../views/IndustryAtlasView.vue'),
+      meta: { sector: 'drone' }
+    },
+    {
+      path: '/industry-map/robot',
+      name: 'industry-map-robot',
+      component: () => import('../views/IndustryAtlasView.vue'),
+      meta: { sector: 'robot' }
+    },
+    {
       path: '/trade-records',
       name: 'trade-records',
       component: TradeRecordsView
