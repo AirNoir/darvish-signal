@@ -4,6 +4,24 @@
 const S=window.SECTOR;if(!S)return;
 const byCode=Object.fromEntries(S.companies.map(c=>[c.code,c]));
 
+// --- 3D 拆解區：層按鈕 + 右側說明欄（事件協定同 AI / LEO：selectChipLayer ↔ chip-layer-select） ---
+if(S.layers&&document.querySelector('#layers')){
+ const layers=S.layers;
+ const layerHost=document.querySelector('#layers');
+ layers.forEach((l,i)=>{const b=document.createElement('button');b.className='layer';b.innerHTML=`<span class="num">0${i+1}</span><span><strong>${l.zh}</strong><small>${l.en}</small></span><span class="dot">●</span>`;b.onclick=()=>selectLayer(i);layerHost.append(b)});
+ function selectLayer(i,extract=true){
+  const l=layers[i];
+  document.querySelectorAll('.layer').forEach((b,j)=>{b.classList.toggle('selected',i===j);b.setAttribute('aria-pressed',i===j)});
+  document.querySelector('#extracted-name').textContent=l.zh;
+  document.querySelector('#selection-caption').textContent=extract?'已抽出 · '+l.zh:'展開全貌 · 點選任一層抽出';
+  if(extract)window.dispatchEvent(new CustomEvent('chip-layer-select',{detail:i}));
+  const stocks=l.codes.map(code=>byCode[code]).filter(Boolean);
+  document.querySelector('#detail').innerHTML=`<div class="tag">LAYER 0${i+1} / 0${layers.length}</div><div class="symbol">${l.icon}</div><h2>${l.zh}</h2><div class="english">${l.en}</div><p>${l.desc}</p><div class="tech-tags">${l.tags.map(t=>`<span>${t}</span>`).join('')}</div><div class="related"><div class="related-label">相關台股企業</div>${stocks.map(c=>`<button class="stock" data-code="${c.code}" aria-label="查看 ${c.name} 公司簡介"><span>${c.name}</span><code>${c.market} ${c.code} ↗</code></button>`).join('')}</div><div class="detail-foot">模型為教學示意，相關公司為產業角色整理，非特定機種供應鏈。</div>`;
+ }
+ window.selectChipLayer=selectLayer;
+ selectLayer(0,false);
+}
+
 // --- 產業鏈 stage 卡片 ---
 const chainHost=document.querySelector('#chain-grid');
 chainHost.innerHTML=S.stages.map((st,i)=>`<article class="stage-card"><div class="stage-head"><span class="stage-num">0${i+1}</span><h3>${st.name}</h3></div><div class="stage-en">${st.en}</div><p>${st.desc}</p><div class="stage-chips">${st.codes.map(code=>{const c=byCode[code];return c?`<button data-code="${code}"><span>${c.name}</span><code>${code}</code></button>`:''}).join('')}</div></article>`).join('');
