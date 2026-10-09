@@ -41,7 +41,7 @@ const handleClick = async () => {
     @click="handleClick"
     :disabled="pending"
     class="p-1 transition-colors disabled:opacity-50"
-    :class="isStarred ? 'text-[#f5b840]' : 'text-[#666] hover:text-[#f5b840]'"
+    :class="isStarred ? 'text-series-gold' : 'text-fg-subtle hover:text-series-gold'"
     :aria-label="isStarred ? '從我的最愛移除' : '加入我的最愛'"
     :title="isStarred ? '從我的最愛移除' : '加入我的最愛'"
   >

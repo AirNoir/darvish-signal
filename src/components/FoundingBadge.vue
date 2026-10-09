@@ -33,7 +33,7 @@ withDefaults(
 
 <style scoped>
 /* 官方 tag/founder-badge.css 原樣 inline（避免 runtime @import public 路徑） */
-.founder-badge{--gold:#D8AB52;--gold-soft:#F3D28B;--dark:#0B2E2A;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px 0 5px;border:1px solid var(--gold);border-radius:999px;background:#fff4db;color:#19150f;font-size:13px;font-weight:700;line-height:1;white-space:nowrap}
+.founder-badge{--gold:#D8AB52;--gold-soft:#F3D28B;--dark:#0B2E2A;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px 0 5px;border:1px solid var(--gold);border-radius:999px;background:#fff4db;color:#19150f;font-size:13px;font-weight:700;line-height:1;white-space:nowrap} /* theme-ignore: 官方創始會員徽章品牌色（素材包規範，不隨主題變動） */
 .founder-badge--dark{background:var(--dark);color:var(--gold-soft)}
 .founder-badge__icon{width:20px;height:20px;display:block}
 @media(max-width:640px){.founder-badge{height:26px;padding-right:8px;font-size:12px;gap:4px}.founder-badge__icon{width:18px;height:18px}}

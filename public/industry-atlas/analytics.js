@@ -18,7 +18,7 @@
     host = window;
   }
 
-  var mapId = location.pathname.indexOf('/leo-atlas/') === 0 ? 'leo' : 'ai';
+  var mapId = document.documentElement.getAttribute('data-map-id') || (location.pathname.indexOf('/leo-atlas/') === 0 ? 'leo' : 'ai');
 
   function push(params) {
     host.dataLayer = host.dataLayer || [];

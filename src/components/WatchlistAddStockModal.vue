@@ -54,18 +54,18 @@ onMounted(async () => {
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
-      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="emit('close')"></div>
+      <div class="absolute inset-0 bg-scrim backdrop-blur-sm" @click="emit('close')"></div>
 
-      <div class="relative w-full sm:max-w-md max-h-[85vh] bg-[#141414] border border-white/10 rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col">
+      <div class="relative w-full sm:max-w-md max-h-[85vh] bg-surface border border-line rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col">
         <!-- Header -->
-        <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/5">
+        <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-line-subtle">
           <div>
-            <h2 class="text-white text-base font-bold">新增個股</h2>
-            <p class="text-xs text-gray-500 mt-0.5">
+            <h2 class="text-fg-strong text-base font-bold">新增個股</h2>
+            <p class="text-xs text-fg-muted mt-0.5">
               我的最愛（{{ favorites.count }}/{{ favorites.limit }}）
             </p>
           </div>
-          <button @click="emit('close')" class="p-1 text-gray-500 hover:text-white transition-colors" aria-label="關閉">
+          <button @click="emit('close')" class="p-1 text-fg-muted hover:text-fg-strong transition-colors" aria-label="關閉">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -75,7 +75,7 @@ onMounted(async () => {
         <!-- Search input -->
         <div class="px-5 py-3">
           <div class="relative">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -83,25 +83,25 @@ onMounted(async () => {
               v-model="query"
               type="text"
               placeholder="輸入股票代碼或名稱（例：2330 / 台積電）"
-              class="w-full pl-9 pr-3 py-2 bg-[#1e1e1e] border border-[#333] rounded-lg text-base md:text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#3b82f6] transition-colors"
+              class="w-full pl-9 pr-3 py-2 bg-raised border border-line rounded-lg text-base md:text-sm text-fg-strong placeholder:text-fg-subtle focus:outline-none focus:border-accent transition-colors"
             />
           </div>
-          <p v-if="notice" class="mt-2 text-xs text-amber-400">{{ notice }}</p>
+          <p v-if="notice" class="mt-2 text-xs text-warning-fg">{{ notice }}</p>
         </div>
 
         <!-- Results -->
         <div class="flex-1 overflow-y-auto px-2 pb-4 min-h-[200px]">
-          <p v-if="results.length === 0" class="px-4 py-6 text-center text-sm text-gray-500">
+          <p v-if="results.length === 0" class="px-4 py-6 text-center text-sm text-fg-muted">
             找不到符合的股票
           </p>
           <div
             v-for="stock in results"
             :key="stock.symbol"
-            class="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors"
+            class="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-hover transition-colors"
           >
             <div class="flex items-center gap-3 min-w-0">
-              <span class="font-mono text-[#3b82f6] text-sm w-14 shrink-0">{{ stock.symbol }}</span>
-              <span class="text-sm text-gray-200 truncate">{{ stock.name }}</span>
+              <span class="font-mono text-accent text-sm w-14 shrink-0">{{ stock.symbol }}</span>
+              <span class="text-sm text-fg truncate">{{ stock.name }}</span>
             </div>
             <button
               @click="toggle(stock.symbol)"
@@ -109,8 +109,8 @@ onMounted(async () => {
               :class="[
                 'px-3 py-1 rounded-full text-xs font-medium transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed',
                 favorites.isFavorite(stock.symbol)
-                  ? 'bg-white/10 text-gray-400 hover:bg-red-500/20 hover:text-red-400'
-                  : 'bg-blue-600 text-white hover:bg-blue-500'
+                  ? 'bg-control text-fg-secondary hover:bg-danger/20 hover:text-danger-fg'
+                  : 'bg-accent text-fg-strong hover:bg-accent-hover'
               ]"
             >
               {{ favorites.isFavorite(stock.symbol) ? '已加入' : '＋ 加入' }}
