@@ -208,35 +208,35 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="emit('close')">
-    <div class="bg-[#1a1a1a] border border-[#333] rounded-lg w-96 max-h-[85vh] overflow-hidden">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-scrim" @click.self="emit('close')">
+    <div class="bg-surface border border-line rounded-lg w-96 max-h-[85vh] overflow-hidden">
       <!-- Header -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-[#333]">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-line">
         <div class="flex items-center gap-3">
-          <h3 class="text-white font-medium">指標設定</h3>
-          <span class="text-[#666] text-xs">({{ enabledChartCount }}/{{ MAX_INDICATORS }})</span>
+          <h3 class="text-fg-strong font-medium">指標設定</h3>
+          <span class="text-fg-subtle text-xs">({{ enabledChartCount }}/{{ MAX_INDICATORS }})</span>
           <!-- Global Toggle -->
           <div
             @click="toggleAll(!isAllOn)"
             class="flex items-center gap-1.5 cursor-pointer"
           >
-            <span class="text-[#888] text-xs">{{ isAllOn ? '全開' : isAllOff ? '全關' : '部分' }}</span>
+            <span class="text-fg-muted text-xs">{{ isAllOn ? '全開' : isAllOff ? '全關' : '部分' }}</span>
             <div
               :class="[
                 'w-8 h-5 rounded-full transition-colors relative',
-                isAllOn ? 'bg-[#3b82f6]' : !isAllOff ? 'bg-[#3b82f6]/50' : 'bg-[#444]'
+                isAllOn ? 'bg-accent' : !isAllOff ? 'bg-accent/50' : 'bg-line-strong'
               ]"
             >
               <div
                 :class="[
-                  'absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform',
+                  'absolute top-0.5 w-4 h-4 bg-fg-on-accent rounded-full transition-transform',
                   isAllOn ? 'translate-x-3.5' : !isAllOff ? 'translate-x-1.5' : 'translate-x-0.5'
                 ]"
               />
             </div>
           </div>
         </div>
-        <button @click="emit('close')" class="text-[#888] hover:text-white transition-colors">
+        <button @click="emit('close')" class="text-fg-muted hover:text-fg-strong transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -246,7 +246,7 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
       <!-- Warning Message -->
       <div
         v-if="warningMessage"
-        class="mx-4 mt-3 p-2 bg-[#f59e0b]/20 border border-[#f59e0b]/50 rounded-lg text-[#f59e0b] text-xs flex items-center gap-2"
+        class="mx-4 mt-3 p-2 bg-warning/20 border border-warning/50 rounded-lg text-warning-fg text-xs flex items-center gap-2"
       >
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -262,18 +262,18 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
             class="flex items-center justify-between mb-2 cursor-pointer group"
             @click="toggleGroup(group)"
           >
-            <h4 class="text-[#888] text-xs font-medium uppercase tracking-wider group-hover:text-white transition-colors">
+            <h4 class="text-fg-muted text-xs font-medium uppercase tracking-wider group-hover:text-fg-strong transition-colors">
               {{ group.title }}
             </h4>
             <div
               :class="[
                 'w-8 h-5 rounded-full transition-colors relative flex-shrink-0',
-                getGroupState(group) === 'all' ? 'bg-[#3b82f6]' : getGroupState(group) === 'partial' ? 'bg-[#3b82f6]/50' : 'bg-[#444]'
+                getGroupState(group) === 'all' ? 'bg-accent' : getGroupState(group) === 'partial' ? 'bg-accent/50' : 'bg-line-strong'
               ]"
             >
               <div
                 :class="[
-                  'absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform',
+                  'absolute top-0.5 w-4 h-4 bg-fg-on-accent rounded-full transition-transform',
                   getGroupState(group) === 'all' ? 'translate-x-3.5' : getGroupState(group) === 'partial' ? 'translate-x-1.5' : 'translate-x-0.5'
                 ]"
               />
@@ -287,30 +287,30 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
               :class="[
                 'flex items-center justify-between p-3 rounded-lg transition-colors',
                 canEnableIndicator(indicator.key)
-                  ? 'bg-[#252525] hover:bg-[#2a2a2a] cursor-pointer'
-                  : 'bg-[#1f1f1f] cursor-not-allowed opacity-50'
+                  ? 'bg-raised hover:bg-hover cursor-pointer'
+                  : 'bg-raised cursor-not-allowed opacity-50'
               ]"
               @click="toggleIndicator(indicator.key)"
             >
               <div>
-                <div :class="canEnableIndicator(indicator.key) ? 'text-white' : 'text-[#666]'" class="text-sm font-medium">{{ indicator.label }}</div>
-                <div class="text-[#666] text-xs mt-0.5">{{ indicator.description }}</div>
+                <div :class="canEnableIndicator(indicator.key) ? 'text-fg-strong' : 'text-fg-subtle'" class="text-sm font-medium">{{ indicator.label }}</div>
+                <div class="text-fg-subtle text-xs mt-0.5">{{ indicator.description }}</div>
               </div>
               <div
                 :class="[
                   'w-10 h-6 rounded-full transition-colors relative flex-shrink-0',
                   modelValue[indicator.key as keyof typeof modelValue]
-                    ? 'bg-[#3b82f6]'
+                    ? 'bg-accent'
                     : canEnableIndicator(indicator.key)
-                      ? 'bg-[#444]'
-                      : 'bg-[#333]'
+                      ? 'bg-line-strong'
+                      : 'bg-line'
                 ]"
               >
                 <div
                   :class="[
                     'absolute top-1 w-4 h-4 rounded-full transition-transform',
                     modelValue[indicator.key as keyof typeof modelValue] ? 'translate-x-5' : 'translate-x-1',
-                    canEnableIndicator(indicator.key) ? 'bg-white' : 'bg-[#555]'
+                    canEnableIndicator(indicator.key) ? 'bg-fg-on-accent' : 'bg-fg-subtle'
                   ]"
                 />
               </div>
@@ -320,10 +320,10 @@ const toggleGroup = (group: typeof indicatorGroups[0]) => {
       </div>
 
       <!-- Footer -->
-      <div class="px-4 py-3 border-t border-[#333]">
+      <div class="px-4 py-3 border-t border-line">
         <button
           @click="emit('close')"
-          class="w-full px-4 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm rounded-lg transition-colors"
+          class="w-full px-4 py-2 bg-accent hover:bg-accent-hover text-fg-on-accent text-sm rounded-lg transition-colors"
         >
           完成
         </button>

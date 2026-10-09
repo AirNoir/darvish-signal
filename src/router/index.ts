@@ -12,7 +12,24 @@ const router = createRouter({
     {
       path: '/industry-map',
       name: 'industry-map',
-      component: () => import('../views/IndustryAtlasView.vue')
+      component: () => import('../views/IndustryAtlasView.vue'),
+      props: {
+        mapId: 'ai',
+        src: '/industry-atlas/index.html',
+        pageTitle: 'AI 產業地圖｜達比 K-Zone',
+        frameTitle: 'AI 產業地圖：互動晶片拆解、產業鏈與台灣企業'
+      }
+    },
+    {
+      path: '/leo-map',
+      name: 'leo-map',
+      component: () => import('../views/IndustryAtlasView.vue'),
+      props: {
+        mapId: 'leo',
+        src: '/leo-atlas/index.html',
+        pageTitle: '低軌衛星產業地圖｜達比 K-Zone',
+        frameTitle: '低軌衛星產業地圖：互動衛星拆解、產業鏈與台灣企業'
+      }
     },
     {
       path: '/',
@@ -25,17 +42,30 @@ const router = createRouter({
       component: KZoneApp
     },
     {
-      path: '/industry-map/drone',
-      name: 'industry-map-drone',
+      path: '/drone-map',
+      name: 'drone-map',
       component: () => import('../views/IndustryAtlasView.vue'),
-      meta: { sector: 'drone' }
+      props: {
+        mapId: 'drone',
+        src: '/industry-atlas/drone.html',
+        pageTitle: '無人機產業地圖｜達比 K-Zone',
+        frameTitle: '無人機產業地圖：產業鏈拆解與台灣企業'
+      }
     },
     {
-      path: '/industry-map/robot',
-      name: 'industry-map-robot',
+      path: '/robot-map',
+      name: 'robot-map',
       component: () => import('../views/IndustryAtlasView.vue'),
-      meta: { sector: 'robot' }
+      props: {
+        mapId: 'robot',
+        src: '/industry-atlas/robot.html',
+        pageTitle: '機器人產業地圖｜達比 K-Zone',
+        frameTitle: '機器人產業地圖：產業鏈拆解與台灣企業'
+      }
     },
+    // 舊路徑（曾部署到測試機）導向新命名
+    { path: '/industry-map/drone', redirect: '/drone-map' },
+    { path: '/industry-map/robot', redirect: '/robot-map' },
     {
       path: '/trade-records',
       name: 'trade-records',

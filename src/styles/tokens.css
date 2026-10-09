@@ -1,0 +1,270 @@
+/*
+ * Theme tokens — 全站唯一允許出現色碼的地方。
+ *
+ * 規則（由 scripts/check-theme.mjs 在 build 前強制檢查）：
+ * 1. 元件 / TS 不得寫死色碼（#hex、rgb()、hsl()）或 Tailwind 調色盤 class（text-white、bg-gray-800…）。
+ *    一律使用語意 token：CSS 用 var(--ds-*)，Tailwind 用 bg-surface / text-fg … 等 class，
+ *    canvas / JS 用 src/theme/palette.ts 的 themeColor()。
+ * 2. 每個 --ds-* token 必須同時在 dark 與 light 區塊定義（缺一個 build 就會失敗）。
+ * 3. 新增 token：兩個區塊都加 → 需要 Tailwind class 再到下方 @theme inline 加映射。
+ *
+ * 預設主題為 dark；<html data-theme="light"> 時切成淺色。完整說明見 docs/theme-tokens.md。
+ */
+
+/* ---------- Dark（預設） ---------- */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Surface */
+  --ds-bg-canvas: #0f0f0f;
+  --ds-bg-surface: #1a1a1a;
+  --ds-bg-raised: #252525;
+  --ds-bg-hover: #2a2a2a;
+  --ds-bg-control: #333333;
+  --ds-bg-control-hover: #444444;
+  --ds-bg-header: rgb(10 10 10 / 0.8);
+  --ds-bg-scrim: rgb(0 0 0 / 0.5);
+  --ds-bg-tooltip: rgb(20 20 20 / 0.95);
+  /* 第三方內嵌 / QR code 底，兩個主題都維持白底 */
+  --ds-bg-media: #ffffff;
+
+  /* Brand surface（首頁 / 關於 / 動態 / 產業地圖的霓虹風格） */
+  --ds-bg-brand: #00000a;
+  --ds-bg-brand-panel: #16213e;
+  --ds-bg-brand-panel-alt: #1a1a2e;
+  --ds-bg-brand-deep: #0f3460;
+
+  /* Text */
+  --ds-fg-strong: #ffffff;
+  --ds-fg: #e5e5e5;
+  --ds-fg-secondary: #a0a0a0;
+  --ds-fg-muted: #888888;
+  --ds-fg-subtle: #666666;
+  --ds-fg-brand-body: #a0b0c0;
+  --ds-fg-brand-muted: #606080;
+  --ds-fg-label: #b2bdcb;
+  --ds-fg-gold-muted: #c0a060;
+  --ds-fg-on-accent: #ffffff;
+  --ds-fg-on-brand: #1a1a1a;
+
+  /* Border */
+  --ds-border: #333333;
+  --ds-border-strong: #444444;
+  --ds-border-subtle: rgb(255 255 255 / 0.08);
+  --ds-border-brand: #0f3460;
+
+  /* Accent / Brand */
+  --ds-accent: #3b82f6;
+  --ds-accent-hover: #2563eb;
+  --ds-accent-strong: #1d4ed8;
+  --ds-accent-fg: #60a5fa;
+  --ds-brand-cyan: #00d4ff;
+  --ds-brand-cyan-fg: #7ee8ff;
+  --ds-brand-pink: #ff006e;
+  --ds-brand-purple: #7700ff;
+  --ds-brand-purple-fg: #b388ff;
+  --ds-brand-green: #00ff88;
+  --ds-brand-gold: #f5b840;
+  --ds-brand-rose: #e94560;
+  --ds-brand-line: #06c755;
+
+  /* Status */
+  --ds-success: #22c55e;
+  --ds-success-fg: #34d399;
+  --ds-warning: #f59e0b;
+  --ds-warning-fg: #fbbf24;
+  --ds-danger: #ef4444;
+  --ds-danger-fg: #f87171;
+
+  /* Market（台股：紅漲綠跌） */
+  --ds-market-up: #ef5350;
+  --ds-market-down: #26a69a;
+  --ds-market-flat: #888888;
+
+  /* Chart */
+  --ds-chart-grid: #1a1a1a;
+  --ds-chart-axis: #333333;
+  --ds-chart-text: #a0a0a0;
+  --ds-chart-crosshair: #888888;
+  --ds-chart-label-bg: rgb(15 15 15 / 0.6);
+  --ds-chart-buy: #00bfff;
+  --ds-chart-sell: #ff8c00;
+  --ds-chart-marker-border: #ffffff;
+  --ds-series-amber: #f59e0b;
+  --ds-series-blue: #3b82f6;
+  --ds-series-blue-soft: #7faaff;
+  --ds-series-violet: #8b5cf6;
+  --ds-series-purple: #a855f7;
+  --ds-series-pink: #ec4899;
+  --ds-series-green: #22c55e;
+  --ds-series-red: #ef4444;
+  --ds-series-cyan: #22d3ee;
+  --ds-series-gold: #f5b840;
+  --ds-series-lavender: #b388ff;
+}
+
+/* ---------- Light ---------- */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  /* Surface */
+  --ds-bg-canvas: #f4f6f9;
+  --ds-bg-surface: #ffffff;
+  --ds-bg-raised: #eef1f5;
+  --ds-bg-hover: #e6eaf0;
+  --ds-bg-control: #e4e8ee;
+  --ds-bg-control-hover: #d5dbe3;
+  --ds-bg-header: rgb(255 255 255 / 0.85);
+  --ds-bg-scrim: rgb(15 23 42 / 0.35);
+  --ds-bg-tooltip: rgb(255 255 255 / 0.97);
+  --ds-bg-media: #ffffff;
+
+  /* Brand surface */
+  --ds-bg-brand: #f5f7fc;
+  --ds-bg-brand-panel: #ffffff;
+  --ds-bg-brand-panel-alt: #f0f3fa;
+  --ds-bg-brand-deep: #dde7f5;
+
+  /* Text */
+  --ds-fg-strong: #0b1220;
+  --ds-fg: #1f2937;
+  --ds-fg-secondary: #4b5563;
+  --ds-fg-muted: #6b7280;
+  --ds-fg-subtle: #8a93a0;
+  --ds-fg-brand-body: #3c4a5c;
+  --ds-fg-brand-muted: #5f6b85;
+  --ds-fg-label: #556274;
+  --ds-fg-gold-muted: #8a6a2a;
+  --ds-fg-on-accent: #ffffff;
+  --ds-fg-on-brand: #ffffff;
+
+  /* Border */
+  --ds-border: #d6dbe3;
+  --ds-border-strong: #bcc4cf;
+  --ds-border-subtle: rgb(15 23 42 / 0.08);
+  --ds-border-brand: #c5d3ea;
+
+  /* Accent / Brand（淺底需要較深的版本才有足夠對比） */
+  --ds-accent: #2563eb;
+  --ds-accent-hover: #1d4ed8;
+  --ds-accent-strong: #1e40af;
+  --ds-accent-fg: #1d4ed8;
+  --ds-brand-cyan: #0284c7;
+  --ds-brand-cyan-fg: #0369a1;
+  --ds-brand-pink: #db2777;
+  --ds-brand-purple: #7c3aed;
+  --ds-brand-purple-fg: #6d28d9;
+  --ds-brand-green: #059669;
+  --ds-brand-gold: #b7791f;
+  --ds-brand-rose: #e11d48;
+  --ds-brand-line: #06a346;
+
+  /* Status */
+  --ds-success: #16a34a;
+  --ds-success-fg: #047857;
+  --ds-warning: #d97706;
+  --ds-warning-fg: #b45309;
+  --ds-danger: #dc2626;
+  --ds-danger-fg: #b91c1c;
+
+  /* Market */
+  --ds-market-up: #e53935;
+  --ds-market-down: #00897b;
+  --ds-market-flat: #6b7280;
+
+  /* Chart */
+  --ds-chart-grid: #edf0f4;
+  --ds-chart-axis: #d6dbe3;
+  --ds-chart-text: #5b6573;
+  --ds-chart-crosshair: #8a93a0;
+  --ds-chart-label-bg: rgb(255 255 255 / 0.75);
+  --ds-chart-buy: #0284c7;
+  --ds-chart-sell: #ea580c;
+  --ds-chart-marker-border: #ffffff;
+  --ds-series-amber: #d97706;
+  --ds-series-blue: #2563eb;
+  --ds-series-blue-soft: #3b6fd8;
+  --ds-series-violet: #7c3aed;
+  --ds-series-purple: #9333ea;
+  --ds-series-pink: #db2777;
+  --ds-series-green: #16a34a;
+  --ds-series-red: #dc2626;
+  --ds-series-cyan: #0891b2;
+  --ds-series-gold: #b7791f;
+  --ds-series-lavender: #7c4dff;
+}
+
+/*
+ * Tailwind 映射：bg-surface、text-fg-muted、border-line、bg-brand-cyan/10 …
+ * 使用 inline，讓 class 直接引用 var(--ds-*)，切換主題時不需重新產生 CSS。
+ */
+@theme inline {
+  --color-canvas: var(--ds-bg-canvas);
+  --color-surface: var(--ds-bg-surface);
+  --color-raised: var(--ds-bg-raised);
+  --color-hover: var(--ds-bg-hover);
+  --color-control: var(--ds-bg-control);
+  --color-control-hover: var(--ds-bg-control-hover);
+  --color-header: var(--ds-bg-header);
+  --color-scrim: var(--ds-bg-scrim);
+  --color-tooltip: var(--ds-bg-tooltip);
+  --color-media: var(--ds-bg-media);
+  --color-brand-bg: var(--ds-bg-brand);
+  --color-brand-panel: var(--ds-bg-brand-panel);
+  --color-brand-panel-alt: var(--ds-bg-brand-panel-alt);
+  --color-brand-deep: var(--ds-bg-brand-deep);
+
+  --color-fg-strong: var(--ds-fg-strong);
+  --color-fg: var(--ds-fg);
+  --color-fg-secondary: var(--ds-fg-secondary);
+  --color-fg-muted: var(--ds-fg-muted);
+  --color-fg-subtle: var(--ds-fg-subtle);
+  --color-fg-brand-body: var(--ds-fg-brand-body);
+  --color-fg-brand-muted: var(--ds-fg-brand-muted);
+  --color-fg-label: var(--ds-fg-label);
+  --color-fg-gold-muted: var(--ds-fg-gold-muted);
+  --color-fg-on-accent: var(--ds-fg-on-accent);
+  --color-fg-on-brand: var(--ds-fg-on-brand);
+
+  --color-line: var(--ds-border);
+  --color-line-strong: var(--ds-border-strong);
+  --color-line-subtle: var(--ds-border-subtle);
+  --color-line-brand: var(--ds-border-brand);
+
+  --color-accent: var(--ds-accent);
+  --color-accent-hover: var(--ds-accent-hover);
+  --color-accent-strong: var(--ds-accent-strong);
+  --color-accent-fg: var(--ds-accent-fg);
+  --color-brand-cyan: var(--ds-brand-cyan);
+  --color-brand-cyan-fg: var(--ds-brand-cyan-fg);
+  --color-brand-pink: var(--ds-brand-pink);
+  --color-brand-purple: var(--ds-brand-purple);
+  --color-brand-purple-fg: var(--ds-brand-purple-fg);
+  --color-brand-green: var(--ds-brand-green);
+  --color-brand-gold: var(--ds-brand-gold);
+  --color-brand-rose: var(--ds-brand-rose);
+  --color-brand-line: var(--ds-brand-line);
+
+  --color-success: var(--ds-success);
+  --color-success-fg: var(--ds-success-fg);
+  --color-warning: var(--ds-warning);
+  --color-warning-fg: var(--ds-warning-fg);
+  --color-danger: var(--ds-danger);
+  --color-danger-fg: var(--ds-danger-fg);
+
+  --color-market-up: var(--ds-market-up);
+  --color-market-down: var(--ds-market-down);
+  --color-market-flat: var(--ds-market-flat);
+
+  --color-series-amber: var(--ds-series-amber);
+  --color-series-blue: var(--ds-series-blue);
+  --color-series-violet: var(--ds-series-violet);
+  --color-series-purple: var(--ds-series-purple);
+  --color-series-pink: var(--ds-series-pink);
+  --color-series-green: var(--ds-series-green);
+  --color-series-red: var(--ds-series-red);
+  --color-series-cyan: var(--ds-series-cyan);
+  --color-series-gold: var(--ds-series-gold);
+  --color-series-lavender: var(--ds-series-lavender);
+}

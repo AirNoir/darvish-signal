@@ -1,0 +1,14 @@
+Copyright (c) 2025-2026 達比 K-Zone (darvishkzone.com). All rights reserved.
+
+本專案之原始碼、3D 模型、產業地圖內容（含公司分類、角色說明與編排）、文字與視覺設計，
+均受著作權法保護。未經書面授權，不得重製、改作、散布、公開傳輸或用於商業用途。
+引用產業地圖內容時，請註明出處「達比 K-Zone」並附上原始連結。
+
+This repository, including source code, 3D models, industry atlas content
+(company selection, classification, role descriptions and arrangement), text and
+visual design, is proprietary. No license is granted to copy, modify, distribute,
+publicly transmit or use it commercially without prior written permission.
+
+Third-party components keep their own licenses:
+- three.js and OrbitControls (public/industry-atlas/vendor/) — MIT License, see vendor/LICENSE
+- Company basic information is sourced from TWSE / MOPS open data and remains subject to their terms.

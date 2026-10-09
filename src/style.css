@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
 
 @font-face {
   font-family: 'GuanHei';
@@ -24,19 +25,6 @@
   font-display: swap;
 }
 
-/* Custom dark theme variables */
-:root {
-  --color-bg-primary: #0f0f0f;
-  --color-bg-secondary: #1a1a1a;
-  --color-bg-tertiary: #252525;
-  --color-border: #333;
-  --color-text-primary: #e5e5e5;
-  --color-text-secondary: #a0a0a0;
-  --color-accent: #3b82f6;
-  --color-success: #22c55e;
-  --color-danger: #ef4444;
-}
-
 @layer base {
   * {
     margin: 0;
@@ -52,8 +40,8 @@ html, body, #app {
 
 body {
   font-family: 'Iansui', system-ui, sans-serif;
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  background-color: var(--ds-bg-canvas);
+  color: var(--ds-fg);
 }
 
 /* Scrollbar styling */
@@ -63,14 +51,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  background: var(--ds-bg-surface);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: var(--ds-border);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: var(--ds-border-strong);
 }

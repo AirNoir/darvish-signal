@@ -159,7 +159,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
     <div v-if="showDisclaimer" class="disclaimer-overlay" @click="closeDisclaimer">
       <div class="disclaimer-modal" @click.stop>
         <div class="disclaimer-header">
-          <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-8 h-8 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
           </svg>
           <h3>⚠️ 工具性質聲明與投資警語</h3>
@@ -185,11 +185,11 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 
 <style scoped>
 .alpha-pick-panel {
-  background: #1a1a2e;
+  background: var(--ds-bg-brand-panel-alt);
   height: 100%;
   display: flex;
   flex-direction: column;
-  color: #fff;
+  color: var(--ds-fg-strong);
 }
 
 .panel-header {
@@ -197,33 +197,33 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #0f3460;
+  border-bottom: 1px solid var(--ds-border-brand);
 }
 
 .panel-header h2 {
   margin: 0;
   font-size: 1rem;
-  color: #e0e0e0;
+  color: var(--ds-fg);
 }
 
 .panel-notice {
   padding: 8px 16px;
   font-size: 0.8125rem;
   line-height: 1.7;
-  color: #c0a060;
-  background: rgba(245, 158, 11, 0.06);
-  border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+  color: var(--ds-fg-gold-muted);
+  background: color-mix(in srgb, var(--ds-warning) 6%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ds-warning) 15%, transparent);
 }
 
 .panel-notice strong {
-  color: #f5b840;
+  color: var(--ds-brand-gold);
   font-weight: 600;
 }
 
 .date-select {
-  background: #16213e;
-  color: #fff;
-  border: 1px solid #0f3460;
+  background: var(--ds-bg-brand-panel);
+  color: var(--ds-fg-strong);
+  border: 1px solid var(--ds-border-brand);
   border-radius: 6px;
   padding: 4px 8px;
   font-size: 0.8rem;
@@ -232,7 +232,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 .tabs {
   display: flex;
   gap: 8px; /* 增加按鈕間距 */
-  border-bottom: 1px solid #0f3460;
+  border-bottom: 1px solid var(--ds-border-brand);
 }
 
 .tab {
@@ -240,32 +240,32 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
   padding: 10px;
   font-size: 0.85rem;
   background: transparent;
-  color: #b0bdcc;
+  color: var(--ds-fg-label);
   border: none;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .tab:hover {
-  background: #16213e;
-  color: #fff;
+  background: var(--ds-bg-brand-panel);
+  color: var(--ds-fg-strong);
 }
 
 .tab-active-buy {
-  color: #26a69a;
-  border-bottom: 2px solid #26a69a;
+  color: var(--ds-market-down);
+  border-bottom: 2px solid var(--ds-market-down);
 }
 
 .tab-active-sell {
-  color: #ef5350;
-  border-bottom: 2px solid #ef5350;
+  color: var(--ds-market-up);
+  border-bottom: 2px solid var(--ds-market-up);
 }
 
 .loading,
 .empty {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--ds-fg-subtle);
   font-size: 0.9rem;
 }
 
@@ -279,7 +279,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 }
 
 .pick-card {
-  background: #16213e;
+  background: var(--ds-bg-brand-panel);
   border-radius: 8px;
   padding: 12px;
   cursor: pointer;
@@ -292,19 +292,19 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 }
 
 .pick-card-buy {
-  border-left-color: #26a69a;
+  border-left-color: var(--ds-market-down);
 }
 
 .pick-card-buy:hover {
-  box-shadow: 0 2px 8px rgba(38, 166, 154, 0.25);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ds-market-down) 25%, transparent);
 }
 
 .pick-card-sell {
-  border-left-color: #ef5350;
+  border-left-color: var(--ds-market-up);
 }
 
 .pick-card-sell:hover {
-  box-shadow: 0 2px 8px rgba(239, 83, 80, 0.25);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ds-market-up) 25%, transparent);
 }
 
 .pick-header {
@@ -323,12 +323,12 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 .symbol {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #fff;
+  color: var(--ds-fg-strong);
 }
 
 .name {
   font-size: 0.8rem;
-  color: #b0bdcc;
+  color: var(--ds-fg-label);
 }
 
 .price-group {
@@ -340,7 +340,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 .price {
   font-size: 1rem;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--ds-fg);
 }
 
 .signal-badge {
@@ -351,15 +351,15 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 }
 
 .buy-badge {
-  background: rgba(38, 166, 154, 0.2);
-  color: #26a69a;
-  border: 1px solid #26a69a;
+  background: color-mix(in srgb, var(--ds-market-down) 20%, transparent);
+  color: var(--ds-market-down);
+  border: 1px solid var(--ds-market-down);
 }
 
 .sell-badge {
-  background: rgba(239, 83, 80, 0.2);
-  color: #ef5350;
-  border: 1px solid #ef5350;
+  background: color-mix(in srgb, var(--ds-market-up) 20%, transparent);
+  color: var(--ds-market-up);
+  border: 1px solid var(--ds-market-up);
 }
 
 .indicators {
@@ -370,8 +370,8 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 }
 
 .indicator {
-  background: #0f1923;
-  color: #aaa;
+  background: var(--ds-bg-canvas);
+  color: var(--ds-fg-secondary);
   font-size: 0.8125rem;
   padding: 2px 6px;
   border-radius: 4px;
@@ -379,7 +379,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 
 .reasons {
   font-size: 0.8125rem;
-  color: #b5c0cf;
+  color: var(--ds-fg-label);
   line-height: 1.7;
   word-break: break-all;
 }
@@ -387,8 +387,8 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 .footer {
   padding: 10px 16px;
   font-size: 0.8125rem;
-  color: #a9b6c8;
-  border-top: 1px solid #0f3460;
+  color: var(--ds-fg-label);
+  border-top: 1px solid var(--ds-border-brand);
   text-align: center;
 }
 
@@ -399,7 +399,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: color-mix(in srgb, var(--ds-bg-canvas) 85%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -408,13 +408,13 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 }
 
 .disclaimer-modal {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, var(--ds-bg-brand-panel-alt) 0%, var(--ds-bg-brand-panel) 100%);
   border-radius: 16px;
   max-width: 500px;
   width: 100%;
   padding: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 1px solid #0f3460;
+  box-shadow: 0 20px 60px var(--ds-bg-scrim);
+  border: 1px solid var(--ds-border-brand);
 }
 
 .disclaimer-header {
@@ -423,25 +423,25 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
   gap: 12px;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #0f3460;
+  border-bottom: 1px solid var(--ds-border-brand);
 }
 
 .disclaimer-header svg {
   width: 32px;
   height: 32px;
-  color: #f59e0b;
+  color: var(--ds-warning);
   flex-shrink: 0;
 }
 
 .disclaimer-header h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: #f59e0b;
+  color: var(--ds-warning-fg);
   font-weight: 600;
 }
 
 .disclaimer-content {
-  color: #e0e0e0;
+  color: var(--ds-fg);
   line-height: 1.6;
   margin-bottom: 20px;
 }
@@ -451,7 +451,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 }
 
 .disclaimer-content strong {
-  color: #fff;
+  color: var(--ds-fg-strong);
   font-size: 1.05rem;
 }
 
@@ -462,25 +462,25 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 
 .disclaimer-content li {
   margin: 8px 0;
-  color: #ccc;
+  color: var(--ds-fg);
   font-size: 0.9rem;
 }
 
 .disclaimer-highlight {
   margin-top: 16px;
   padding: 12px;
-  background: rgba(245, 158, 11, 0.1);
-  border-left: 3px solid #f59e0b;
+  background: color-mix(in srgb, var(--ds-warning) 10%, transparent);
+  border-left: 3px solid var(--ds-warning);
   border-radius: 4px;
-  color: #fbbf24;
+  color: var(--ds-warning-fg);
   font-weight: 500;
 }
 
 .disclaimer-button {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
+  background: linear-gradient(135deg, var(--ds-accent), var(--ds-accent-hover));
+  color: var(--ds-fg-on-accent);
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -490,8 +490,8 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
 }
 
 .disclaimer-button:hover {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, var(--ds-accent-hover), var(--ds-accent-strong));
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ds-accent) 40%, transparent);
 }
 </style>

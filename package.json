@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "build:staging": "vue-tsc -b && vite build --mode staging",
+    "build": "npm run lint:theme && vue-tsc -b && vite build && node scripts/minify-atlas.mjs",
+    "build:staging": "npm run lint:theme && vue-tsc -b && vite build --mode staging && node scripts/minify-atlas.mjs",
+    "lint:theme": "node scripts/check-theme.mjs",
     "preview": "vite preview",
     "server": "tsx server/mockApi.ts",
     "start": "npm run server"

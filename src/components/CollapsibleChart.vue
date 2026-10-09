@@ -30,14 +30,14 @@ watch(isExpanded, async (expanded) => {
 </script>
 
 <template>
-  <div class="border border-[#333] rounded-lg overflow-hidden flex-shrink-0">
+  <div class="border border-line rounded-lg overflow-hidden flex-shrink-0">
     <!-- Collapsed Header (always visible) -->
     <div
-      class="flex items-center justify-between px-3 py-1.5 bg-[#1a1a1a] cursor-pointer hover:bg-[#222] transition-colors select-none"
+      class="flex items-center justify-between px-3 py-1.5 bg-surface cursor-pointer hover:bg-hover transition-colors select-none"
       @click="toggle"
     >
       <div class="flex items-center gap-2 text-xs">
-        <span class="text-white font-bold">{{ title }}</span>
+        <span class="text-fg-strong font-bold">{{ title }}</span>
         <template v-if="indicators">
           <span
             v-for="ind in indicators"
@@ -50,7 +50,7 @@ watch(isExpanded, async (expanded) => {
       </div>
       <svg
         :class="[
-          'w-4 h-4 text-[#666] transition-transform',
+          'w-4 h-4 text-fg-subtle transition-transform',
           isExpanded ? '' : 'rotate-180'
         ]"
         fill="none"

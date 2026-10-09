@@ -37,33 +37,33 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage));
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#00000a] text-white" style="font-family: 'GuanHei', 'Iansui', sans-serif;">
+  <div class="min-h-screen bg-brand-bg text-fg-strong" style="font-family: 'GuanHei', 'Iansui', sans-serif;">
     <AppHeader />
 
     <div class="pointer-events-none fixed inset-0 z-40 scanlines opacity-[0.03]"></div>
 
     <section class="relative pt-24 pb-24 px-6">
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-10 blur-3xl" style="background: radial-gradient(circle, #7700ff, transparent);"></div>
-        <div class="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full opacity-10 blur-3xl" style="background: radial-gradient(circle, #00d4ff, transparent);"></div>
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-10 blur-3xl" style="background: radial-gradient(circle, var(--ds-brand-purple), transparent);"></div>
+        <div class="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full opacity-10 blur-3xl" style="background: radial-gradient(circle, var(--ds-brand-cyan), transparent);"></div>
       </div>
 
       <div class="relative max-w-6xl mx-auto">
         <div class="text-center mb-12">
           <div class="inline-flex items-center gap-3 mb-4">
-            <div class="h-px w-12 bg-[#7700ff] opacity-50"></div>
-            <span class="text-xs text-[#7700ff] tracking-[0.3em] uppercase">Latest Posts</span>
-            <div class="h-px w-12 bg-[#7700ff] opacity-50"></div>
+            <div class="h-px w-12 bg-brand-purple opacity-50"></div>
+            <span class="text-xs text-brand-purple tracking-[0.3em] uppercase">Latest Posts</span>
+            <div class="h-px w-12 bg-brand-purple opacity-50"></div>
           </div>
-          <h1 class="text-3xl md:text-5xl font-bold text-white tracking-wider">最新動態</h1>
-          <p class="text-sm text-[#a0b0c0] mt-4 font-noto">
+          <h1 class="text-3xl md:text-5xl font-bold text-fg-strong tracking-wider">最新動態</h1>
+          <p class="text-sm text-fg-brand-body mt-4 font-noto">
             來自 Threads
             <a
               href="https://www.threads.com/@scout.darvi"
               target="_blank"
               rel="noopener noreferrer"
               @click="trackThreadsProfile"
-              class="text-[#7700ff] hover:underline"
+              class="text-brand-purple hover:underline"
             >@scout.darvi</a>
           </p>
         </div>
@@ -79,8 +79,8 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage));
               :src="`${permalink}/embed/`"
               :data-post-idx="idx"
               :style="{ height: (heights[idx] ?? 720) + 'px' }"
-              class="w-full block rounded-lg bg-white"
-              style="border:0; box-shadow: 0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15);"
+              class="w-full block rounded-lg bg-media"
+              style="border:0; box-shadow: 0 0 1px 0 var(--ds-bg-scrim), 0 1px 10px 0 color-mix(in srgb, var(--ds-bg-scrim) 30%, transparent);"
               scrolling="no"
               allowtransparency="true"
               allowfullscreen
@@ -90,7 +90,7 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage));
           </div>
         </div>
 
-        <p class="text-xs text-[#606080] tracking-widest font-noto text-center mt-12">
+        <p class="text-xs text-fg-brand-muted tracking-widest font-noto text-center mt-12">
           // 內容僅為技術指標討論與工具更新，不推播個股買賣訊號、不提供選股建議
         </p>
       </div>
@@ -104,8 +104,8 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage));
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 212, 255, 0.03) 2px,
-    rgba(0, 212, 255, 0.03) 4px
+    color-mix(in srgb, var(--ds-brand-cyan) 3%, transparent) 2px,
+    color-mix(in srgb, var(--ds-brand-cyan) 3%, transparent) 4px
   );
 }
 
