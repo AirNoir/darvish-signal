@@ -207,6 +207,19 @@ export interface PeriodHoldingItem {
   retail_ratio: number | null
 }
 
+// --- 我的最愛（/api/favorites，見 frontend-favorites-integration.md） ---
+export interface FavoriteItem {
+  symbol: string
+  name: string
+  created_time: string // RFC 3339，用 new Date() 解析
+}
+
+export interface FavoriteList {
+  limit: number
+  count: number
+  items: FavoriteItem[]
+}
+
 // 401 專用錯誤：呼叫端可用 instanceof 區分「需要重新登入」與一般失敗。
 // reason 對應後端 body：'token expired'（過期）| 'unauthorized'（沒帶 / 無效）。
 export class AuthError extends Error {
@@ -218,22 +231,41 @@ export class AuthError extends Error {
   }
 }
 
-async function apiFetch<T>(url: string): Promise<T> {
+// 其他非 2xx：status 為 HTTP 狀態碼，body 為解析後的 JSON（可能是 null）。
+// 例：加入我的最愛回 409 時，body.limit 是目前上限。
+export class ApiError extends Error {
+  status: number
+  body: { error?: string; detail?: string; limit?: number } | null
+  constructor(status: number, body: ApiError['body']) {
+    super(body?.error ?? body?.detail ?? `TWStockAPI ${status}`)
+    this.name = 'ApiError'
+    this.status = status
+    this.body = body
+  }
+}
+
+async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
   const auth = useAuthStore()
-  const headers = new Headers()
+  const headers = new Headers(options.headers)
   // 沒 token 時不送 header，避免送出 "Bearer null"（後端一律回 401 unauthorized）
   if (auth.token) headers.set('Authorization', `Bearer ${auth.token}`)
+  if (options.body !== undefined && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
 
-  const res = await fetch(url, { headers })
+  const res = await fetch(url, { ...options, headers })
+
+  // 204 沒有 body（DELETE 成功），不能呼叫 res.json()
+  if (res.status === 204) return null as T
+  const body = await res.json().catch(() => null)
 
   if (res.status === 401) {
-    const body = (await res.json().catch(() => ({}))) as { error?: string }
-    const reason = body.error === 'token expired' ? 'token expired' : 'unauthorized'
+    const reason = body?.error === 'token expired' ? 'token expired' : 'unauthorized'
     auth.handleUnauthorized(reason)
     throw new AuthError(reason)
   }
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`)
-  return res.json()
+  if (!res.ok) throw new ApiError(res.status, body)
+  return body as T
 }
 
 export const stockApi = {
@@ -313,6 +345,26 @@ export const stockApi = {
   // 大戶 / 散戶持股 (週頻)
   async getPeriodHolding(symbol: string): Promise<PeriodHoldingItem[]> {
     return apiFetch<PeriodHoldingItem[]>(`${API_BASE_URL}/api/period/holding/${symbol}`)
+  },
+
+  // 我的最愛（一律需要登入；數量上限依 member_level，以 GET 回傳的 limit 為準）
+  async getFavorites(): Promise<FavoriteList> {
+    return apiFetch<FavoriteList>(`${API_BASE_URL}/api/favorites`)
+  },
+
+  // 201（新加入）與 200（已在清單中）都回傳該筆；409 已達上限（ApiError.body.limit）
+  async addFavorite(symbol: string): Promise<FavoriteItem> {
+    return apiFetch<FavoriteItem>(`${API_BASE_URL}/api/favorites`, {
+      method: 'POST',
+      body: JSON.stringify({ symbol })
+    })
+  },
+
+  // 204；本來就不在清單中也回 204
+  async removeFavorite(symbol: string): Promise<void> {
+    await apiFetch<null>(`${API_BASE_URL}/api/favorites/${encodeURIComponent(symbol)}`, {
+      method: 'DELETE'
+    })
   },
 }
 

@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import { computed } from 'vue';
 import { useStockStore } from '../stores/stockStore';
-import { useWatchlistStore, MAX_SYMBOLS_PER_GROUP } from '../stores/watchlistStore';
+import { useFavoritesStore } from '../stores/favoritesStore';
 
-const props = defineProps<{ groupId: string }>();
 const emit = defineEmits<{ close: [] }>();
 
 const stockStore = useStockStore();
-const watchlist = useWatchlistStore();
+const favorites = useFavoritesStore();
 const query = ref('');
 const inputRef = ref<HTMLInputElement | null>(null);
-
-const group = computed(() => watchlist.groups.find((g) => g.id === props.groupId) ?? null);
+const pendingSymbol = ref<string | null>(null);
+const notice = ref<string | null>(null);
 
 // 代碼或名稱模糊搜尋；未輸入時顯示全部（上限 50 筆避免過長）
 const results = computed(() => {
@@ -24,10 +24,23 @@ const results = computed(() => {
   return list.slice(0, 50);
 });
 
-const isFull = computed(() => (group.value?.symbols.length ?? 0) >= MAX_SYMBOLS_PER_GROUP);
-
-const toggle = (symbol: string) => {
-  watchlist.toggleSymbol(props.groupId, symbol);
+const toggle = async (symbol: string) => {
+  if (pendingSymbol.value) return;
+  pendingSymbol.value = symbol;
+  notice.value = null;
+  try {
+    const result = await favorites.toggle(symbol);
+    if (typeof result === 'object' && !result.ok) {
+      notice.value =
+        result.reason === 'limit'
+          ? `我的最愛已達上限（${result.limit} 檔）`
+          : result.reason === 'not_found'
+            ? '這檔股票目前無法加入我的最愛'
+            : '操作失敗，請稍後再試';
+    }
+  } finally {
+    pendingSymbol.value = null;
+  }
 };
 
 onMounted(async () => {
@@ -49,7 +62,7 @@ onMounted(async () => {
           <div>
             <h2 class="text-white text-base font-bold">新增個股</h2>
             <p class="text-xs text-gray-500 mt-0.5">
-              加入「{{ group?.name }}」（{{ group?.symbols.length ?? 0 }}/{{ MAX_SYMBOLS_PER_GROUP }}）
+              我的最愛（{{ favorites.count }}/{{ favorites.limit }}）
             </p>
           </div>
           <button @click="emit('close')" class="p-1 text-gray-500 hover:text-white transition-colors" aria-label="關閉">
@@ -73,6 +86,7 @@ onMounted(async () => {
               class="w-full pl-9 pr-3 py-2 bg-[#1e1e1e] border border-[#333] rounded-lg text-base md:text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#3b82f6] transition-colors"
             />
           </div>
+          <p v-if="notice" class="mt-2 text-xs text-amber-400">{{ notice }}</p>
         </div>
 
         <!-- Results -->
@@ -91,15 +105,15 @@ onMounted(async () => {
             </div>
             <button
               @click="toggle(stock.symbol)"
-              :disabled="!watchlist.isInGroup(stock.symbol, props.groupId) && isFull"
+              :disabled="pendingSymbol === stock.symbol || (!favorites.isFavorite(stock.symbol) && favorites.isFull)"
               :class="[
                 'px-3 py-1 rounded-full text-xs font-medium transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed',
-                watchlist.isInGroup(stock.symbol, props.groupId)
+                favorites.isFavorite(stock.symbol)
                   ? 'bg-white/10 text-gray-400 hover:bg-red-500/20 hover:text-red-400'
                   : 'bg-blue-600 text-white hover:bg-blue-500'
               ]"
             >
-              {{ watchlist.isInGroup(stock.symbol, props.groupId) ? '已加入' : '＋ 加入' }}
+              {{ favorites.isFavorite(stock.symbol) ? '已加入' : '＋ 加入' }}
             </button>
           </div>
         </div>
