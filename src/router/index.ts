@@ -41,6 +41,31 @@ const router = createRouter({
       component: KZoneApp
     },
     {
+      path: '/drone-map',
+      name: 'drone-map',
+      component: () => import('../views/IndustryAtlasView.vue'),
+      props: {
+        mapId: 'drone',
+        src: '/industry-atlas/drone.html',
+        pageTitle: '無人機產業地圖｜達比 K-Zone',
+        frameTitle: '無人機產業地圖：產業鏈拆解與台灣企業'
+      }
+    },
+    {
+      path: '/robot-map',
+      name: 'robot-map',
+      component: () => import('../views/IndustryAtlasView.vue'),
+      props: {
+        mapId: 'robot',
+        src: '/industry-atlas/robot.html',
+        pageTitle: '機器人產業地圖｜達比 K-Zone',
+        frameTitle: '機器人產業地圖：產業鏈拆解與台灣企業'
+      }
+    },
+    // 舊路徑（曾部署到測試機）導向新命名
+    { path: '/industry-map/drone', redirect: '/drone-map' },
+    { path: '/industry-map/robot', redirect: '/robot-map' },
+    {
       path: '/trade-records',
       name: 'trade-records',
       component: TradeRecordsView

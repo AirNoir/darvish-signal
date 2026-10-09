@@ -1,0 +1,37 @@
+/* 產業地圖（無人機 / 機器人）資料驅動版型 — 沿用 darvish.css 的 --at-* 主題 token（light/dark 自動跟隨） */
+
+/* 地圖切換列 */
+.map-switch{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 6px}
+.map-switch a{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border:1px solid var(--at-line);border-radius:999px;font-size:13px;color:var(--at-subtle);letter-spacing:1px;background:var(--at-nav-bg);transition:.2s;cursor:pointer}
+.map-switch a span{font-size:10px;color:var(--at-faint);letter-spacing:1.5px}
+.map-switch a:hover{color:var(--at-accent);border-color:var(--at-accent)}
+.map-switch a.current{color:var(--at-bg);background:var(--at-accent);border-color:var(--at-accent);font-weight:700}
+.map-switch a.current span{color:var(--at-bg);opacity:.65}
+
+/* 產業鏈 stage 卡片 */
+.chain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:30px 0 10px}
+.stage-card{border:1px solid var(--at-line);border-radius:4px;background:var(--at-panel);padding:22px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 30px var(--at-shadow)}
+.stage-card .stage-head{display:flex;align-items:baseline;gap:12px}
+.stage-card .stage-num{font-family:monospace;font-size:12px;color:var(--at-accent);letter-spacing:1px}
+.stage-card h3{margin:0;font-size:17px;color:var(--at-ink);letter-spacing:1px}
+.stage-card .stage-en{font-size:10px;letter-spacing:2px;color:var(--at-faint)}
+.stage-card p{margin:0;font-size:13px;line-height:1.9;color:var(--at-body)}
+.stage-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:6px}
+.stage-chips button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--at-line);background:var(--at-raised);color:var(--at-control-ink);font-size:12px;padding:5px 11px;border-radius:999px;transition:.2s}
+.stage-chips button code{font-family:monospace;font-size:11px;color:var(--at-accent-ink)}
+.stage-chips button:hover{border-color:var(--at-accent);color:var(--at-ink-strong);background:var(--at-hover)}
+
+/* 公司牆區塊沿用 style.css / darvish.css 的 .supply / .filters / .company-grid */
+
+/* 公司對話框（精簡版 archive） */
+.sector-archive .chart-link{margin:14px 0}
+.sector-archive .archive-note{font-size:12px;color:var(--at-muted);line-height:1.8;border-top:1px solid var(--at-line);margin-top:18px;padding-top:14px}
+.sector-archive .role-tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 0}
+.sector-archive .role-tags span{border:1px solid var(--at-line);border-radius:999px;font-size:11px;color:var(--at-subtle);padding:4px 10px}
+.sector-archive .official-link{display:inline-block;margin-top:12px;font-size:13px;color:var(--at-accent-ink)}
+.sector-archive .official-link:hover{color:var(--at-accent)}
+
+@media(max-width:640px){
+  .chain-grid{grid-template-columns:1fr}
+  .map-switch a{padding:8px 14px;font-size:12px}
+}

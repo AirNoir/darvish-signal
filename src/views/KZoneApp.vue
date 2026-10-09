@@ -28,7 +28,9 @@ const openIndicatorSettings = (source: 'desktop' | 'mobile') => {
 
 const industryMaps = [
   { label: 'AI 產業地圖', short: 'AI 地圖', to: '/industry-map' },
-  { label: '低軌衛星地圖', short: '衛星地圖', to: '/leo-map' }
+  { label: '低軌衛星地圖', short: '衛星地圖', to: '/leo-map' },
+  { label: '無人機地圖', short: '無人機', to: '/drone-map' },
+  { label: '機器人地圖', short: '機器人', to: '/robot-map' }
 ];
 // 平板寬度（md–lg）header 放不下兩顆地圖按鈕，收成一顆「產業地圖」下拉
 const showMapMenu = ref(false);
