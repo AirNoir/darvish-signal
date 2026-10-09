@@ -11,6 +11,7 @@ export interface AccountUser {
   picture?: string | null;
   email_verified?: boolean;
   member_level?: number;
+  is_og_member?: boolean; // 創始會員（永久身份，非付費等級）
   created_at?: string;
   last_login_at?: string;
 }

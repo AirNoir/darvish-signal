@@ -2,12 +2,12 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
-import { isFoundingMember } from '../lib/badges';
+import { isOgMember } from '../lib/badges';
 import FoundingBadge from './FoundingBadge.vue';
 
 const auth = useAuthStore();
 const router = useRouter();
-const isFounder = computed(() => isFoundingMember(auth.user?.email));
+const isFounder = computed(() => isOgMember(auth.user));
 const menuOpen = ref(false);
 const rootRef = ref<HTMLDivElement | null>(null);
 
