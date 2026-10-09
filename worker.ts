@@ -13,9 +13,13 @@ export default {
     if (url.pathname.startsWith('/api/')) {
       const externalUrl = `${EXTERNAL_API_BASE}${url.pathname}${url.search}`;
       try {
+        // TWStockAPI 已啟用 JWT 驗證，Authorization header 必須原樣轉發
+        const headers: Record<string, string> = { 'Accept': 'application/json' };
+        const authorization = request.headers.get('Authorization');
+        if (authorization) headers['Authorization'] = authorization;
         const response = await fetch(externalUrl, {
           method: request.method,
-          headers: { 'Accept': 'application/json' },
+          headers,
         });
         const data = await response.json();
         return new Response(JSON.stringify(data), {

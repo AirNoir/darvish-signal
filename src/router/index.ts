@@ -4,6 +4,7 @@ import KZoneApp from '../views/KZoneApp.vue';
 import TradeRecordsView from '../views/TradeRecordsView.vue';
 import FeedView from '../views/FeedView.vue';
 import AboutView from '../views/AboutView.vue';
+import WatchlistView from '../views/WatchlistView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -24,6 +25,18 @@ const router = createRouter({
       component: KZoneApp
     },
     {
+      path: '/industry-map/drone',
+      name: 'industry-map-drone',
+      component: () => import('../views/IndustryAtlasView.vue'),
+      meta: { sector: 'drone' }
+    },
+    {
+      path: '/industry-map/robot',
+      name: 'industry-map-robot',
+      component: () => import('../views/IndustryAtlasView.vue'),
+      meta: { sector: 'robot' }
+    },
+    {
       path: '/trade-records',
       name: 'trade-records',
       component: TradeRecordsView
@@ -32,6 +45,11 @@ const router = createRouter({
       path: '/feed',
       name: 'feed',
       component: FeedView
+    },
+    {
+      path: '/watchlist',
+      name: 'watchlist',
+      component: WatchlistView
     },
     {
       path: '/about',

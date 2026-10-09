@@ -1,0 +1,37 @@
+/* 產業地圖（無人機 / 機器人）資料驅動版型 — 沿用 darvish.css 的賽博藍視覺 */
+
+/* 三張地圖切換列 */
+.map-switch{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 6px}
+.map-switch a{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border:1px solid #233044;border-radius:999px;font-size:13px;color:#9ba9bd;letter-spacing:1px;background:#070b15;transition:.2s}
+.map-switch a span{font-size:10px;color:#5f7391;letter-spacing:1.5px}
+.map-switch a:hover{color:#00d4ff;border-color:#00d4ff66}
+.map-switch a.current{color:#001018;background:#00d4ff;border-color:#00d4ff;font-weight:700}
+.map-switch a.current span{color:#003346}
+
+/* 產業鏈 stage 卡片 */
+.chain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:30px 0 10px}
+.stage-card{border:1px solid #233044;border-radius:4px;background:#080e1a;padding:22px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 0 40px #00d4ff06}
+.stage-card .stage-head{display:flex;align-items:baseline;gap:12px}
+.stage-card .stage-num{font-family:monospace;font-size:12px;color:#00d4ff;letter-spacing:1px}
+.stage-card h3{margin:0;font-size:17px;color:#eef3ff;letter-spacing:1px}
+.stage-card .stage-en{font-size:10px;letter-spacing:2px;color:#5f7391}
+.stage-card p{margin:0;font-size:13px;line-height:1.9;color:#a3b1c5}
+.stage-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:6px}
+.stage-chips button{display:inline-flex;align-items:center;gap:6px;border:1px solid #23304480;background:#0c1322;color:#cfdcf0;font-size:12px;padding:5px 11px;border-radius:999px;transition:.2s}
+.stage-chips button code{font-family:monospace;font-size:11px;color:#00d4ff}
+.stage-chips button:hover{border-color:#00d4ff66;color:#fff;background:#0c283b}
+
+/* 公司牆區塊沿用 style.css/darvish.css 的 .supply/.filters/.company-grid */
+
+/* 公司對話框（精簡版 archive） */
+.sector-archive .chart-link{margin:14px 0}
+.sector-archive .archive-note{font-size:12px;color:#7c9aba;line-height:1.8;border-top:1px solid #233044;margin-top:18px;padding-top:14px}
+.sector-archive .role-tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 0}
+.sector-archive .role-tags span{border:1px solid #23304480;border-radius:999px;font-size:11px;color:#9ba9bd;padding:4px 10px}
+.sector-archive .official-link{display:inline-block;margin-top:12px;font-size:13px;color:#87e4ff}
+.sector-archive .official-link:hover{color:#00d4ff}
+
+@media(max-width:640px){
+  .chain-grid{grid-template-columns:1fr}
+  .map-switch a{padding:8px 14px;font-size:12px}
+}
