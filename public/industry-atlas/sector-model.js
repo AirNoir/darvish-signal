@@ -292,16 +292,30 @@ export function initModel(spec) {
       });
     });
     packed = reduced ? +(mode === 'assembled') : THREE.MathUtils.damp(packed, +(mode === 'assembled'), 6, dt);
+    // 先算出每個標籤的投影位置，再做一次螢幕空間排版：
+    // 水平範圍有交集的標籤，由上往下保留最小間距（手機縮放後 3D 錨點會擠在一起）
+    const placed = [];
     labelsData.forEach(({ i, point, packed: alt }) => {
       const b = labels.querySelector(`[data-part="${i}"]`);
       temp.set(...point);
       if (alt) temp.lerp(anchor.set(...alt), packed);
       groups[i].localToWorld(temp);
       const p = project(temp);
-      b.style.transform = `translate(${Math.min(p.x, mount.clientWidth - b.offsetWidth - 4)}px,${p.y}px)`;
-      b.style.opacity = active < 0 ? 1 : 0;
-      b.style.pointerEvents = active < 0 ? 'auto' : 'none';
+      const x = Math.min(p.x, mount.clientWidth - b.offsetWidth - 4);
+      placed.push({ b, x, y: p.y, w: b.offsetWidth, h: b.offsetHeight });
     });
+    placed.sort((a, c) => a.y - c.y);
+    const gap = 4;
+    for (let k = 0; k < placed.length; k++) {
+      const cur = placed[k];
+      for (let j = 0; j < k; j++) {
+        const prev = placed[j];
+        if (cur.x < prev.x + prev.w && prev.x < cur.x + cur.w) cur.y = Math.max(cur.y, prev.y + prev.h + gap);
+      }
+      cur.b.style.transform = `translate(${cur.x}px,${cur.y}px)`;
+      cur.b.style.opacity = active < 0 ? 1 : 0;
+      cur.b.style.pointerEvents = active < 0 ? 'auto' : 'none';
+    }
     if (active >= 0) {
       temp.copy(groups[active].position);
       const p = project(temp);
