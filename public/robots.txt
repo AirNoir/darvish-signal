@@ -1,4 +1,20 @@
+# 一般搜尋引擎：可收錄頁面（/industry-map、/leo-map…），
+# 但不要抓產業地圖的原始程式與資料目錄（公司清單、分類、3D 模型）
 User-agent: *
 Allow: /
+Disallow: /industry-atlas/
+Disallow: /leo-atlas/
+
+# AI 模型訓練爬蟲：整站不給抓。
+# 不影響 Google / Bing 搜尋收錄，也不影響 Threads 連結預覽（facebookexternalhit）。
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+User-agent: CCBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bytespider
+User-agent: meta-externalagent
+Disallow: /
 
 Sitemap: https://darvishkzone.com/sitemap.xml
