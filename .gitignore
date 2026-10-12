@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 .vercel
 .vercel
+
+# wrangler dev 本機快取
+.wrangler/
