@@ -174,7 +174,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-brand-bg text-fg-strong" style="font-family: 'GuanHei', 'Iansui', sans-serif;">
+  <!-- 內容是報價與數字清單，用與 K-Zone 相同的 Noto Sans TC 比較好讀；品牌字型只留在頁面標題 -->
+  <div class="min-h-screen bg-brand-bg text-fg-strong" style="font-family: 'Noto Sans TC', system-ui, sans-serif;">
     <AppHeader />
 
     <main class="max-w-4xl mx-auto px-4 sm:px-6 pt-20 pb-16">
@@ -197,7 +198,7 @@ onMounted(() => {
       <template v-else>
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-baseline gap-2">
-            <h1 class="text-xl font-bold">我的最愛</h1>
+            <h1 class="text-xl font-bold" style="font-family: 'GuanHei', 'Iansui', sans-serif;">我的最愛</h1>
             <span v-if="favorites.loaded" class="text-sm text-fg-muted tabular-nums">
               共 {{ favorites.totalCount }} 檔・每組最多 {{ favorites.maxPerGroup }} 檔
             </span>
