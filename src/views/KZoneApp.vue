@@ -31,12 +31,12 @@ const openIndicatorSettings = (source: 'desktop' | 'mobile') => {
 };
 
 const industryMaps = [
-  { label: 'AI 產業地圖', short: 'AI 地圖', to: '/industry-map' },
-  { label: '低軌衛星地圖', short: '衛星地圖', to: '/leo-map' },
-  { label: '無人機地圖', short: '無人機', to: '/drone-map' },
-  { label: '機器人地圖', short: '機器人', to: '/robot-map' }
+  { label: 'AI 產業地圖', to: '/industry-map' },
+  { label: '低軌衛星地圖', to: '/leo-map' },
+  { label: '無人機地圖', to: '/drone-map' },
+  { label: '機器人地圖', to: '/robot-map' }
 ];
-// 平板寬度（md–lg）header 放不下兩顆地圖按鈕，收成一顆「產業地圖」下拉
+// 四張地圖收成一顆「產業地圖」選單：桌面是下拉，手機選單裡是展開列
 const showMapMenu = ref(false);
 
 const openIndustryMap = (map: { label: string; to: string }) => {
@@ -282,26 +282,24 @@ watch(() => store.stockId, (id) => {
       </div>
 
       <div :class="['hidden md:flex items-center gap-2', !latestData && 'ml-auto']">
-        <button
-          v-for="map in industryMaps"
-          :key="map.to"
-          @click="openIndustryMap(map)"
-          class="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors"
-        ><span class="xl:hidden">{{ map.short }}</span><span class="hidden xl:inline">{{ map.label }}</span></button>
-        <div class="relative lg:hidden">
+        <div class="relative">
           <button
             @click="showMapMenu = !showMapMenu"
             :aria-expanded="showMapMenu"
+            aria-haspopup="menu"
             class="shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors"
           >產業地圖 ▾</button>
           <div v-if="showMapMenu" class="fixed inset-0 z-40" @click="showMapMenu = false"></div>
           <div
             v-if="showMapMenu"
-            class="absolute right-0 top-full mt-1 z-50 w-36 py-1 bg-surface border border-line rounded shadow-lg"
+            role="menu"
+            aria-label="產業地圖"
+            class="absolute right-0 top-full mt-1 z-50 w-40 py-1 bg-surface border border-line rounded shadow-lg"
           >
             <button
               v-for="map in industryMaps"
               :key="map.to"
+              role="menuitem"
               @click="openIndustryMap(map)"
               class="w-full px-3 py-2 text-left text-sm text-fg hover:bg-hover hover:text-fg-strong transition-colors"
             >{{ map.label }}</button>
@@ -343,12 +341,21 @@ watch(() => store.stockId, (id) => {
       v-if="showMobileMenu"
       class="md:hidden absolute top-14 left-0 right-0 bg-surface border-b border-line z-50 p-3 flex flex-col gap-2"
     >
-      <div class="grid grid-cols-2 gap-2">
+      <!-- 產業地圖：一顆按鈕展開四張地圖 -->
+      <button
+        @click="showMapMenu = !showMapMenu"
+        :aria-expanded="showMapMenu"
+        class="w-full px-3 py-2 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors text-left flex items-center justify-between"
+      >
+        產業地圖
+        <span :class="['transition-transform', showMapMenu ? 'rotate-180' : '']">▾</span>
+      </button>
+      <div v-if="showMapMenu" class="grid grid-cols-2 gap-2">
         <button
           v-for="map in industryMaps"
           :key="map.to"
           @click="openIndustryMap(map)"
-          class="px-3 py-2 text-sm font-medium rounded border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan-fg hover:bg-brand-cyan/20 transition-colors text-left"
+          class="px-3 py-2 text-sm rounded bg-control text-fg-secondary hover:bg-control-hover hover:text-fg-strong transition-colors text-left"
         >{{ map.label }}</button>
       </div>
       <SearchBar autofocus @stock-selected="showMobileMenu = false" />
