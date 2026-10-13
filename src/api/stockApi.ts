@@ -207,17 +207,28 @@ export interface PeriodHoldingItem {
   retail_ratio: number | null
 }
 
-// --- 我的最愛（/api/favorites，見 frontend-favorites-integration.md） ---
+// --- 我的最愛群組（/api/favorites，見 frontend-favorites-integration.md） ---
 export interface FavoriteItem {
   symbol: string
   name: string
   created_time: string // RFC 3339，用 new Date() 解析
 }
 
-export interface FavoriteList {
-  limit: number
+export interface FavoriteGroup {
+  group_no: number // 從 1 開始；POST / DELETE 用這個值
+  name: string // 「群組一」……由後端給定，直接顯示，不能改名
   count: number
-  items: FavoriteItem[]
+  items: FavoriteItem[] // 依加入時間新到舊；空群組是 []
+}
+
+export interface FavoriteGroups {
+  max_groups: number
+  max_stocks_per_group: number
+  groups: FavoriteGroup[] // 固定 max_groups 個，依 group_no 由小到大
+}
+
+export interface FavoriteGroupItem extends FavoriteItem {
+  group_no: number
 }
 
 // 401 專用錯誤：呼叫端可用 instanceof 區分「需要重新登入」與一般失敗。
@@ -347,24 +358,27 @@ export const stockApi = {
     return apiFetch<PeriodHoldingItem[]>(`${API_BASE_URL}/api/period/holding/${symbol}`)
   },
 
-  // 我的最愛（一律需要登入；數量上限依 member_level，以 GET 回傳的 limit 為準）
-  async getFavorites(): Promise<FavoriteList> {
-    return apiFetch<FavoriteList>(`${API_BASE_URL}/api/favorites`)
+  // 我的最愛群組（一律需要登入；群組數與每組上限依 member_level，以 GET 回傳值為準）
+  async getFavorites(): Promise<FavoriteGroups> {
+    return apiFetch<FavoriteGroups>(`${API_BASE_URL}/api/favorites`)
   },
 
-  // 201（新加入）與 200（已在清單中）都回傳該筆；409 已達上限（ApiError.body.limit）
-  async addFavorite(symbol: string): Promise<FavoriteItem> {
-    return apiFetch<FavoriteItem>(`${API_BASE_URL}/api/favorites`, {
+  // 201（新加入）與 200（該群組本來就有）都回傳該筆。
+  // 404 body.error：'group not found'（群組資訊過期，重新 GET）| 'stock not found'；
+  // 409 群組已滿（ApiError.body.limit 為每組上限）
+  async addFavorite(groupNo: number, symbol: string): Promise<FavoriteGroupItem> {
+    return apiFetch<FavoriteGroupItem>(`${API_BASE_URL}/api/favorites/groups/${groupNo}`, {
       method: 'POST',
       body: JSON.stringify({ symbol })
     })
   },
 
-  // 204；本來就不在清單中也回 204
-  async removeFavorite(symbol: string): Promise<void> {
-    await apiFetch<null>(`${API_BASE_URL}/api/favorites/${encodeURIComponent(symbol)}`, {
-      method: 'DELETE'
-    })
+  // 204；本來就不在該群組也回 204。只移除這個群組的那一筆，其他群組的同一檔不受影響
+  async removeFavorite(groupNo: number, symbol: string): Promise<void> {
+    await apiFetch<null>(
+      `${API_BASE_URL}/api/favorites/groups/${groupNo}/${encodeURIComponent(symbol)}`,
+      { method: 'DELETE' }
+    )
   },
 }
 

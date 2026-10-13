@@ -5,7 +5,7 @@ import AppHeader from '../components/AppHeader.vue';
 import WatchlistAddStockModal from '../components/WatchlistAddStockModal.vue';
 import { useAuthStore } from '../stores/authStore';
 import { useStockStore } from '../stores/stockStore';
-import { useFavoritesStore } from '../stores/favoritesStore';
+import { useFavoritesStore, addResultMessage } from '../stores/favoritesStore';
 import { stockApi } from '../api/stockApi';
 import { trackEvent } from '../lib/analytics';
 
@@ -24,8 +24,16 @@ const favorites = useFavoritesStore();
 const showAddModal = ref(false);
 const quotes = ref<Record<string, Quote>>({});
 const loadingQuotes = ref(false);
+const notice = ref<string | null>(null);
+const pendingSymbol = ref<string | null>(null);
 
-// 取最近兩根日 K 算漲跌；已抓過的 symbol 不重抓
+// 目前選中的群組（群組數、名稱、每組上限都由後端決定）
+const group = computed(() => favorites.activeGroup);
+const groupNo = computed(() => group.value?.group_no ?? 0);
+const groupFull = computed(() => favorites.isGroupFull(groupNo.value));
+const otherGroups = computed(() => favorites.groups.filter((g) => g.group_no !== groupNo.value));
+
+// 取最近兩根日 K 算漲跌；已抓過的 symbol 不重抓（切群組時共用）
 const fetchQuotes = async (symbols: string[]) => {
   const missing = symbols.filter((s) => !(s in quotes.value));
   if (missing.length === 0) return;
@@ -57,13 +65,40 @@ const fetchQuotes = async (symbols: string[]) => {
   }
 };
 
-const symbols = computed(() => favorites.items.map((i) => i.symbol));
+const symbols = computed(() => group.value?.items.map((i) => i.symbol) ?? []);
 
 watch(symbols, (s) => fetchQuotes(s), { immediate: true });
 
 const goToStock = (symbol: string) => {
   trackEvent('watchlist_stock_click', { symbol });
   router.push(`/app/${symbol}`);
+};
+
+const removeStock = async (symbol: string) => {
+  if (pendingSymbol.value) return;
+  pendingSymbol.value = symbol;
+  notice.value = null;
+  try {
+    if (!(await favorites.remove(groupNo.value, symbol))) notice.value = '移除失敗，請稍後再試';
+  } finally {
+    pendingSymbol.value = null;
+  }
+};
+
+// 移到其他群組：先加入新群組，成功後再從目前群組移除（store.move）
+const moveStock = async (symbol: string, event: Event) => {
+  const select = event.target as HTMLSelectElement;
+  const to = Number(select.value);
+  select.value = '';
+  if (!to || pendingSymbol.value) return;
+  pendingSymbol.value = symbol;
+  notice.value = null;
+  try {
+    const result = await favorites.move(groupNo.value, to, symbol);
+    if (!result.ok) notice.value = addResultMessage(result, favorites.groupOf(to)?.name);
+  } finally {
+    pendingSymbol.value = null;
+  }
 };
 
 const formatPrice = (v: number | null): string =>
@@ -95,7 +130,7 @@ onMounted(() => {
           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
         </svg>
         <h1 class="text-xl font-bold">我的最愛</h1>
-        <p class="text-fg-secondary text-sm">登入後即可將個股加入我的最愛，快速追蹤你關注的個股</p>
+        <p class="text-fg-secondary text-sm">登入後即可將個股分組收藏，快速追蹤你關注的個股</p>
         <button
           @click="auth.openLogin('watchlist_page')"
           class="mt-2 px-6 py-2 rounded-lg bg-accent hover:bg-accent-hover text-fg-strong text-sm font-medium transition-colors shadow-lg shadow-accent/20"
@@ -106,17 +141,17 @@ onMounted(() => {
 
       <!-- 已登入 -->
       <template v-else>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-3">
           <div class="flex items-baseline gap-2">
             <h1 class="text-xl font-bold">我的最愛</h1>
             <span v-if="favorites.loaded" class="text-sm text-fg-muted tabular-nums">
-              {{ favorites.count }} / {{ favorites.limit }}
+              共 {{ favorites.totalCount }} 檔・每組最多 {{ favorites.maxPerGroup }} 檔
             </span>
           </div>
           <button
             @click="showAddModal = true"
-            :disabled="favorites.isFull"
-            :title="favorites.isFull ? `已達上限（${favorites.limit} 檔）` : undefined"
+            :disabled="!favorites.loaded || groupFull"
+            :title="groupFull && group ? `${group.name}已滿（每組 ${favorites.maxPerGroup} 檔）` : undefined"
             class="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-fg-strong text-sm font-medium transition-colors flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -126,21 +161,46 @@ onMounted(() => {
           </button>
         </div>
 
-        <p v-if="favorites.isFull" class="text-xs text-warning-fg mb-3">
-          已達我的最愛上限（{{ favorites.limit }} 檔），移除部分個股後才能再加入
+        <!-- 群組分頁（名稱與數量由後端決定；手機可橫向捲動） -->
+        <div
+          v-if="favorites.loaded"
+          class="flex gap-1.5 overflow-x-auto pb-1 mb-3 -mx-1 px-1"
+          role="tablist"
+          aria-label="我的最愛群組"
+        >
+          <button
+            v-for="g in favorites.groups"
+            :key="g.group_no"
+            role="tab"
+            :aria-selected="g.group_no === groupNo"
+            @click="favorites.setActiveGroup(g.group_no)"
+            :class="[
+              'shrink-0 px-3 py-1.5 rounded-full text-sm transition-colors tabular-nums',
+              g.group_no === groupNo
+                ? 'bg-accent text-fg-strong'
+                : 'bg-control text-fg-secondary hover:bg-control-hover hover:text-fg-strong'
+            ]"
+          >
+            {{ g.name }} <span class="text-xs opacity-80">{{ g.items.length }}/{{ favorites.maxPerGroup }}</span>
+          </button>
+        </div>
+
+        <p v-if="groupFull && group" class="text-xs text-warning-fg mb-3">
+          {{ group.name }}已滿（每組 {{ favorites.maxPerGroup }} 檔），移除或移至其他群組後才能再加入
         </p>
+        <p v-if="notice" class="text-xs text-warning-fg mb-3">{{ notice }}</p>
 
         <!-- 載入中 -->
         <div v-if="favorites.isLoading && !favorites.loaded" class="py-20 text-center text-sm text-fg-muted">
           載入中…
         </div>
 
-        <!-- 空清單 -->
+        <!-- 空群組 -->
         <div
-          v-else-if="favorites.items.length === 0"
+          v-else-if="!group || group.items.length === 0"
           class="flex flex-col items-center justify-center py-20 text-center gap-3 border border-dashed border-line rounded-2xl"
         >
-          <p class="text-fg-muted text-sm">還沒有加入任何個股</p>
+          <p class="text-fg-muted text-sm">{{ group?.name ?? '這個群組' }}還沒有加入任何個股</p>
           <button
             @click="showAddModal = true"
             class="px-4 py-1.5 rounded-lg bg-hover hover:bg-control-hover text-fg hover:text-fg-strong text-sm transition-colors"
@@ -157,63 +217,88 @@ onMounted(() => {
             <span class="text-right w-20 sm:w-auto">股價</span>
             <span class="text-right w-24 sm:w-auto">漲跌</span>
             <span class="hidden sm:block text-right">成交量</span>
-            <span class="hidden sm:block w-8"></span>
+            <span class="hidden sm:block w-28"></span>
           </div>
 
-          <button
-            v-for="item in favorites.items"
+          <div
+            v-for="item in group.items"
             :key="item.symbol"
-            @click="goToStock(item.symbol)"
-            class="w-full grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1.2fr_1fr_1fr_1fr_auto] items-center gap-2 px-4 py-3 border-t border-line-subtle hover:bg-hover transition-colors text-left group"
+            class="relative group border-t border-line-subtle"
           >
-            <!-- 代碼 + 名稱（名稱以後端回傳為準） -->
-            <div class="min-w-0">
-              <p class="text-sm font-medium text-fg-strong truncate">{{ item.name || item.symbol }}</p>
-              <p class="text-xs text-fg-muted font-mono">{{ item.symbol }}</p>
-            </div>
-
-            <!-- 股價 -->
-            <span class="text-sm text-fg-strong tabular-nums text-right w-20 sm:w-auto">
-              {{ formatPrice(quotes[item.symbol]?.close ?? null) }}
-            </span>
-
-            <!-- 漲跌（台股慣例：紅漲綠跌，同 KZoneApp） -->
-            <span
-              class="text-sm tabular-nums text-right w-24 sm:w-auto"
-              :class="
-                (quotes[item.symbol]?.change ?? 0) > 0
-                  ? 'text-market-up'
-                  : (quotes[item.symbol]?.change ?? 0) < 0
-                    ? 'text-market-down'
-                    : 'text-fg-secondary'
-              "
+            <button
+              @click="goToStock(item.symbol)"
+              class="w-full grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1.2fr_1fr_1fr_1fr_auto] items-center gap-2 px-4 py-3 hover:bg-hover transition-colors text-left"
             >
-              <template v-if="quotes[item.symbol]?.change != null">
-                {{ (quotes[item.symbol]!.change! > 0 ? '+' : '') + quotes[item.symbol]!.change!.toFixed(2) }}
-                ({{ quotes[item.symbol]!.changePercent!.toFixed(2) }}%)
-              </template>
-              <template v-else>—</template>
-            </span>
+              <!-- 代碼 + 名稱（名稱以後端回傳為準） -->
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-fg-strong truncate">{{ item.name || item.symbol }}</p>
+                <p class="text-xs text-fg-muted font-mono">{{ item.symbol }}</p>
+              </div>
 
-            <!-- 成交量（桌面） -->
-            <span class="hidden sm:block text-sm text-fg-secondary tabular-nums text-right">
-              {{ formatVolume(quotes[item.symbol]?.volume ?? null) }}
-            </span>
+              <!-- 股價 -->
+              <span class="text-sm text-fg-strong tabular-nums text-right w-20 sm:w-auto">
+                {{ formatPrice(quotes[item.symbol]?.close ?? null) }}
+              </span>
 
-            <!-- 移除 -->
-            <span class="hidden sm:flex w-8 justify-end">
+              <!-- 漲跌（台股慣例：紅漲綠跌，同 KZoneApp） -->
               <span
-                @click.stop="favorites.remove(item.symbol)"
-                class="p-1 text-fg-subtle opacity-0 group-hover:opacity-100 hover:text-danger-fg transition-all cursor-pointer"
-                role="button"
+                class="text-sm tabular-nums text-right w-24 sm:w-auto"
+                :class="
+                  (quotes[item.symbol]?.change ?? 0) > 0
+                    ? 'text-market-up'
+                    : (quotes[item.symbol]?.change ?? 0) < 0
+                      ? 'text-market-down'
+                      : 'text-fg-secondary'
+                "
+              >
+                <template v-if="quotes[item.symbol]?.change != null">
+                  {{ (quotes[item.symbol]!.change! > 0 ? '+' : '') + quotes[item.symbol]!.change!.toFixed(2) }}
+                  ({{ quotes[item.symbol]!.changePercent!.toFixed(2) }}%)
+                </template>
+                <template v-else>—</template>
+              </span>
+
+              <!-- 成交量（桌面） -->
+              <span class="hidden sm:block text-sm text-fg-secondary tabular-nums text-right">
+                {{ formatVolume(quotes[item.symbol]?.volume ?? null) }}
+              </span>
+
+              <!-- 操作欄位的佔位（實際按鈕在下方，避免巢狀互動元素） -->
+              <span class="hidden sm:block w-28"></span>
+            </button>
+
+            <!-- 操作（桌面，hover 或鍵盤聚焦時顯示）：移至其他群組、從這個群組移除 -->
+            <div class="hidden sm:flex items-center justify-end gap-1 absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              <select
+                :value="''"
+                @change="moveStock(item.symbol, $event)"
+                :disabled="pendingSymbol === item.symbol || otherGroups.length === 0"
+                aria-label="移至其他群組"
+                class="text-xs bg-control text-fg-secondary border border-line rounded-md px-1.5 py-1 focus:outline-none focus:border-accent disabled:opacity-40"
+              >
+                <option value="" disabled>移至…</option>
+                <option
+                  v-for="g in otherGroups"
+                  :key="g.group_no"
+                  :value="g.group_no"
+                  :disabled="favorites.isInGroup(g.group_no, item.symbol) || favorites.isGroupFull(g.group_no)"
+                >
+                  {{ g.name }}{{ favorites.isInGroup(g.group_no, item.symbol) ? '（已在）' : favorites.isGroupFull(g.group_no) ? '（已滿）' : '' }}
+                </option>
+              </select>
+              <button
+                @click="removeStock(item.symbol)"
+                :disabled="pendingSymbol === item.symbol"
+                class="p-1 text-fg-subtle hover:text-danger-fg transition-colors disabled:opacity-40"
                 aria-label="移除"
+                :title="`從${group.name}移除`"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </span>
-            </span>
-          </button>
+              </button>
+            </div>
+          </div>
         </div>
 
         <p v-if="loadingQuotes" class="text-xs text-fg-subtle mt-3 text-center">報價載入中…</p>

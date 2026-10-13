@@ -1,44 +1,58 @@
 import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
 import { useAuthStore } from './authStore';
-import { stockApi, ApiError, type FavoriteItem } from '../api/stockApi';
+import { stockApi, ApiError, type FavoriteGroup, type FavoriteGroups } from '../api/stockApi';
 import { trackEvent } from '../lib/analytics';
 
-// 我的最愛：後端 /api/favorites 為唯一資料來源（取代舊的 localStorage 自選股群組）。
-// 單一清單、上限依 member_level 由後端決定（一律用 GET 回傳的 limit，不在前端寫死）。
+// 我的最愛（群組版）：後端 /api/favorites 為唯一資料來源，見 frontend-favorites-integration.md。
+// 群組數、名稱、每組上限都由後端依 member_level 決定，前端一律用 GET 回傳值，不寫死。
+// 同一檔股票可以同時在多個群組；加入 / 移除都以「群組 + 代號」為單位。
 
 export type AddResult =
   | { ok: true }
-  | { ok: false; reason: 'limit' | 'not_found' | 'error'; limit?: number };
+  | { ok: false; reason: 'limit' | 'group_not_found' | 'not_found' | 'error'; limit?: number };
 
-// 舊版 localStorage 自選股群組（kzone:watchlist:<email>）→ 後端清單的一次性搬移
+// 給 UI 用的錯誤文案；groupName 請傳後端回傳的群組名稱
+export function addResultMessage(result: AddResult, groupName = '這個群組'): string | null {
+  if (result.ok) return null;
+  switch (result.reason) {
+    case 'limit':
+      return `${groupName}已滿（每組 ${result.limit} 檔），請先移除部分個股`;
+    case 'group_not_found':
+      return '群組已變更，請重新選擇';
+    case 'not_found':
+      return '這檔股票目前無法加入我的最愛';
+    default:
+      return '操作失敗，請稍後再試';
+  }
+}
+
+// 目前選中的群組編號（跨頁共用：我的最愛頁、/app 側欄、新增個股 modal）
+const ACTIVE_GROUP_KEY = 'kzone:favorites-active-group';
+
+function readActiveGroup(): number {
+  try {
+    const n = Number(localStorage.getItem(ACTIVE_GROUP_KEY));
+    return Number.isInteger(n) && n >= 1 ? n : 1;
+  } catch {
+    return 1;
+  }
+}
+
+// 舊版 localStorage 自選股群組（kzone:watchlist:<email>）→ 後端群組的一次性搬移：
+// 依原本的群組順序對應到群組一、群組二……，後端群組不夠時其餘略過。
 const legacyKeyFor = (email: string) => `kzone:watchlist:${email}`;
-const migratedKeyFor = (email: string) => `kzone:favorites-migrated:${email}`;
+const migratedKeyFor = (email: string) => `kzone:favorites-migrated-v2:${email}`;
 
-function legacySymbols(email: string): string[] {
+function legacyGroups(email: string): string[][] {
   try {
     const raw = localStorage.getItem(legacyKeyFor(email));
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as {
-      activeGroupId?: string;
-      groups?: Array<{ id: string; symbols?: unknown[] }>;
-    };
+    const parsed = JSON.parse(raw) as { groups?: Array<{ symbols?: unknown[] }> };
     if (!Array.isArray(parsed.groups)) return [];
-    // 啟用中的群組優先，其餘群組依序補上（去重）
-    const ordered = [...parsed.groups].sort((a, b) =>
-      a.id === parsed.activeGroupId ? -1 : b.id === parsed.activeGroupId ? 1 : 0
+    return parsed.groups.map((g) =>
+      Array.from(new Set((g.symbols ?? []).filter((s): s is string => typeof s === 'string')))
     );
-    const seen = new Set<string>();
-    const symbols: string[] = [];
-    for (const g of ordered) {
-      for (const s of g.symbols ?? []) {
-        if (typeof s === 'string' && !seen.has(s)) {
-          seen.add(s);
-          symbols.push(s);
-        }
-      }
-    }
-    return symbols;
   } catch {
     return [];
   }
@@ -47,31 +61,79 @@ function legacySymbols(email: string): string[] {
 export const useFavoritesStore = defineStore('favorites', () => {
   const auth = useAuthStore();
 
-  const items = ref<FavoriteItem[]>([]);
-  const limit = ref(0);
+  const groups = ref<FavoriteGroup[]>([]);
+  const maxGroups = ref(0);
+  const maxPerGroup = ref(0);
   const isLoading = ref(false);
   const loaded = ref(false);
+  const activeGroupNo = ref(readActiveGroup());
 
-  const count = computed(() => items.value.length);
-  // 後端調低上限時 count 可能 > limit：可移除、不能再加
-  const isFull = computed(() => loaded.value && items.value.length >= limit.value);
-  const isFavorite = (symbol: string) => items.value.some((i) => i.symbol === symbol);
+  // groupNo 可能來自 <select> 等字串來源，一律轉 number 比對
+  const groupOf = (groupNo: number | string) =>
+    groups.value.find((g) => g.group_no === Number(groupNo));
+  const activeGroup = computed<FavoriteGroup | null>(
+    () => groupOf(activeGroupNo.value) ?? groups.value[0] ?? null
+  );
+  const totalCount = computed(() => groups.value.reduce((n, g) => n + g.items.length, 0));
 
-  // 舊 localStorage 自選股 → 後端（僅在後端清單為空時搬一次；塞到額滿為止）
+  const isInGroup = (groupNo: number, symbol: string) =>
+    groupOf(groupNo)?.items.some((i) => i.symbol === symbol) ?? false;
+  const groupsContaining = (symbol: string) =>
+    groups.value.filter((g) => g.items.some((i) => i.symbol === symbol)).map((g) => g.group_no);
+  const isFavorite = (symbol: string) => groupsContaining(symbol).length > 0;
+  // 會員等級被調降時群組內數量可能 > 上限：可移除、不能再加
+  const isGroupFull = (groupNo: number) => {
+    const g = groupOf(groupNo);
+    return !g || g.items.length >= maxPerGroup.value;
+  };
+
+  const setActiveGroup = (groupNo: number) => {
+    activeGroupNo.value = groupNo;
+    try {
+      localStorage.setItem(ACTIVE_GROUP_KEY, String(groupNo));
+    } catch {
+      /* 無痕模式 / 配額滿時忽略 */
+    }
+  };
+
+  const applyGroups = (data: FavoriteGroups) => {
+    maxGroups.value = data.max_groups;
+    maxPerGroup.value = data.max_stocks_per_group;
+    groups.value = data.groups.map((g) => ({ ...g, items: g.items ?? [] }));
+    // 目前選的群組不存在（例如等級調降後群組變少）就退回第一個
+    const first = groups.value[0];
+    if (first && !groupOf(activeGroupNo.value)) setActiveGroup(first.group_no);
+  };
+
+  // 把一筆後端回傳的資料放進群組：201 放最前面；200（本來就在）不動，維持與後端相同的順序
+  const upsertItem = (groupNo: number, item: FavoriteGroup['items'][number]) => {
+    const g = groupOf(groupNo);
+    if (g && !g.items.some((i) => i.symbol === item.symbol)) {
+      g.items = [item, ...g.items];
+      g.count = g.items.length;
+    }
+  };
+
   const migrateLegacy = async (email: string) => {
     if (localStorage.getItem(migratedKeyFor(email))) return;
-    const symbols = legacySymbols(email);
+    const legacy = legacyGroups(email);
     try {
-      if (items.value.length === 0 && symbols.length > 0) {
+      if (totalCount.value === 0 && legacy.some((g) => g.length > 0)) {
         let migrated = 0;
-        for (const symbol of symbols) {
-          try {
-            const item = await stockApi.addFavorite(symbol);
-            items.value = [item, ...items.value.filter((i) => i.symbol !== item.symbol)];
-            migrated++;
-          } catch (e) {
-            if (e instanceof ApiError && e.status === 409) break; // 額滿就停
-            // 404（已下架）等其他錯誤：跳過該檔繼續
+        const n = Math.min(legacy.length, groups.value.length);
+        for (let k = 0; k < n; k++) {
+          const target = groups.value[k];
+          const symbols = legacy[k];
+          if (!target || !symbols) continue;
+          for (const symbol of symbols) {
+            try {
+              const { group_no, ...item } = await stockApi.addFavorite(target.group_no, symbol);
+              upsertItem(group_no, item);
+              migrated++;
+            } catch (e) {
+              if (e instanceof ApiError && e.status === 409) break; // 這組滿了，換下一組
+              // 404（已下架）等其他錯誤：跳過該檔繼續
+            }
           }
         }
         if (migrated > 0) trackEvent('watchlist_migrated', { count: migrated });
@@ -84,16 +146,15 @@ export const useFavoritesStore = defineStore('favorites', () => {
 
   const load = async () => {
     if (!auth.isLoggedIn) {
-      items.value = [];
-      limit.value = 0;
+      groups.value = [];
+      maxGroups.value = 0;
+      maxPerGroup.value = 0;
       loaded.value = false;
       return;
     }
     isLoading.value = true;
     try {
-      const data = await stockApi.getFavorites();
-      limit.value = data.limit;
-      items.value = data.items;
+      applyGroups(await stockApi.getFavorites());
       loaded.value = true;
       if (auth.user?.email) await migrateLegacy(auth.user.email);
     } catch {
@@ -103,55 +164,83 @@ export const useFavoritesStore = defineStore('favorites', () => {
     }
   };
 
-  const add = async (symbol: string): Promise<AddResult> => {
+  const add = async (groupNo: number, symbol: string): Promise<AddResult> => {
     try {
-      const item = await stockApi.addFavorite(symbol);
-      // 201 或 200 都放最前面；先濾掉同代號避免 200 時重複
-      items.value = [item, ...items.value.filter((i) => i.symbol !== item.symbol)];
-      trackEvent('watchlist_add_stock', { symbol });
+      const { group_no, ...item } = await stockApi.addFavorite(groupNo, symbol);
+      upsertItem(group_no, item);
+      trackEvent('watchlist_add_stock', { symbol, group_no });
       return { ok: true };
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) {
-        // 以後端回傳的上限為準（會員等級可能剛被調整）
-        if (typeof e.body?.limit === 'number') limit.value = e.body.limit;
-        return { ok: false, reason: 'limit', limit: limit.value };
+        // 以後端回傳的每組上限為準；畫面上沒滿卻 409 代表資料過期（例如別的裝置加過），重抓
+        if (typeof e.body?.limit === 'number') maxPerGroup.value = e.body.limit;
+        if (!isGroupFull(groupNo)) void load();
+        return { ok: false, reason: 'limit', limit: maxPerGroup.value };
       }
-      if (e instanceof ApiError && e.status === 404) return { ok: false, reason: 'not_found' };
+      if (e instanceof ApiError && e.status === 404) {
+        if (e.body?.error === 'group not found') {
+          await load(); // 群組數可能因等級調整而改變
+          return { ok: false, reason: 'group_not_found' };
+        }
+        return { ok: false, reason: 'not_found' };
+      }
       return { ok: false, reason: 'error' };
     }
   };
 
-  const remove = async (symbol: string): Promise<boolean> => {
-    const before = items.value;
-    items.value = items.value.filter((i) => i.symbol !== symbol); // 樂觀更新
+  const remove = async (groupNo: number, symbol: string): Promise<boolean> => {
+    const g = groupOf(groupNo);
+    if (!g) return false;
+    const before = g.items;
+    g.items = g.items.filter((i) => i.symbol !== symbol); // 樂觀更新
+    g.count = g.items.length;
     try {
-      await stockApi.removeFavorite(symbol);
-      trackEvent('watchlist_remove_stock', { symbol });
+      await stockApi.removeFavorite(groupNo, symbol);
+      trackEvent('watchlist_remove_stock', { symbol, group_no: groupNo });
       return true;
-    } catch {
-      items.value = before; // 失敗還原
+    } catch (e) {
+      g.items = before; // 失敗還原
+      g.count = before.length;
+      if (e instanceof ApiError && e.status === 404) await load();
       return false;
     }
   };
 
-  const toggle = async (symbol: string): Promise<AddResult | boolean> =>
-    isFavorite(symbol) ? remove(symbol) : add(symbol);
+  // 在這個群組裡就移除，不在就加入
+  const toggleInGroup = async (groupNo: number, symbol: string): Promise<AddResult | boolean> =>
+    isInGroup(groupNo, symbol) ? remove(groupNo, symbol) : add(groupNo, symbol);
+
+  // 沒有「移動」API：先加入新群組，成功後再從舊群組移除（同一群組什麼都不做，否則會把它刪掉）
+  const move = async (fromGroupNo: number, toGroupNo: number, symbol: string): Promise<AddResult> => {
+    if (Number(fromGroupNo) === Number(toGroupNo)) return { ok: true };
+    const result = await add(toGroupNo, symbol);
+    if (result.ok) await remove(fromGroupNo, symbol);
+    return result;
+  };
 
   // 登入 / 登出 / 換帳號時重新同步
   watch(() => auth.user?.email ?? null, () => load());
   load();
 
   return {
-    items,
-    limit,
-    count,
+    groups,
+    maxGroups,
+    maxPerGroup,
+    totalCount,
     isLoading,
     loaded,
-    isFull,
+    activeGroupNo,
+    activeGroup,
+    groupOf,
+    isInGroup,
+    groupsContaining,
     isFavorite,
+    isGroupFull,
+    setActiveGroup,
     load,
     add,
     remove,
-    toggle
+    toggleInGroup,
+    move
   };
 });

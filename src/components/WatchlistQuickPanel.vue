@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// /app 側欄的我的最愛快速面板：點個股直接換圖，管理則導去 /watchlist。
+// /app 側欄的我的最愛快速面板：切群組、點個股直接換圖，管理則導去 /watchlist。
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStockStore } from '../stores/stockStore';
@@ -33,8 +33,8 @@ const selectStock = (symbol: string) => {
           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
         </svg>
         我的最愛
-        <span v-if="favorites.loaded" class="text-[10px] text-fg-muted font-normal tabular-nums">
-          {{ favorites.count }}/{{ favorites.limit }}
+        <span v-if="favorites.loaded && favorites.activeGroup" class="text-[10px] text-fg-muted font-normal tabular-nums">
+          {{ favorites.activeGroup.items.length }}/{{ favorites.maxPerGroup }}
         </span>
         <svg
           :class="['w-3 h-3 text-fg-muted transition-transform', collapsed ? '-rotate-90' : '']"
@@ -52,13 +52,32 @@ const selectStock = (symbol: string) => {
     </div>
 
     <template v-if="!collapsed">
-      <!-- 個股清單（依加入時間新到舊） -->
-      <div v-if="favorites.items.length === 0" class="px-3 pb-3 text-xs text-fg-subtle">
-        還沒有加入個股，<button @click="router.push('/watchlist')" class="text-accent hover:underline">去加入</button>
+      <!-- 群組切換（名稱與數量由後端決定） -->
+      <div v-if="favorites.groups.length > 0" class="px-3 pb-2 flex flex-wrap gap-1" role="tablist" aria-label="我的最愛群組">
+        <button
+          v-for="g in favorites.groups"
+          :key="g.group_no"
+          role="tab"
+          :aria-selected="g.group_no === favorites.activeGroup?.group_no"
+          @click="favorites.setActiveGroup(g.group_no)"
+          :class="[
+            'px-2 py-0.5 rounded-full text-[11px] transition-colors tabular-nums',
+            g.group_no === favorites.activeGroup?.group_no
+              ? 'bg-accent text-fg-strong'
+              : 'bg-control text-fg-secondary hover:bg-control-hover hover:text-fg-strong'
+          ]"
+        >
+          {{ g.name }}<span v-if="g.items.length" class="ml-0.5 opacity-70">{{ g.items.length }}</span>
+        </button>
+      </div>
+
+      <!-- 目前群組的個股（依加入時間新到舊） -->
+      <div v-if="!favorites.activeGroup || favorites.activeGroup.items.length === 0" class="px-3 pb-3 text-xs text-fg-subtle">
+        {{ favorites.activeGroup?.name ?? '' }}還沒有個股，<button @click="router.push('/watchlist')" class="text-accent hover:underline">去加入</button>
       </div>
       <div v-else class="pb-2 max-h-44 overflow-y-auto">
         <button
-          v-for="item in favorites.items"
+          v-for="item in favorites.activeGroup.items"
           :key="item.symbol"
           @click="selectStock(item.symbol)"
           :class="[
