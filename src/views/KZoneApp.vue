@@ -9,7 +9,7 @@ import MultiPaneChart from '../components/MultiPaneChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
-import WatchlistStarButton from '../components/WatchlistStarButton.vue';
+import FavoriteButton from '../components/FavoriteButton.vue';
 import WatchlistQuickPanel from '../components/WatchlistQuickPanel.vue';
 import ThemeToggle from '../components/ThemeToggle.vue';
 import { trackEvent } from '../lib/analytics';
@@ -267,7 +267,7 @@ watch(() => store.stockId, (id) => {
           class="text-series-gold font-semibold text-base"
           style="text-shadow: 0 0 8px color-mix(in srgb, var(--ds-brand-gold) 35%, transparent);"
         >{{ store.stockName }}</span>
-        <WatchlistStarButton v-if="!store.isMarketView" :symbol="store.stockId" />
+        <FavoriteButton v-if="!store.isMarketView" :symbol="store.stockId" source="kline_title" />
         <span class="text-fg-strong text-sm font-medium">{{ formatPrice(latestData.close) }}</span>
         <span
           v-if="priceChange"

@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useStockStore } from '../stores/stockStore'
 import { trackEvent } from '../lib/analytics'
+import FavoriteButton from './FavoriteButton.vue'
 
 const emit = defineEmits<{ stockSelected: [] }>()
 
@@ -102,6 +103,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
           <div class="symbol-group">
             <span class="symbol">{{ pick.symbol }}</span>
             <span class="name">{{ pick.name }}</span>
+            <FavoriteButton :symbol="pick.symbol" size="sm" source="alpha_pick" />
           </div>
           <div class="price-group">
             <span class="price">{{ pick.close }}</span>
@@ -132,6 +134,7 @@ const fmtSigned = (v: number | null | undefined, digits: number): string =>
           <div class="symbol-group">
             <span class="symbol">{{ alert.symbol }}</span>
             <span class="name">{{ alert.name }}</span>
+            <FavoriteButton :symbol="alert.symbol" size="sm" source="alpha_sell" />
           </div>
           <div class="price-group">
             <span class="price">{{ alert.close }}</span>
