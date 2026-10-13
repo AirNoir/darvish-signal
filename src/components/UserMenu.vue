@@ -46,7 +46,7 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
     <template v-else>
       <button
         @click="menuOpen = !menuOpen"
-        class="flex items-center gap-1.5 rounded-full hover:ring-2 hover:ring-accent/50 transition-shadow"
+        class="relative flex items-center gap-1.5 rounded-full hover:ring-2 hover:ring-accent/50 transition-shadow"
         aria-label="使用者選單"
       >
         <img
@@ -64,6 +64,15 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
         >
           {{ (auth.user?.name ?? auth.user?.email ?? '?').charAt(0).toUpperCase() }}
         </span>
+        <!-- 創始會員：頭像右下角常駐小徽章，不用點開選單就看得到 -->
+        <span
+          v-if="isFounder"
+          data-founder-avatar-icon
+          class="absolute -bottom-0.5 -right-1 w-4 h-4 rounded-full bg-surface flex items-center justify-center"
+          title="創始會員"
+        >
+          <img src="/badges/founder/icon/founder-icon.svg" alt="" class="w-3.5 h-3.5" draggable="false" />
+        </span>
       </button>
 
       <div
@@ -71,11 +80,12 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
         class="absolute right-0 top-full mt-2 w-56 bg-surface border border-line rounded-xl shadow-2xl overflow-hidden z-50"
       >
         <div class="px-4 py-3 border-b border-line-subtle">
-          <p class="text-fg-strong text-sm font-medium truncate flex items-center gap-1.5">
-            <span class="truncate">{{ auth.user?.name ?? '使用者' }}</span>
-            <FoundingBadge v-if="isFounder" class="shrink-0" />
-          </p>
-          <p class="text-fg-muted text-xs truncate">{{ auth.user?.email }}</p>
+          <!-- 名字旁放官方 tag（含「創始會員」文字）；名字太長就讓 tag 換到下一行 -->
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+            <span class="text-fg-strong text-sm font-medium truncate max-w-full">{{ auth.user?.name ?? '使用者' }}</span>
+            <FoundingBadge v-if="isFounder" show-label class="shrink-0" />
+          </div>
+          <p class="text-fg-muted text-xs truncate mt-0.5">{{ auth.user?.email }}</p>
         </div>
         <button
           @click="goWatchlist"
@@ -84,7 +94,7 @@ onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
           <svg class="w-4 h-4 text-series-gold" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
           </svg>
-          我的自選股
+          我的最愛
         </button>
         <button
           @click="handleSignOut"

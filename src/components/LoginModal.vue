@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
 import { useAuthStore } from '../stores/authStore';
+import FounderPromo from './FounderPromo.vue';
 
 const auth = useAuthStore();
 const buttonHost = ref<HTMLDivElement | null>(null);
@@ -44,8 +45,11 @@ watch(
           <img src="/logo.png" alt="達比 K-Zone" class="w-14 h-14 rounded-full" />
           <div>
             <h2 class="text-fg-strong text-lg font-bold tracking-wide">登入達比 K-Zone</h2>
-            <p class="text-fg-secondary text-sm mt-1">登入後即可使用「我的自選股」等個人化功能</p>
+            <p class="text-fg-secondary text-sm mt-1">登入後即可使用「我的最愛」等個人化功能</p>
           </div>
+
+          <!-- 創始會員誘因（招募截止後由 FOUNDER_ENROLLMENT_OPEN 關掉） -->
+          <FounderPromo class="w-full" />
 
           <div class="min-h-[44px] flex items-center justify-center mt-2">
             <div v-if="auth.isConfigured" ref="buttonHost"></div>

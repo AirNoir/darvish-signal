@@ -10,6 +10,7 @@ import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
 import FavoriteButton from '../components/FavoriteButton.vue';
+import FounderPromo from '../components/FounderPromo.vue';
 import WatchlistQuickPanel from '../components/WatchlistQuickPanel.vue';
 import ThemeToggle from '../components/ThemeToggle.vue';
 import { trackEvent } from '../lib/analytics';
@@ -242,7 +243,8 @@ watch(() => store.stockId, (id) => {
   >
     <img src="/logo.png" alt="達比 K-Zone" class="w-14 h-14 rounded-full" />
     <h1 class="text-fg-strong text-xl font-bold">登入達比 K-Zone</h1>
-    <p class="text-fg-secondary text-sm">K 線圖、技術訊號與自選股為會員功能，登入後即可使用</p>
+    <p class="text-fg-secondary text-sm">K 線圖、技術訊號與我的最愛為會員功能，登入後即可使用</p>
+    <FounderPromo class="max-w-sm" />
     <button
       @click="auth.openLogin('app_page')"
       class="mt-2 px-6 py-2 rounded-lg bg-accent hover:bg-accent-hover text-fg-on-accent text-sm font-medium transition-colors shadow-lg shadow-accent/20"

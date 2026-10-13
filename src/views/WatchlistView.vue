@@ -2,6 +2,7 @@
 import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AppHeader from '../components/AppHeader.vue';
+import FounderPromo from '../components/FounderPromo.vue';
 import WatchlistAddStockModal from '../components/WatchlistAddStockModal.vue';
 import { useAuthStore } from '../stores/authStore';
 import { useStockStore } from '../stores/stockStore';
@@ -186,6 +187,7 @@ onMounted(() => {
         </svg>
         <h1 class="text-xl font-bold">我的最愛</h1>
         <p class="text-fg-secondary text-sm">登入後即可將個股分組收藏，快速追蹤你關注的個股</p>
+        <FounderPromo class="max-w-sm" />
         <button
           @click="auth.openLogin('watchlist_page')"
           class="mt-2 px-6 py-2 rounded-lg bg-accent hover:bg-accent-hover text-fg-strong text-sm font-medium transition-colors shadow-lg shadow-accent/20"
