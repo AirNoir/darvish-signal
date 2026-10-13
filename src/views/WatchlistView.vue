@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AppHeader from '../components/AppHeader.vue';
 import WatchlistAddStockModal from '../components/WatchlistAddStockModal.vue';
 import { useAuthStore } from '../stores/authStore';
 import { useStockStore } from '../stores/stockStore';
-import { useFavoritesStore, addResultMessage } from '../stores/favoritesStore';
+import {
+  useFavoritesStore,
+  addResultMessage,
+  renameResultMessage,
+  MAX_GROUP_NAME_LENGTH
+} from '../stores/favoritesStore';
 import { stockApi } from '../api/stockApi';
 import { trackEvent } from '../lib/analytics';
 
@@ -101,6 +106,46 @@ const moveStock = async (symbol: string, event: Event) => {
   }
 };
 
+// 群組改名：鉛筆 → 行內輸入框（Enter 儲存、Esc 取消）；成功與否都由 store 回報
+const renaming = ref(false);
+const renameDraft = ref('');
+const renamePending = ref(false);
+const renameInput = ref<HTMLInputElement | null>(null);
+const renameValid = computed(() => {
+  const n = renameDraft.value.trim().length;
+  return n > 0 && n <= MAX_GROUP_NAME_LENGTH;
+});
+
+const startRename = async () => {
+  if (!group.value) return;
+  renameDraft.value = group.value.name;
+  notice.value = null;
+  renaming.value = true;
+  await nextTick();
+  renameInput.value?.focus();
+  renameInput.value?.select();
+};
+
+const cancelRename = () => {
+  renaming.value = false;
+  renameDraft.value = '';
+};
+
+const commitRename = async () => {
+  if (!group.value || renamePending.value || !renameValid.value) return;
+  renamePending.value = true;
+  try {
+    const result = await favorites.rename(groupNo.value, renameDraft.value);
+    notice.value = renameResultMessage(result);
+    if (result.ok) cancelRename();
+  } finally {
+    renamePending.value = false;
+  }
+};
+
+// 切換群組時放棄未儲存的改名
+watch(groupNo, cancelRename);
+
 const formatPrice = (v: number | null): string =>
   v == null || !Number.isFinite(v) ? '—' : v.toFixed(2);
 
@@ -183,7 +228,50 @@ onMounted(() => {
           >
             {{ g.name }} <span class="text-xs opacity-80">{{ g.items.length }}/{{ favorites.maxPerGroup }}</span>
           </button>
+          <!-- 重新命名目前群組（不是分頁，放在 tablist 之外的同一列） -->
+          <button
+            v-if="group && !renaming"
+            type="button"
+            @click="startRename"
+            aria-label="重新命名群組"
+            :title="`重新命名${group.name}`"
+            class="shrink-0 p-1.5 rounded-full text-fg-subtle hover:text-fg-strong hover:bg-control transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M4 20h4l10.5-10.5a2.5 2.5 0 00-3.536-3.536L4 16v4z" />
+            </svg>
+          </button>
         </div>
+
+        <!-- 改名表單 -->
+        <form v-if="renaming && group" @submit.prevent="commitRename" class="flex items-center gap-2 mb-3">
+          <input
+            ref="renameInput"
+            v-model="renameDraft"
+            type="text"
+            :maxlength="MAX_GROUP_NAME_LENGTH"
+            :placeholder="group.name"
+            aria-label="群組名稱"
+            @keydown.esc.prevent="cancelRename"
+            class="w-40 px-2.5 py-1.5 rounded-lg bg-control text-sm text-fg-strong border border-line focus:outline-none focus:border-accent"
+          />
+          <span class="text-[11px] text-fg-muted tabular-nums">{{ renameDraft.trim().length }}/{{ MAX_GROUP_NAME_LENGTH }}</span>
+          <button
+            type="submit"
+            :disabled="!renameValid || renamePending"
+            class="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-fg-strong text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            儲存
+          </button>
+          <button
+            type="button"
+            @click="cancelRename"
+            :disabled="renamePending"
+            class="px-3 py-1.5 rounded-lg bg-hover hover:bg-control-hover text-fg text-sm transition-colors disabled:opacity-40"
+          >
+            取消
+          </button>
+        </form>
 
         <p v-if="groupFull && group" class="text-xs text-warning-fg mb-3">
           {{ group.name }}已滿（每組 {{ favorites.maxPerGroup }} 檔），移除或移至其他群組後才能再加入

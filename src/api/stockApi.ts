@@ -216,7 +216,7 @@ export interface FavoriteItem {
 
 export interface FavoriteGroup {
   group_no: number // 從 1 開始；POST / DELETE 用這個值
-  name: string // 「群組一」……由後端給定，直接顯示，不能改名
+  name: string // 預設「群組一」……由後端給定；改名走 renameFavoriteGroup（需後端支援）
   count: number
   items: FavoriteItem[] // 依加入時間新到舊；空群組是 []
 }
@@ -378,6 +378,15 @@ export const stockApi = {
     await apiFetch<null>(
       `${API_BASE_URL}/api/favorites/groups/${groupNo}/${encodeURIComponent(symbol)}`,
       { method: 'DELETE' }
+    )
+  },
+
+  // 群組改名（已向後端提需求，依前端提出的契約先接；後端上線前路由不存在，回 404 且 body 不是 JSON）。
+  // 預期：200 回傳更新後的群組；400 名稱不合法；404 { error: 'group not found' }
+  async renameFavoriteGroup(groupNo: number, name: string): Promise<Pick<FavoriteGroup, 'group_no' | 'name'>> {
+    return apiFetch<Pick<FavoriteGroup, 'group_no' | 'name'>>(
+      `${API_BASE_URL}/api/favorites/groups/${groupNo}`,
+      { method: 'PATCH', body: JSON.stringify({ name }) }
     )
   },
 }

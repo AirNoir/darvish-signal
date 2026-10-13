@@ -27,6 +27,27 @@ export function addResultMessage(result: AddResult, groupName = '這個群組'):
   }
 }
 
+// 群組名稱長度上限（前端先擋；後端若另有限制會回 400）
+export const MAX_GROUP_NAME_LENGTH = 10;
+
+export type RenameResult =
+  | { ok: true }
+  | { ok: false; reason: 'invalid' | 'unsupported' | 'group_not_found' | 'error' };
+
+export function renameResultMessage(result: RenameResult): string | null {
+  if (result.ok) return null;
+  switch (result.reason) {
+    case 'invalid':
+      return `群組名稱需為 1～${MAX_GROUP_NAME_LENGTH} 個字`;
+    case 'unsupported':
+      return '後端尚未開放群組改名，請稍後再試';
+    case 'group_not_found':
+      return '群組已變更，請重新選擇';
+    default:
+      return '改名失敗，請稍後再試';
+  }
+}
+
 // 目前選中的群組編號（跨頁共用：我的最愛頁、/app 側欄、新增個股 modal）
 const ACTIVE_GROUP_KEY = 'kzone:favorites-active-group';
 
@@ -218,6 +239,35 @@ export const useFavoritesStore = defineStore('favorites', () => {
     return result;
   };
 
+  // 群組改名：樂觀更新，失敗還原。名稱是所有頁面共用的 store 資料，改完側欄、愛心選單、modal 會一起更新
+  const rename = async (groupNo: number, name: string): Promise<RenameResult> => {
+    const next = name.trim();
+    if (next.length === 0 || next.length > MAX_GROUP_NAME_LENGTH) return { ok: false, reason: 'invalid' };
+    const g = groupOf(groupNo);
+    if (!g) return { ok: false, reason: 'group_not_found' };
+    if (next === g.name) return { ok: true };
+    const before = g.name;
+    g.name = next;
+    try {
+      const res = await stockApi.renameFavoriteGroup(groupNo, next);
+      if (typeof res?.name === 'string' && res.name.length > 0) g.name = res.name; // 以後端存下來的為準
+      trackEvent('watchlist_rename_group', { group_no: groupNo });
+      return { ok: true };
+    } catch (e) {
+      g.name = before;
+      if (e instanceof ApiError) {
+        if (e.status === 400) return { ok: false, reason: 'invalid' };
+        if (e.status === 404 && e.body?.error === 'group not found') {
+          await load();
+          return { ok: false, reason: 'group_not_found' };
+        }
+        // 路由還不存在：404 但 body 不是 JSON（null），或 405
+        if (e.status === 404 || e.status === 405) return { ok: false, reason: 'unsupported' };
+      }
+      return { ok: false, reason: 'error' };
+    }
+  };
+
   // 登入 / 登出 / 換帳號時重新同步
   watch(() => auth.user?.email ?? null, () => load());
   load();
@@ -241,6 +291,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
     add,
     remove,
     toggleInGroup,
-    move
+    move,
+    rename
   };
 });
