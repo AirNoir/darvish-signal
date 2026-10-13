@@ -9,6 +9,8 @@ import {
   useFavoritesStore,
   addResultMessage,
   renameResultMessage,
+  normalizeGroupName,
+  groupNameLength,
   MAX_GROUP_NAME_LENGTH
 } from '../stores/favoritesStore';
 import { stockApi } from '../api/stockApi';
@@ -111,10 +113,17 @@ const renaming = ref(false);
 const renameDraft = ref('');
 const renamePending = ref(false);
 const renameInput = ref<HTMLInputElement | null>(null);
-const renameValid = computed(() => {
-  const n = renameDraft.value.trim().length;
-  return n > 0 && n <= MAX_GROUP_NAME_LENGTH;
-});
+// 規則與後端相同（1～10 個字，以 code point 計，不含控制字元）
+const renameValid = computed(() => normalizeGroupName(renameDraft.value) !== null);
+const renameLength = computed(() => groupNameLength(renameDraft.value));
+
+// 注音、倉頡等輸入法組字時按的 Enter 是選字，不能送出：
+// Chrome 給 isComposing，Safari 只能靠 keyCode 229。這裡一律擋掉表單的隱式送出，再自己決定要不要存
+const onRenameEnter = (e: KeyboardEvent) => {
+  e.preventDefault();
+  if (e.isComposing || e.keyCode === 229) return;
+  void commitRename();
+};
 
 const startRename = async () => {
   if (!group.value) return;
@@ -249,13 +258,18 @@ onMounted(() => {
             ref="renameInput"
             v-model="renameDraft"
             type="text"
-            :maxlength="MAX_GROUP_NAME_LENGTH"
             :placeholder="group.name"
             aria-label="群組名稱"
+            @keydown.enter="onRenameEnter"
             @keydown.esc.prevent="cancelRename"
             class="w-40 px-2.5 py-1.5 rounded-lg bg-control text-sm text-fg-strong border border-line focus:outline-none focus:border-accent"
           />
-          <span class="text-[11px] text-fg-muted tabular-nums">{{ renameDraft.trim().length }}/{{ MAX_GROUP_NAME_LENGTH }}</span>
+          <!-- 字數以 code point 計（maxlength 以 UTF-16 計會提早擋下 emoji），超過時標示 -->
+          <span
+            class="text-[11px] tabular-nums"
+            :class="renameLength > MAX_GROUP_NAME_LENGTH ? 'text-warning-fg' : 'text-fg-muted'"
+            aria-live="polite"
+          >{{ renameLength }}/{{ MAX_GROUP_NAME_LENGTH }}</span>
           <button
             type="submit"
             :disabled="!renameValid || renamePending"

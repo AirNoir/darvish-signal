@@ -27,8 +27,18 @@ export function addResultMessage(result: AddResult, groupName = '這個群組'):
   }
 }
 
-// 群組名稱長度上限（前端先擋；後端若另有限制會回 400）
+// 群組名稱規則（與後端相同，文件 §3.4）：去掉前後空白後 1～10 個字，以 Unicode code point 計
+// （用 [...name].length，不用 name.length，部分 emoji 會被算成 2），不能含換行、tab 等控制字元。
 export const MAX_GROUP_NAME_LENGTH = 10;
+export const groupNameLength = (input: string): number => [...input.trim()].length;
+
+// 合法時回傳去掉空白後的名稱，不合法回 null
+export function normalizeGroupName(input: string): string | null {
+  const name = input.trim();
+  const length = [...name].length;
+  if (length === 0 || length > MAX_GROUP_NAME_LENGTH || /\p{Cc}/u.test(name)) return null;
+  return name;
+}
 
 export type RenameResult =
   | { ok: true }
@@ -38,7 +48,7 @@ export function renameResultMessage(result: RenameResult): string | null {
   if (result.ok) return null;
   switch (result.reason) {
     case 'invalid':
-      return `群組名稱需為 1～${MAX_GROUP_NAME_LENGTH} 個字`;
+      return `群組名稱需為 1～${MAX_GROUP_NAME_LENGTH} 個字，且不能含換行`;
     case 'unsupported':
       return '後端尚未開放群組改名，請稍後再試';
     case 'group_not_found':
@@ -240,17 +250,17 @@ export const useFavoritesStore = defineStore('favorites', () => {
   };
 
   // 群組改名：樂觀更新，失敗還原。名稱是所有頁面共用的 store 資料，改完側欄、愛心選單、modal 會一起更新
-  const rename = async (groupNo: number, name: string): Promise<RenameResult> => {
-    const next = name.trim();
-    if (next.length === 0 || next.length > MAX_GROUP_NAME_LENGTH) return { ok: false, reason: 'invalid' };
+  const rename = async (groupNo: number, input: string): Promise<RenameResult> => {
+    const next = normalizeGroupName(input);
+    if (next === null) return { ok: false, reason: 'invalid' };
     const g = groupOf(groupNo);
     if (!g) return { ok: false, reason: 'group_not_found' };
     if (next === g.name) return { ok: true };
     const before = g.name;
     g.name = next;
     try {
-      const res = await stockApi.renameFavoriteGroup(groupNo, next);
-      if (typeof res?.name === 'string' && res.name.length > 0) g.name = res.name; // 以後端存下來的為準
+      const saved = await stockApi.renameFavoriteGroup(groupNo, next);
+      if (typeof saved?.name === 'string' && saved.name.length > 0) g.name = saved.name; // 以後端存下來的為準
       trackEvent('watchlist_rename_group', { group_no: groupNo });
       return { ok: true };
     } catch (e) {
@@ -261,7 +271,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
           await load();
           return { ok: false, reason: 'group_not_found' };
         }
-        // 路由還不存在：404 但 body 不是 JSON（null），或 405
+        // 該環境的後端還沒部署改名路由：404 但 body 不是 JSON（null），或 405
         if (e.status === 404 || e.status === 405) return { ok: false, reason: 'unsupported' };
       }
       return { ok: false, reason: 'error' };

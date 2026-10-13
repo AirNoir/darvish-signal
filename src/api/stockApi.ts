@@ -216,7 +216,7 @@ export interface FavoriteItem {
 
 export interface FavoriteGroup {
   group_no: number // 從 1 開始；POST / DELETE 用這個值
-  name: string // 預設「群組一」……由後端給定；改名走 renameFavoriteGroup（需後端支援）
+  name: string // 使用者自訂名稱，或預設的「群組一」……；是使用者輸入，一律當純文字顯示（{{ }} 已轉義）
   count: number
   items: FavoriteItem[] // 依加入時間新到舊；空群組是 []
 }
@@ -229,6 +229,12 @@ export interface FavoriteGroups {
 
 export interface FavoriteGroupItem extends FavoriteItem {
   group_no: number
+}
+
+// PUT /api/favorites/groups/:no 的回應：name 是後端去掉前後空白後實際存下的名稱
+export interface FavoriteGroupName {
+  group_no: number
+  name: string
 }
 
 // 401 專用錯誤：呼叫端可用 instanceof 區分「需要重新登入」與一般失敗。
@@ -381,13 +387,13 @@ export const stockApi = {
     )
   },
 
-  // 群組改名（已向後端提需求，依前端提出的契約先接；後端上線前路由不存在，回 404 且 body 不是 JSON）。
-  // 預期：200 回傳更新後的群組；400 名稱不合法；404 { error: 'group not found' }
-  async renameFavoriteGroup(groupNo: number, name: string): Promise<Pick<FavoriteGroup, 'group_no' | 'name'>> {
-    return apiFetch<Pick<FavoriteGroup, 'group_no' | 'name'>>(
-      `${API_BASE_URL}/api/favorites/groups/${groupNo}`,
-      { method: 'PATCH', body: JSON.stringify({ name }) }
-    )
+  // 群組改名（文件 §3.4）：名稱請先用 favoritesStore.normalizeGroupName 檢查。
+  // 200 { group_no, name }；400 名稱不合法；404 { error: 'group not found' }（群組資訊過期，重新 GET）
+  async renameFavoriteGroup(groupNo: number, name: string): Promise<FavoriteGroupName> {
+    return apiFetch<FavoriteGroupName>(`${API_BASE_URL}/api/favorites/groups/${groupNo}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name })
+    })
   },
 }
 
