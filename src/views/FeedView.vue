@@ -7,12 +7,12 @@ const trackThreadsProfile = () => {
   trackEvent('social_click', { social_platform: 'threads', social_location: 'feed' });
 };
 
-// 目前手動列表；之後改成從 /api/threads-latest 拉
+// 目前手動列表（@airnoir0605 達比幫手，依發文時序新→舊）；之後改成從 /api/threads-latest 拉
 const posts = [
-  'https://www.threads.com/@scout.darvi/post/DcSbsNWk046',
-  'https://www.threads.com/@scout.darvi/post/DcSBc6oE-Ke',
-  'https://www.threads.com/@scout.darvi/post/DcQfNhqk3kn',
-  'https://www.threads.com/@scout.darvi/post/DcPdOp1E2Bd',
+  'https://www.threads.com/@airnoir0605/post/DecC9HgD-f2',
+  'https://www.threads.com/@airnoir0605/post/DeZc9dFjz5u',
+  'https://www.threads.com/@airnoir0605/post/DeYVvNsj_-0',
+  'https://www.threads.com/@airnoir0605/post/DeYVvPUDwGP',
 ];
 
 // 直接用 /embed/ URL 嵌 iframe，繞過 Threads embed.js（多篇時會 race）。
@@ -59,12 +59,12 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage));
           <p class="text-sm text-fg-brand-body mt-4 font-noto">
             來自 Threads
             <a
-              href="https://www.threads.com/@scout.darvi"
+              href="https://www.threads.com/@airnoir0605"
               target="_blank"
               rel="noopener noreferrer"
               @click="trackThreadsProfile"
               class="text-brand-purple hover:underline"
-            >@scout.darvi</a>
+            >@airnoir0605</a>
           </p>
         </div>
 
