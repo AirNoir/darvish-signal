@@ -7,12 +7,34 @@ const trackThreadsProfile = () => {
   trackEvent('social_click', { social_platform: 'threads', social_location: 'feed' });
 };
 
-// 目前手動列表（@airnoir0605 達比幫手，依發文時序新→舊）；之後改成從 /api/threads-latest 拉
+// 目前手動列表（@airnoir0605 達比幫手）；之後改成從 /api/threads-latest 拉
+// 排序：置頂文第一篇，其餘主文依發文時間新→舊，共 20 篇（不含回覆串）。更新日期 2026-10-14
+const PROFILE = 'https://www.threads.com/@airnoir0605';
+const pinnedCodes = ['DdBIhmWD3BP']; // 歡迎來到達比幫手（2026-09-08）
+const latestCodes = [
+  'DecLvAzDyAp', // 2026-10-13 達比快報：欣興楊梅廠工安意外
+  'DecC9HgD-f2', // 2026-10-13 達比日報
+  'DeZc9dFjz5u', // 2026-10-12 達比日報
+  'DeYVvPUDwGP', // 2026-10-12 大立光短空長多
+  'DeYHzY-D2vd', // 2026-10-12 鴻海、廣達、台達電專利官司
+  'DePLR18j5VD', // 2026-10-08 大立光法說會
+  'DeN7ZX8kSVe', // 2026-10-08 低軌衛星產業地圖
+  'DeMkWqZD_ML', // 2026-10-07 達比日報
+  'DeMAwZAkYfI', // 2026-10-07 AI 產業地圖
+  'DeKAZFzj-jM', // 2026-10-06 達比日報
+  'DeHc2z1j1Vq', // 2026-10-05 洋基工程 6691
+  'DeG7Y8Mj5nW', // 2026-10-05 台股創新高 49712
+  'DeGr9jPD_oc', // 2026-10-05 帆宣 6196
+  'DeGkkhaD5bS', // 2026-10-05 盤後閒聊：國巨 2327
+  'DeCYjdbj_9H', // 2026-10-03 台積電 × Terafab
+  'Dd_8k1CD50K', // 2026-10-02 達比日報
+  'Dd-cfuNj-8x', // 2026-10-02 南茂 8150
+  'Dd-a4T7D8Do', // 2026-10-02 晶系列
+  'Dd-R1pcD7MT', // 2026-10-02 晶技 3042
+];
 const posts = [
-  'https://www.threads.com/@airnoir0605/post/DecC9HgD-f2',
-  'https://www.threads.com/@airnoir0605/post/DeZc9dFjz5u',
-  'https://www.threads.com/@airnoir0605/post/DeYVvNsj_-0',
-  'https://www.threads.com/@airnoir0605/post/DeYVvPUDwGP',
+  ...pinnedCodes.map(code => ({ permalink: `${PROFILE}/post/${code}`, pinned: true })),
+  ...latestCodes.map(code => ({ permalink: `${PROFILE}/post/${code}`, pinned: false })),
 ];
 
 // 直接用 /embed/ URL 嵌 iframe，繞過 Threads embed.js（多篇時會 race）。
@@ -70,13 +92,18 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage));
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
           <div
-            v-for="(permalink, idx) in posts"
-            :key="permalink"
-            class="min-w-0 mx-auto w-full"
+            v-for="(post, idx) in posts"
+            :key="post.permalink"
+            class="relative min-w-0 mx-auto w-full"
             style="max-width: 540px;"
           >
+            <span
+              v-if="post.pinned"
+              class="absolute -top-3 left-3 z-10 px-2.5 py-0.5 rounded-full border border-line bg-raised text-xs text-fg-secondary tracking-widest font-noto"
+              data-pinned-label
+            >📌 置頂</span>
             <iframe
-              :src="`${permalink}/embed/`"
+              :src="`${post.permalink}/embed/`"
               :data-post-idx="idx"
               :style="{ height: (heights[idx] ?? 720) + 'px' }"
               class="w-full block rounded-lg bg-media"
