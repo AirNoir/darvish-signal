@@ -3,17 +3,27 @@ import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { trackEvent } from '../lib/analytics';
 import ThemeToggle from './ThemeToggle.vue';
+import UserMenu from './UserMenu.vue';
 
 const router = useRouter();
 const route = useRoute();
 const mobileOpen = ref(false);
 
+// 產業地圖為單一入口（AI 晶片 / 低軌衛星 / 無人機 / 機器人在地圖內切換）
 const navItems = [
-  { label: 'AI 產業地圖', to: '/industry-map' },
-  { label: '低軌衛星地圖', to: '/leo-map' },
+  { label: '產業地圖', to: '/industry-map' },
   { label: '最新動態', to: '/feed' },
+  { label: '我的最愛', to: '/watchlist' },
   { label: '關於我', to: '/about' },
 ];
+
+const MAP_PATHS = ['/industry-map', '/leo-map', '/drone-map', '/robot-map'];
+
+// 各張地圖路徑與子路由都算在「產業地圖」項目內
+const isActive = (item: { to: string }) =>
+  item.to === '/industry-map'
+    ? MAP_PATHS.some((p) => route.path === p || route.path.startsWith(p + '/'))
+    : route.path === item.to || route.path.startsWith(item.to + '/');
 
 const goHome = () => {
   mobileOpen.value = false;
@@ -53,7 +63,7 @@ const enterApp = () => {
           @click="navigate(item)"
           :class="[
             'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-            route.path === item.to
+            isActive(item)
               ? 'bg-accent/20 text-accent-fg'
               : 'text-fg-secondary hover:text-fg-strong hover:bg-line-subtle'
           ]"
@@ -67,11 +77,15 @@ const enterApp = () => {
         >
           進入 K-Zone
         </button>
+        <div class="ml-2">
+          <UserMenu />
+        </div>
       </nav>
 
-      <!-- Mobile hamburger -->
+      <!-- Mobile: 主題切換 + 使用者選單 + hamburger -->
       <div class="sm:hidden flex items-center gap-1">
         <ThemeToggle source="header_mobile" />
+        <UserMenu />
         <button
           class="text-fg-secondary hover:text-fg-strong transition-colors p-1"
           @click="mobileOpen = !mobileOpen"
@@ -95,7 +109,7 @@ const enterApp = () => {
         @click="navigate(item)"
         :class="[
           'w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-          route.path === item.to
+          isActive(item)
             ? 'bg-accent/20 text-accent-fg'
             : 'text-fg-secondary hover:text-fg-strong hover:bg-line-subtle'
         ]"
