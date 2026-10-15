@@ -8,10 +8,11 @@ const trackThreadsProfile = () => {
 };
 
 // 目前手動列表（@airnoir0605 達比幫手）；之後改成從 /api/threads-latest 拉
-// 排序：置頂文第一篇，其餘主文依發文時間新→舊，共 20 篇（不含回覆串）。更新日期 2026-10-14
+// 排序：置頂文第一篇，其餘主文依發文時間新→舊，共 20 篇（不含回覆串）。更新日期 2026-10-15
 const PROFILE = 'https://www.threads.com/@airnoir0605';
 const pinnedCodes = ['DdBIhmWD3BP']; // 歡迎來到達比幫手（2026-09-08）
 const latestCodes = [
+  'DeenbKyD2SQ', // 2026-10-14 達比日報
   'DecLvAzDyAp', // 2026-10-13 達比快報：欣興楊梅廠工安意外
   'DecC9HgD-f2', // 2026-10-13 達比日報
   'DeZc9dFjz5u', // 2026-10-12 達比日報
@@ -30,7 +31,6 @@ const latestCodes = [
   'Dd_8k1CD50K', // 2026-10-02 達比日報
   'Dd-cfuNj-8x', // 2026-10-02 南茂 8150
   'Dd-a4T7D8Do', // 2026-10-02 晶系列
-  'Dd-R1pcD7MT', // 2026-10-02 晶技 3042
 ];
 const posts = [
   ...pinnedCodes.map(code => ({ permalink: `${PROFILE}/post/${code}`, pinned: true })),
