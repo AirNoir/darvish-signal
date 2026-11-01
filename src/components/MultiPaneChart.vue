@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { init, dispose, registerOverlay, registerLocale, ActionType, PolygonType, LineType, TooltipShowRule, TooltipShowType } from 'klinecharts';
 import type { Chart, DeepPartial, Styles } from 'klinecharts';
 import { useStockStore, type SignalMarker, MARKET_SUPPORTED_PANE_KEYS } from '../stores/stockStore';
+import { useCustomSignalStore } from '../stores/customSignalStore';
 import type { IndicatorSettings } from '../types';
 import { registerCustomIndicators, setExtraDataMap, formatBig, type ExtraValues } from '../lib/klineIndicators';
 import { themeColor } from '../theme/palette';
@@ -14,6 +15,7 @@ const props = defineProps<{
 }>();
 
 const store = useStockStore();
+const customSignal = useCustomSignalStore();
 const { theme } = useTheme();
 const wrapperEl = ref<HTMLDivElement | null>(null);
 const containerEl = ref<HTMLDivElement | null>(null);
@@ -353,12 +355,15 @@ const buildChartStyles = (tooltipRule: TooltipShowRule): DeepPartial<Styles> => 
 const drawSignalOverlays = () => {
   if (!chart) return;
   chart.removeOverlay({ groupId: 'signals' });
-  const markers: SignalMarker[] = store.signalMarkers ?? [];
+  // 自訂訊號啟用時取代達比 B/S 標記（版面乾淨、避免兩套訊號混讀）
+  const markers: SignalMarker[] = customSignal.enabled
+    ? customSignal.markers
+    : (store.signalMarkers ?? []);
   const dataByDate = new Map(store.stockData.map(d => [d.time, d]));
   for (const m of markers) {
     const d = dataByDate.get(m.date);
     if (!d) continue;
-    const value = m.type === 'buy' ? d.low : d.high;
+    const value = m.type === 'sell' ? d.high : d.low;
     chart.createOverlay({
       name: 'signal_marker',
       groupId: 'signals',
@@ -403,14 +408,16 @@ onMounted(() => {
     createPointFigures: ({ overlay, coordinates }) => {
       const c = coordinates[0];
       if (!c) return [];
-      const { type, pickType } = (overlay.extendData ?? {}) as { type?: 'buy' | 'sell'; pickType?: string };
-      const isBuy = type === 'buy';
-      // dip 訊號維持藍底，僅以字母 D 區隔
-      const isDip = isBuy && pickType === 'dip';
-      const color = isBuy ? themeColor('chart-buy') : themeColor('chart-sell');
+      const { type } = (overlay.extendData ?? {}) as { type?: 'buy' | 'sell' | 'custom' };
+      const isSell = type === 'sell';
+      // D（dip）暫停顯示；custom = 使用者自訂訊號（紫色 ✦）
+      const color =
+        type === 'custom' ? themeColor('series-purple')
+        : isSell ? themeColor('chart-sell')
+        : themeColor('chart-buy');
       const textColor = themeColor('fg-on-brand');
-      const label = isDip ? 'D' : isBuy ? 'B' : 'S';
-      const dir = isBuy ? 1 : -1;
+      const label = type === 'custom' ? '✦' : isSell ? 'S' : 'B';
+      const dir = isSell ? -1 : 1;
 
       const gap = 14;
       const headH = 22;
@@ -542,6 +549,8 @@ watch(theme, () => {
 });
 watch(() => store.stockData, () => applyData(), { deep: false });
 watch(() => store.signalMarkers, () => drawSignalOverlays(), { deep: false });
+// 自訂訊號：開關或命中結果變動都重畫標記
+watch(() => [customSignal.enabled, customSignal.markers] as const, () => drawSignalOverlays());
 // 切換大盤/個股時，支援的指標清單會變 → 重建指標窗格
 watch(() => store.isMarketView, () => reconcileIndicators());
 watch(

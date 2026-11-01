@@ -20,7 +20,7 @@ export type ApiSource = 'finmind' | 'darvish'
 
 export interface SignalMarker {
   date: string
-  type: 'buy' | 'sell'
+  type: 'buy' | 'sell' | 'custom'
   pickType?: PickType
 }
 
@@ -422,6 +422,7 @@ export const useStockStore = defineStore('stock', () => {
       // Use Map to deduplicate by date (sell takes priority if both exist on same date)
       const markerMap = new Map<string, SignalMarker>();
       for (const p of picks) {
+        if (p.pick_type === 'dip') continue; // D（dip）訊號暫停顯示，只畫 B / S
         markerMap.set(p.trade_date, { date: p.trade_date, type: 'buy', pickType: p.pick_type });
       }
       for (const s of sells) {
