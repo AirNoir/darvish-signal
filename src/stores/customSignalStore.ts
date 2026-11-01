@@ -32,24 +32,26 @@ export interface CustomCondition {
   cross?: 'golden' | 'death';       // kd_cross 專用
 }
 
-// 各條件型別的 UI 與預設值描述（Modal 直接吃這張表渲染）
+// 各條件型別的 UI 與預設值描述（Modal 直接吃這張表渲染）。
+// defaults = 多方預設；shortDefaults = 空方分頁新增時覆蓋的預設（運算符與門檻取空方慣用方向）。
 export const COND_META: Record<CondKind, {
   label: string;
   unit: string;
   periods?: number[];
   defaults: Partial<CustomCondition>;
+  shortDefaults?: Partial<CustomCondition>;
   step?: number;
 }> = {
-  vol_ma: { label: '成交量 vs 均量', unit: '倍', periods: [5, 10, 20], defaults: { period: 5, op: 'gt', value: 1.5 }, step: 0.1 },
-  insti_avg: { label: '外資/投信 日均買賣超', unit: '張', periods: [5, 10, 15, 20, 30], defaults: { entity: 'foreign', period: 10, op: 'gt', value: 1000 } },
-  margin_balance: { label: '融資餘額', unit: '張', defaults: { op: 'gt', value: 20000 } },
-  short_balance: { label: '融券餘額', unit: '張', defaults: { op: 'gt', value: 5000 } },
-  short_margin_ratio: { label: '券資比', unit: '%', defaults: { op: 'gt', value: 20 }, step: 0.5 },
-  rsi: { label: 'RSI', unit: '', periods: [9, 14], defaults: { period: 14, op: 'gt', value: 50 }, step: 1 },
-  macd_hist: { label: 'MACD 柱狀', unit: '', defaults: { op: 'gt', value: 0 }, step: 0.1 },
-  bb_percent_b: { label: '布林 %b', unit: '', defaults: { op: 'gt', value: 0.75 }, step: 0.05 },
-  kd_k: { label: 'KD 的 K 值', unit: '', defaults: { op: 'gt', value: 80 }, step: 1 },
-  kd_cross: { label: 'KD 交叉', unit: '', defaults: { cross: 'golden' } },
+  vol_ma: { label: '成交量 vs 均量', unit: '倍', periods: [5, 10, 20], defaults: { period: 5, op: 'gt', value: 1.5 }, shortDefaults: { op: 'lt', value: 1 }, step: 0.1 },
+  insti_avg: { label: '外資/投信 日均買賣超', unit: '張', periods: [5, 10, 15, 20, 30], defaults: { entity: 'foreign', period: 10, op: 'gt', value: 1000 }, shortDefaults: { op: 'lt', value: -1000 } },
+  margin_balance: { label: '融資餘額', unit: '張', defaults: { op: 'gt', value: 20000 }, shortDefaults: { op: 'lt', value: 20000 } },
+  short_balance: { label: '融券餘額', unit: '張', defaults: { op: 'gt', value: 5000 }, shortDefaults: { op: 'lt', value: 5000 } },
+  short_margin_ratio: { label: '券資比', unit: '%', defaults: { op: 'gt', value: 20 }, shortDefaults: { op: 'lt', value: 2 }, step: 0.5 },
+  rsi: { label: 'RSI', unit: '', periods: [9, 14], defaults: { period: 14, op: 'gt', value: 50 }, shortDefaults: { op: 'lt', value: 40 }, step: 1 },
+  macd_hist: { label: 'MACD 柱狀', unit: '', defaults: { op: 'gt', value: 0 }, shortDefaults: { op: 'lt', value: 0 }, step: 0.1 },
+  bb_percent_b: { label: '布林 %b', unit: '', defaults: { op: 'gt', value: 0.75 }, shortDefaults: { op: 'lt', value: 0.5 }, step: 0.05 },
+  kd_k: { label: 'KD 的 K 值', unit: '', defaults: { op: 'gt', value: 80 }, shortDefaults: { op: 'lt', value: 20 }, step: 1 },
+  kd_cross: { label: 'KD 交叉', unit: '', defaults: { cross: 'golden' }, shortDefaults: { cross: 'death' } },
 };
 
 const STORAGE_KEY = 'kzone:custom-signal';
@@ -89,7 +91,10 @@ export const useCustomSignalStore = defineStore('customSignal', () => {
   }, { deep: true });
 
   const addCondition = (kind: CondKind, side: CondSide) => {
-    conditions.value.push({ id: genId(), side, kind, op: 'gt', value: 0, ...COND_META[kind].defaults });
+    const meta = COND_META[kind];
+    // 空方分頁新增 → 套空方預設（運算符/門檻走空方慣用方向）
+    const defaults = { ...meta.defaults, ...(side === 'short' ? meta.shortDefaults : undefined) };
+    conditions.value.push({ id: genId(), side, kind, op: 'gt', value: 0, ...defaults });
   };
   const removeCondition = (id: string) => {
     conditions.value = conditions.value.filter((c) => c.id !== id);
