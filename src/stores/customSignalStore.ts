@@ -54,6 +54,9 @@ export const COND_META: Record<CondKind, {
   kd_cross: { label: 'KD 交叉', unit: '', defaults: { cross: 'golden' }, shortDefaults: { cross: 'death' } },
 };
 
+// 功能開關：正式機以 VITE_FEATURE_CUSTOM_SIGNAL=false 整組隱藏（按鈕、標記都不出現）
+export const CUSTOM_SIGNAL_FEATURE = import.meta.env.VITE_FEATURE_CUSTOM_SIGNAL === 'true';
+
 const STORAGE_KEY = 'kzone:custom-signal';
 
 const genId = () =>
@@ -81,7 +84,8 @@ export const useCustomSignalStore = defineStore('customSignal', () => {
   const stock = useStockStore();
 
   const persisted = loadPersisted();
-  const enabled = ref(persisted.enabled);
+  // feature off：即使 localStorage 存了啟用狀態也不生效
+  const enabled = ref(CUSTOM_SIGNAL_FEATURE && persisted.enabled);
   const conditions = ref<CustomCondition[]>(persisted.conditions);
 
   watch([enabled, conditions], () => {
@@ -210,7 +214,7 @@ export const useCustomSignalStore = defineStore('customSignal', () => {
 
   // 命中日 → chart 標記：多方 / 空方各自 AND、各自產生標記（同日可同時命中）
   const markers = computed<SignalMarker[]>(() => {
-    if (!enabled.value || conditions.value.length === 0 || stock.stockData.length === 0) return [];
+    if (!CUSTOM_SIGNAL_FEATURE || !enabled.value || conditions.value.length === 0 || stock.stockData.length === 0) return [];
     if (stock.isMarketView) return []; // 大盤無個股籌碼/指標資料
     const longs = conditions.value.filter((c) => c.side === 'long');
     const shorts = conditions.value.filter((c) => c.side === 'short');

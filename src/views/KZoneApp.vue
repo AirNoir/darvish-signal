@@ -15,7 +15,7 @@ import FounderPromo from '../components/FounderPromo.vue';
 import WatchlistQuickPanel from '../components/WatchlistQuickPanel.vue';
 import ThemeToggle from '../components/ThemeToggle.vue';
 import { trackEvent } from '../lib/analytics';
-import { useCustomSignalStore } from '../stores/customSignalStore';
+import { useCustomSignalStore, CUSTOM_SIGNAL_FEATURE } from '../stores/customSignalStore';
 
 const router = useRouter();
 const route = useRoute();
@@ -331,6 +331,7 @@ watch(() => store.stockId, (id) => {
           </span>
         </button>
         <button
+          v-if="CUSTOM_SIGNAL_FEATURE"
           @click="openCustomSignal('desktop')"
           :class="[
             'shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded transition-colors',
@@ -395,6 +396,7 @@ watch(() => store.stockId, (id) => {
         </span>
       </button>
       <button
+        v-if="CUSTOM_SIGNAL_FEATURE"
         @click="openCustomSignal('mobile')"
         :class="[
           'w-full px-3 py-1.5 text-sm font-medium rounded transition-colors text-left',
@@ -503,7 +505,7 @@ watch(() => store.stockId, (id) => {
       </div>
     </main>
 
-    <CustomSignalModal v-if="showCustomSignal" @close="showCustomSignal = false" />
+    <CustomSignalModal v-if="CUSTOM_SIGNAL_FEATURE && showCustomSignal" @close="showCustomSignal = false" />
     <IndicatorSettingsModal
       v-if="showSettings"
       v-model="indicatorSettings"
