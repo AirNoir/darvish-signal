@@ -17,6 +17,10 @@ const SIDES: { key: CondSide; label: string; markClass: string; mark: string }[]
 
 const newKind = reactive<Record<CondSide, CondKind>>({ long: 'vol_ma', short: 'vol_ma' });
 const activeSide = ref<CondSide>('long');
+const setSide = (k: CondSide) => { activeSide.value = k; };
+// 只渲染目前分頁那一側（另一側完全不進 DOM，避免殘影）
+const activeMeta = computed(() => SIDES.find((x) => x.key === activeSide.value)!);
+const activeConds = computed(() => signal.conditions.filter((c) => c.side === activeSide.value));
 
 const bySide = computed<Record<CondSide, CustomCondition[]>>(() => ({
   long: signal.conditions.filter((c) => c.side === 'long'),
@@ -91,7 +95,7 @@ const toggleEnabled = () => {
           <button
             v-for="side in SIDES"
             :key="side.key"
-            @click="activeSide = side.key"
+            @click="setSide(side.key)"
             :aria-pressed="activeSide === side.key"
             :class="[
               'px-4 py-1.5 rounded-t-lg text-sm font-bold transition-colors border-b-2',
@@ -105,97 +109,96 @@ const toggleEnabled = () => {
           </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-5 py-3 flex flex-col gap-4 min-h-[200px]">
-          <section v-for="side in SIDES" :key="side.key" v-show="activeSide === side.key">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-xs text-fg-subtle">此分頁的條件全部成立，當日才標記「{{ side.mark }}」；兩邊互不影響</span>
-            </div>
+        <div class="flex-1 overflow-y-auto px-5 py-3 min-h-[200px]" :key="activeSide">
+          <div class="flex items-center gap-2 mb-2">
+            <span :class="['text-sm font-bold', activeMeta.markClass]">{{ activeMeta.label }}</span>
+            <span class="text-xs text-fg-subtle">全部成立，當日才標記「{{ activeMeta.mark }}」；兩邊互不影響</span>
+          </div>
 
-            <p v-if="bySide[side.key].length === 0" class="text-xs text-fg-subtle rounded-xl border border-dashed border-line-subtle px-3 py-3 mb-2">
-              尚無{{ side.label }}，不會產生「{{ side.mark }}」標記
-            </p>
+          <p v-if="activeConds.length === 0" class="text-xs text-fg-subtle rounded-xl border border-dashed border-line-subtle px-3 py-3 mb-2">
+            尚無{{ activeMeta.label }}，不會產生「{{ activeMeta.mark }}」標記
+          </p>
 
-            <div
-              v-for="c in bySide[side.key]"
-              :key="c.id"
-              class="rounded-xl border border-line-subtle bg-raised px-3 py-2.5 mb-2"
-            >
-              <div class="flex items-center gap-2 flex-wrap text-sm text-fg">
-                <!-- 成交量 vs 均量 -->
-                <template v-if="c.kind === 'vol_ma'">
-                  <span>今日成交量</span>
-                  <select v-model="c.op" class="csel"><option value="gt">＞</option><option value="lt">＜</option></select>
-                  <select v-model.number="c.period" class="csel">
-                    <option v-for="p in COND_META.vol_ma.periods" :key="p" :value="p">{{ p }} 日均量</option>
-                  </select>
-                  <span>×</span>
-                  <input v-model.number="c.value" type="number" :step="COND_META.vol_ma.step" class="cinput" />
-                  <span class="text-fg-muted">倍</span>
-                </template>
+          <div
+            v-for="c in activeConds"
+            :key="c.id"
+            class="rounded-xl border border-line-subtle bg-raised px-3 py-2.5 mb-2"
+          >
+            <div class="flex items-center gap-2 flex-wrap text-sm text-fg">
+              <!-- 成交量 vs 均量 -->
+              <template v-if="c.kind === 'vol_ma'">
+                <span>今日成交量</span>
+                <select v-model="c.op" class="csel"><option value="gt">＞</option><option value="lt">＜</option></select>
+                <select v-model.number="c.period" class="csel">
+                  <option v-for="p in COND_META.vol_ma.periods" :key="p" :value="p">{{ p }} 日均量</option>
+                </select>
+                <span>×</span>
+                <input v-model.number="c.value" type="number" :step="COND_META.vol_ma.step" class="cinput" />
+                <span class="text-fg-muted">倍</span>
+              </template>
 
-                <!-- 外資/投信日均買賣超 -->
-                <template v-else-if="c.kind === 'insti_avg'">
-                  <select v-model="c.entity" class="csel"><option value="foreign">外資</option><option value="trust">投信</option></select>
-                  <select v-model.number="c.period" class="csel">
-                    <option v-for="p in COND_META.insti_avg.periods" :key="p" :value="p">{{ p }} 日均</option>
-                  </select>
-                  <span>買賣超</span>
-                  <select v-model="c.op" class="csel"><option value="gt">＞</option><option value="lt">＜</option></select>
-                  <input v-model.number="c.value" type="number" class="cinput" />
-                  <span class="text-fg-muted">張（賣超用負值）</span>
-                </template>
+              <!-- 外資/投信日均買賣超 -->
+              <template v-else-if="c.kind === 'insti_avg'">
+                <select v-model="c.entity" class="csel"><option value="foreign">外資</option><option value="trust">投信</option></select>
+                <select v-model.number="c.period" class="csel">
+                  <option v-for="p in COND_META.insti_avg.periods" :key="p" :value="p">{{ p }} 日均</option>
+                </select>
+                <span>買賣超</span>
+                <select v-model="c.op" class="csel"><option value="gt">＞</option><option value="lt">＜</option></select>
+                <input v-model.number="c.value" type="number" class="cinput" />
+                <span class="text-fg-muted">張（賣超用負值）</span>
+              </template>
 
-                <!-- RSI -->
-                <template v-else-if="c.kind === 'rsi'">
-                  <span>RSI</span>
-                  <select v-model.number="c.period" class="csel"><option :value="9">9</option><option :value="14">14</option></select>
-                  <select v-model="c.op" class="csel"><option value="gt">＞</option><option value="lt">＜</option></select>
-                  <input v-model.number="c.value" type="number" step="1" class="cinput" />
-                </template>
+              <!-- RSI -->
+              <template v-else-if="c.kind === 'rsi'">
+                <span>RSI</span>
+                <select v-model.number="c.period" class="csel"><option :value="9">9</option><option :value="14">14</option></select>
+                <select v-model="c.op" class="csel"><option value="gt">＞</option><option value="lt">＜</option></select>
+                <input v-model.number="c.value" type="number" step="1" class="cinput" />
+              </template>
 
-                <!-- KD 交叉 -->
-                <template v-else-if="c.kind === 'kd_cross'">
-                  <span>KD</span>
-                  <select v-model="c.cross" class="csel">
-                    <option value="golden">黃金交叉（K 上穿 D）</option>
-                    <option value="death">死亡交叉（K 下穿 D）</option>
-                  </select>
-                </template>
+              <!-- KD 交叉 -->
+              <template v-else-if="c.kind === 'kd_cross'">
+                <span>KD</span>
+                <select v-model="c.cross" class="csel">
+                  <option value="golden">黃金交叉（K 上穿 D）</option>
+                  <option value="death">死亡交叉（K 下穿 D）</option>
+                </select>
+              </template>
 
-                <!-- 其餘：單值比較 -->
-                <template v-else>
-                  <span>{{ COND_META[c.kind].label }}</span>
-                  <select v-model="c.op" class="csel"><option value="gt">＞</option><option value="lt">＜</option></select>
-                  <input v-model.number="c.value" type="number" :step="COND_META[c.kind].step ?? 1" class="cinput" />
-                  <span v-if="COND_META[c.kind].unit" class="text-fg-muted">{{ COND_META[c.kind].unit }}</span>
-                </template>
+              <!-- 其餘：單值比較 -->
+              <template v-else>
+                <span>{{ COND_META[c.kind].label }}</span>
+                <select v-model="c.op" class="csel"><option value="gt">＞</option><option value="lt">＜</option></select>
+                <input v-model.number="c.value" type="number" :step="COND_META[c.kind].step ?? 1" class="cinput" />
+                <span v-if="COND_META[c.kind].unit" class="text-fg-muted">{{ COND_META[c.kind].unit }}</span>
+              </template>
 
-                <button
-                  @click="signal.removeCondition(c.id)"
-                  class="ml-auto p-1 text-fg-subtle hover:text-danger-fg transition-colors shrink-0"
-                  aria-label="刪除條件"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <p class="text-xs text-fg-subtle mt-1.5">{{ signal.latestValues[c.id] ?? '' }}</p>
-            </div>
-
-            <!-- 該側新增 -->
-            <div class="flex items-center gap-2">
-              <select v-model="newKind[side.key]" class="csel flex-1 sm:flex-none">
-                <option v-for="o in KIND_OPTIONS" :key="o.kind" :value="o.kind">{{ o.label }}</option>
-              </select>
               <button
-                @click="addCondition(side.key)"
-                class="px-3 py-1.5 rounded-lg bg-control hover:bg-control-hover text-fg text-sm font-medium transition-colors shrink-0"
+                @click="signal.removeCondition(c.id)"
+                class="ml-auto p-1 text-fg-subtle hover:text-danger-fg transition-colors shrink-0"
+                aria-label="刪除條件"
               >
-                ＋ 加入{{ side.label }}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
-          </section>
+            <p class="text-xs text-fg-subtle mt-1.5">{{ signal.latestValues[c.id] ?? '' }}</p>
+          </div>
+
+          <!-- 該側新增 -->
+          <div class="flex items-center gap-2 mt-1">
+            <select v-model="newKind[activeSide]" class="csel flex-1 sm:flex-none">
+              <option v-for="o in KIND_OPTIONS" :key="o.kind" :value="o.kind">{{ o.label }}</option>
+            </select>
+            <button
+              @click="addCondition(activeSide)"
+              :class="['px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shrink-0 text-fg-on-accent', activeSide === 'long' ? 'bg-market-up' : 'bg-market-down']"
+            >
+              ＋ 加入{{ activeMeta.label }}
+            </button>
+          </div>
         </div>
 
         <!-- 單位說明 -->
