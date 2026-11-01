@@ -66,7 +66,7 @@ function loadPersisted(): { enabled: boolean; conditions: CustomCondition[] } {
     const parsed = JSON.parse(raw) as { enabled?: boolean; conditions?: CustomCondition[] };
     const conditions = (parsed.conditions ?? [])
       .filter((c) => c && c.id && COND_META[c.kind])
-      .map((c) => ({ side: 'long' as CondSide, ...c }));
+      .map((c) => ({ ...c, side: (c as { side?: CondSide }).side ?? 'long' }));
     return { enabled: parsed.enabled === true && conditions.length > 0, conditions };
   } catch {
     return { enabled: false, conditions: [] };
