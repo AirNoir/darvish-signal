@@ -363,7 +363,7 @@ const drawSignalOverlays = () => {
   for (const m of markers) {
     const d = dataByDate.get(m.date);
     if (!d) continue;
-    const value = m.type === 'sell' ? d.high : d.low;
+    const value = m.type === 'sell' || m.type === 'custom-short' ? d.high : d.low;
     chart.createOverlay({
       name: 'signal_marker',
       groupId: 'signals',
@@ -408,16 +408,17 @@ onMounted(() => {
     createPointFigures: ({ overlay, coordinates }) => {
       const c = coordinates[0];
       if (!c) return [];
-      const { type } = (overlay.extendData ?? {}) as { type?: 'buy' | 'sell' | 'custom' };
-      const isSell = type === 'sell';
-      // D（dip）暫停顯示；custom = 使用者自訂訊號（紫色 ✦）
+      const { type } = (overlay.extendData ?? {}) as { type?: 'buy' | 'sell' | 'custom-long' | 'custom-short' };
+      // D（dip）暫停顯示；custom-long/short = 使用者自訂多方 / 空方訊號
+      const down = type === 'sell' || type === 'custom-short';
       const color =
-        type === 'custom' ? themeColor('series-purple')
-        : isSell ? themeColor('chart-sell')
+        type === 'custom-long' ? themeColor('market-up')
+        : type === 'custom-short' ? themeColor('market-down')
+        : type === 'sell' ? themeColor('chart-sell')
         : themeColor('chart-buy');
       const textColor = themeColor('fg-on-brand');
-      const label = type === 'custom' ? '✦' : isSell ? 'S' : 'B';
-      const dir = isSell ? -1 : 1;
+      const label = type === 'custom-long' ? '多' : type === 'custom-short' ? '空' : type === 'sell' ? 'S' : 'B';
+      const dir = down ? -1 : 1;
 
       const gap = 14;
       const headH = 22;

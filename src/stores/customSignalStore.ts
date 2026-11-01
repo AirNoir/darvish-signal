@@ -19,8 +19,11 @@ export type CondKind =
   | 'kd_k'              // KD 的 K 值 vs X
   | 'kd_cross';         // KD 黃金 / 死亡交叉
 
+export type CondSide = 'long' | 'short';
+
 export interface CustomCondition {
   id: string;
+  side: CondSide;                   // 多方 / 空方（兩組條件各自 AND，分別產生 多/空 標記）
   kind: CondKind;
   op: CondOp;                       // kd_cross 不用
   value: number;                    // 門檻 X（vol_ma 時為倍數，可小數；kd_cross 不用）
@@ -61,7 +64,9 @@ function loadPersisted(): { enabled: boolean; conditions: CustomCondition[] } {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { enabled: false, conditions: [] };
     const parsed = JSON.parse(raw) as { enabled?: boolean; conditions?: CustomCondition[] };
-    const conditions = (parsed.conditions ?? []).filter((c) => c && c.id && COND_META[c.kind]);
+    const conditions = (parsed.conditions ?? [])
+      .filter((c) => c && c.id && COND_META[c.kind])
+      .map((c) => ({ side: 'long' as CondSide, ...c }));
     return { enabled: parsed.enabled === true && conditions.length > 0, conditions };
   } catch {
     return { enabled: false, conditions: [] };
@@ -83,8 +88,8 @@ export const useCustomSignalStore = defineStore('customSignal', () => {
     } catch { /* 無痕模式忽略 */ }
   }, { deep: true });
 
-  const addCondition = (kind: CondKind) => {
-    conditions.value.push({ id: genId(), kind, op: 'gt', value: 0, ...COND_META[kind].defaults });
+  const addCondition = (kind: CondKind, side: CondSide) => {
+    conditions.value.push({ id: genId(), side, kind, op: 'gt', value: 0, ...COND_META[kind].defaults });
   };
   const removeCondition = (id: string) => {
     conditions.value = conditions.value.filter((c) => c.id !== id);
@@ -198,15 +203,20 @@ export const useCustomSignalStore = defineStore('customSignal', () => {
     }
   }
 
-  // 命中日 → chart 標記（啟用 + 至少一條件才計算）
+  // 命中日 → chart 標記：多方 / 空方各自 AND、各自產生標記（同日可同時命中）
   const markers = computed<SignalMarker[]>(() => {
     if (!enabled.value || conditions.value.length === 0 || stock.stockData.length === 0) return [];
     if (stock.isMarketView) return []; // 大盤無個股籌碼/指標資料
+    const longs = conditions.value.filter((c) => c.side === 'long');
+    const shorts = conditions.value.filter((c) => c.side === 'short');
     const ctx = buildCtx();
     const out: SignalMarker[] = [];
     for (let i = 0; i < ctx.times.length; i++) {
-      if (conditions.value.every((c) => passes(c, i, ctx))) {
-        out.push({ date: ctx.times[i]!, type: 'custom' });
+      if (longs.length > 0 && longs.every((c) => passes(c, i, ctx))) {
+        out.push({ date: ctx.times[i]!, type: 'custom-long' });
+      }
+      if (shorts.length > 0 && shorts.every((c) => passes(c, i, ctx))) {
+        out.push({ date: ctx.times[i]!, type: 'custom-short' });
       }
     }
     return out;
@@ -260,7 +270,10 @@ export const useCustomSignalStore = defineStore('customSignal', () => {
     return out;
   });
 
-  const matchCount = computed(() => markers.value.length);
+  const matchCount = computed(() => ({
+    long: markers.value.filter((m) => m.type === 'custom-long').length,
+    short: markers.value.filter((m) => m.type === 'custom-short').length,
+  }));
 
   return { enabled, conditions, markers, matchCount, latestValues, addCondition, removeCondition };
 });

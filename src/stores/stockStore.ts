@@ -20,7 +20,7 @@ export type ApiSource = 'finmind' | 'darvish'
 
 export interface SignalMarker {
   date: string
-  type: 'buy' | 'sell' | 'custom'
+  type: 'buy' | 'sell' | 'custom-long' | 'custom-short'
   pickType?: PickType
 }
 
