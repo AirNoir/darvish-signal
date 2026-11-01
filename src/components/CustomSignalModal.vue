@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // 自訂訊號設定：多方 / 空方兩組條件（各自 AND、各自產生標記）＋啟用開關。
 // 啟用時 K 線上的達比 B/S 標記會隱藏，改畫自訂 多（紅）/ 空（綠）標記。
-import { reactive, computed } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { useCustomSignalStore, COND_META, type CondKind, type CondSide, type CustomCondition } from '../stores/customSignalStore';
 import { trackEvent } from '../lib/analytics';
 
@@ -16,6 +16,7 @@ const SIDES: { key: CondSide; label: string; markClass: string; mark: string }[]
 ];
 
 const newKind = reactive<Record<CondSide, CondKind>>({ long: 'vol_ma', short: 'vol_ma' });
+const activeSide = ref<CondSide>('long');
 
 const bySide = computed<Record<CondSide, CustomCondition[]>>(() => ({
   long: signal.conditions.filter((c) => c.side === 'long'),
@@ -85,12 +86,29 @@ const toggleEnabled = () => {
           </button>
         </div>
 
-        <!-- 多方 / 空方 兩區 -->
+        <!-- 多方 / 空方 tab 切換 -->
+        <div class="flex items-center gap-1 px-5 pt-3">
+          <button
+            v-for="side in SIDES"
+            :key="side.key"
+            @click="activeSide = side.key"
+            :aria-pressed="activeSide === side.key"
+            :class="[
+              'px-4 py-1.5 rounded-t-lg text-sm font-bold transition-colors border-b-2',
+              activeSide === side.key
+                ? [side.markClass, 'bg-raised', side.key === 'long' ? 'border-market-up' : 'border-market-down']
+                : 'text-fg-muted border-transparent hover:text-fg hover:bg-hover'
+            ]"
+          >
+            {{ side.label }}
+            <span class="text-xs font-normal opacity-70">{{ bySide[side.key].length }}</span>
+          </button>
+        </div>
+
         <div class="flex-1 overflow-y-auto px-5 py-3 flex flex-col gap-4 min-h-[200px]">
-          <section v-for="side in SIDES" :key="side.key">
+          <section v-for="side in SIDES" :key="side.key" v-show="activeSide === side.key">
             <div class="flex items-center gap-2 mb-2">
-              <span :class="['text-sm font-bold', side.markClass]">{{ side.label }}</span>
-              <span class="text-xs text-fg-subtle">全部成立才標記「{{ side.mark }}」</span>
+              <span class="text-xs text-fg-subtle">此分頁的條件全部成立，當日才標記「{{ side.mark }}」；兩邊互不影響</span>
             </div>
 
             <p v-if="bySide[side.key].length === 0" class="text-xs text-fg-subtle rounded-xl border border-dashed border-line-subtle px-3 py-3 mb-2">
