@@ -9,11 +9,13 @@ import MultiPaneChart from '../components/MultiPaneChart.vue';
 import AlphaPickPanel from '../components/AlphaPickPanel.vue';
 import MarketSummaryCard from '../components/MarketSummaryCard.vue';
 import IndicatorSettingsModal from '../components/IndicatorSettings.vue';
+import CustomSignalModal from '../components/CustomSignalModal.vue';
 import FavoriteButton from '../components/FavoriteButton.vue';
 import FounderPromo from '../components/FounderPromo.vue';
 import WatchlistQuickPanel from '../components/WatchlistQuickPanel.vue';
 import ThemeToggle from '../components/ThemeToggle.vue';
 import { trackEvent } from '../lib/analytics';
+import { useCustomSignalStore, CUSTOM_SIGNAL_FEATURE } from '../stores/customSignalStore';
 
 const router = useRouter();
 const route = useRoute();
@@ -21,6 +23,14 @@ const store = useStockStore();
 const auth = useAuthStore();
 const showMobileAlphaPick = ref(false);
 const showSettings = ref(false);
+const showCustomSignal = ref(false);
+const customSignal = useCustomSignalStore();
+
+const openCustomSignal = (source: 'desktop' | 'mobile') => {
+  showCustomSignal.value = true;
+  showMobileMenu.value = false;
+  trackEvent('custom_signal_open', { source });
+};
 // 手機版進站預設展開搜尋面板，讓使用者能直接輸入股票代碼
 const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
 const showMobileMenu = ref(isMobileViewport);
@@ -320,6 +330,18 @@ watch(() => store.stockId, (id) => {
             指標
           </span>
         </button>
+        <button
+          v-if="CUSTOM_SIGNAL_FEATURE"
+          @click="openCustomSignal('desktop')"
+          :class="[
+            'shrink-0 whitespace-nowrap px-2 py-1 text-sm font-medium rounded transition-colors',
+            customSignal.enabled
+              ? 'bg-accent text-fg-on-accent'
+              : 'bg-control text-fg-secondary hover:bg-control-hover'
+          ]"
+        >
+          <span class="flex items-center gap-1">✦ 自訂訊號</span>
+        </button>
         <SearchBar />
       </div>
 
@@ -372,6 +394,16 @@ watch(() => store.stockId, (id) => {
           </svg>
           指標設定
         </span>
+      </button>
+      <button
+        v-if="CUSTOM_SIGNAL_FEATURE"
+        @click="openCustomSignal('mobile')"
+        :class="[
+          'w-full px-3 py-1.5 text-sm font-medium rounded transition-colors text-left',
+          customSignal.enabled ? 'bg-accent text-fg-on-accent' : 'bg-control text-fg-secondary hover:bg-control-hover'
+        ]"
+      >
+        <span class="flex items-center gap-2">✦ 自訂訊號{{ customSignal.enabled ? '（啟用中）' : '' }}</span>
       </button>
       <button
         @click="showMobileAlphaPick = !showMobileAlphaPick; showMobileMenu = false"
@@ -473,6 +505,7 @@ watch(() => store.stockId, (id) => {
       </div>
     </main>
 
+    <CustomSignalModal v-if="CUSTOM_SIGNAL_FEATURE && showCustomSignal" @close="showCustomSignal = false" />
     <IndicatorSettingsModal
       v-if="showSettings"
       v-model="indicatorSettings"

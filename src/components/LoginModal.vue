@@ -48,7 +48,7 @@ watch(
             <p class="text-fg-secondary text-sm mt-1">登入後即可使用「我的最愛」等個人化功能</p>
           </div>
 
-          <!-- 創始會員誘因（招募截止後由 FOUNDER_ENROLLMENT_OPEN 關掉） -->
+          <!-- 創始會員誘因（招募截止後依 FOUNDER_ENROLLMENT_DEADLINE 自動隱藏） -->
           <FounderPromo class="w-full" />
 
           <div class="min-h-[44px] flex items-center justify-center mt-2">
