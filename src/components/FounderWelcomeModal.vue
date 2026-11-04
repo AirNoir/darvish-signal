@@ -67,7 +67,7 @@ const close = () => {
         <div>
           <h2 id="founder-welcome-title" class="text-fg-strong text-lg font-bold tracking-wide">感謝你成為創始會員</h2>
           <p class="text-fg-secondary text-sm mt-2 leading-relaxed">
-            你是達比 K-Zone 初期加入的首批會員，這個徽章會永久保留在你的帳號上，點開頭像隨時看得到。
+            你是達比球探 初期加入的首批會員，這個徽章會永久保留在你的帳號上，點開頭像隨時看得到。
           </p>
         </div>
         <button

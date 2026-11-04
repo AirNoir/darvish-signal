@@ -42,9 +42,9 @@ watch(
         </button>
 
         <div class="flex flex-col items-center text-center gap-4">
-          <img src="/logo.png" alt="達比 K-Zone" class="w-14 h-14 rounded-full" />
+          <img src="/logo.png" alt="達比球探" class="w-14 h-14 rounded-full" />
           <div>
-            <h2 class="text-fg-strong text-lg font-bold tracking-wide">登入達比 K-Zone</h2>
+            <h2 class="text-fg-strong text-lg font-bold tracking-wide">登入達比球探</h2>
             <p class="text-fg-secondary text-sm mt-1">登入後即可使用「我的最愛」等個人化功能</p>
           </div>
 

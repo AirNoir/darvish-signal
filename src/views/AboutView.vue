@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
             提供一款<span class="text-brand-cyan font-semibold">清晰、易讀、可自訂</span>的技術指標視覺化工具。
           </p>
           <p class="text-lg text-fg-brand-body leading-relaxed mb-10 font-noto">
-            達比 K-Zone 是三五好友為自己打造的圖表工具，將公開市場資料整合於同一介面，
+            達比球探 是三五好友為自己打造的圖表工具，將公開市場資料整合於同一介面，
             以達比修有的精準控球為靈感命名。本網站非投顧服務，所有內容均不構成投資建議。
           </p>
 
@@ -133,7 +133,7 @@ onBeforeUnmount(() => {
                 </div>
                 <div class="flex-1 text-left">
                   <div class="text-sm font-semibold text-fg-strong group-hover:text-brand-line transition-colors">LINE 社群</div>
-                  <div class="text-xs text-fg-brand-muted">達比 K-Zone 台股工具交流群</div>
+                  <div class="text-xs text-fg-brand-muted">達比球探 台股工具交流群</div>
                 </div>
               </a>
 
