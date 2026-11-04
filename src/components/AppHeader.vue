@@ -51,8 +51,8 @@ const enterApp = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
       <!-- Logo -->
       <button @click="goHome" class="flex items-center gap-2 group">
-        <img src="/logo.png" alt="達比 K-Zone" class="w-7 h-7 rounded-full" />
-        <span class="text-fg-strong font-bold text-base tracking-wide group-hover:text-accent-fg transition-colors">達比 K-Zone</span>
+        <img src="/logo.png" alt="達比球探" class="w-7 h-7 rounded-full" />
+        <span class="text-fg-strong font-bold text-base tracking-wide group-hover:text-accent-fg transition-colors">達比球探</span>
       </button>
 
       <!-- Desktop Nav -->

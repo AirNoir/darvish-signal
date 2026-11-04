@@ -16,7 +16,7 @@ const router = createRouter({
       props: {
         mapId: 'ai',
         src: '/industry-atlas/index.html',
-        pageTitle: 'AI 產業地圖｜達比 K-Zone',
+        pageTitle: 'AI 產業地圖｜達比球探',
         frameTitle: 'AI 產業地圖：互動晶片拆解、產業鏈與台灣企業'
       }
     },
@@ -27,7 +27,7 @@ const router = createRouter({
       props: {
         mapId: 'leo',
         src: '/leo-atlas/index.html',
-        pageTitle: '低軌衛星產業地圖｜達比 K-Zone',
+        pageTitle: '低軌衛星產業地圖｜達比球探',
         frameTitle: '低軌衛星產業地圖：互動衛星拆解、產業鏈與台灣企業'
       }
     },
@@ -48,7 +48,7 @@ const router = createRouter({
       props: {
         mapId: 'drone',
         src: '/industry-atlas/drone.html',
-        pageTitle: '無人機產業地圖｜達比 K-Zone',
+        pageTitle: '無人機產業地圖｜達比球探',
         frameTitle: '無人機產業地圖：產業鏈拆解與台灣企業'
       }
     },
@@ -59,7 +59,7 @@ const router = createRouter({
       props: {
         mapId: 'robot',
         src: '/industry-atlas/robot.html',
-        pageTitle: '機器人產業地圖｜達比 K-Zone',
+        pageTitle: '機器人產業地圖｜達比球探',
         frameTitle: '機器人產業地圖：產業鏈拆解與台灣企業'
       }
     },

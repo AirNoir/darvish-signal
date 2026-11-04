@@ -251,8 +251,8 @@ watch(() => store.stockId, (id) => {
     class="h-screen bg-canvas flex flex-col items-center justify-center gap-4 px-6 text-center"
     style="font-family: 'Noto Sans TC', system-ui, sans-serif;"
   >
-    <img src="/logo.png" alt="達比 K-Zone" class="w-14 h-14 rounded-full" />
-    <h1 class="text-fg-strong text-xl font-bold">登入達比 K-Zone</h1>
+    <img src="/logo.png" alt="達比球探" class="w-14 h-14 rounded-full" />
+    <h1 class="text-fg-strong text-xl font-bold">登入達比球探</h1>
     <p class="text-fg-secondary text-sm">K 線圖、技術訊號與我的最愛為會員功能，登入後即可使用</p>
     <FounderPromo class="max-w-sm" />
     <button
@@ -268,8 +268,8 @@ watch(() => store.stockId, (id) => {
     <!-- Header -->
     <header class="h-14 min-h-[56px] md:h-10 md:min-h-[40px] flex items-center px-3 border-b border-line bg-surface flex-shrink-0 gap-2">
       <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity" @click="goToHome">
-        <img src="/logo.png" alt="達比 K-Zone" class="w-7 h-7 rounded-full" />
-        <h1 class="text-sm font-semibold text-fg-strong whitespace-nowrap hidden sm:block md:hidden lg:block">達比 K-Zone</h1>
+        <img src="/logo.png" alt="達比球探" class="w-7 h-7 rounded-full" />
+        <h1 class="text-sm font-semibold text-fg-strong whitespace-nowrap hidden sm:block md:hidden lg:block">達比球探</h1>
       </div>
 
       <div v-if="latestData" class="ml-auto flex items-center gap-x-2 gap-y-0 flex-wrap justify-end min-w-0">

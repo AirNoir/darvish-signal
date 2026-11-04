@@ -44,16 +44,16 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
         <div class="mb-8 flex justify-center">
           <div class="relative">
             <div class="absolute inset-0 rounded-full blur-md opacity-60 logo-glow" style="background: var(--ds-brand-cyan);"></div>
-            <img src="/logo.png" alt="達比 K-Zone" class="relative w-24 h-24 rounded-full border-2 logo-neon-edge" />
+            <img src="/logo.png" alt="達比球探" class="relative w-24 h-24 rounded-full border-2 logo-neon-edge" />
           </div>
         </div>
 
         <!-- Main Title with Glitch -->
-        <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold mb-2 glitch-text" data-text="達比 K-Zone">
-          達比 K-Zone
+        <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold mb-2 glitch-text" data-text="達比球探">
+          達比球探
         </h1>
-        <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold mb-6 glitch-text-en" data-text="DARVISH K-ZONE">
-          DARVISH K-ZONE
+        <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold mb-6 glitch-text-en" data-text="DARVISH SCOUT">
+          DARVISH SCOUT
         </h1>
 
         <!-- Tagline -->
@@ -164,7 +164,7 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
           </p>
           <p class="text-xl md:text-2xl text-fg-brand-body leading-relaxed font-noto">
             如同他在投手丘上的<span class="text-brand-pink font-semibold neon-glow-pink">精準控球</span>，
-            達比 K-Zone 致力於將<span class="text-brand-pink font-semibold neon-glow-pink">公開市場資料</span>
+            達比球探 致力於將<span class="text-brand-pink font-semibold neon-glow-pink">公開市場資料</span>
             以清晰、可自訂的圖表方式呈現，協助使用者建立屬於自己的觀察介面。
           </p>
         </div>
@@ -423,7 +423,7 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
             <span class="text-xs text-brand-green tracking-[0.3em] uppercase">Why K-Zone</span>
             <div class="h-px w-12 bg-brand-green opacity-50"></div>
           </div>
-          <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold text-fg-strong tracking-wider">為什麼選擇達比 K-Zone？</h2>
+          <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold text-fg-strong tracking-wider">為什麼選擇達比球探？</h2>
         </div>
 
         <div class="grid md:grid-cols-2 gap-6">
@@ -513,7 +513,7 @@ const trackSocial = (platform: 'threads' | 'telegram' | 'line') => {
         </div>
         <!-- Bottom Bar -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-fg-subtle tracking-widest">
-          <span>© 2025 DARVISH K-ZONE. ALL RIGHTS RESERVED.</span>
+          <span>© 2025 DARVISH SCOUT. ALL RIGHTS RESERVED.</span>
           <span>VISUALIZATION TOOL :: NOT INVESTMENT ADVICE</span>
         </div>
       </div>

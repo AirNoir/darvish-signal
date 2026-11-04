@@ -19,7 +19,7 @@
   window.kzoneChartLink = function (c) {
     var code = encodeURIComponent(c.code);
     if (!listed || listed.has(c.code)) {
-      return '<a class="chart-link" href="/app/' + code + '" target="_top" aria-label="查看 ' + c.name + ' ' + c.code + ' 的達比訊號">查看達比訊號 <span>' + c.code + ' · K-Zone</span></a>';
+      return '<a class="chart-link" href="/app/' + code + '" target="_top" aria-label="查看 ' + c.name + ' ' + c.code + ' 的達比訊號">查看達比訊號 <span>' + c.code + ' · 達比球探</span></a>';
     }
     return '<div class="wish" data-wish-code="' + c.code + '">' +
       '<button type="button" class="wish-btn" aria-expanded="false">許願收錄 ' + c.name + ' <span>尚未收錄於達比訊號 · 告訴管理員</span></button>' +

@@ -156,4 +156,4 @@ body{font-size:1rem;line-height:1.7}
 /* 公司簡介關閉鈕：開啟時焦點落在內容區（不在 X 上），鍵盤焦點框收在按鈕內側，不會壓到對話框邊與捲軸 */
 #company-history:focus{outline:none}#history-close{z-index:2}#history-close:focus-visible,#industry-close:focus-visible{outline-offset:-2px}
 /* 版權標示：頁尾一行＋3D 舞台右下角浮水印（截圖轉傳時保留出處） */
-footer{flex-wrap:wrap}footer .copyright{display:block;flex-basis:100%;margin-top:6px;color:var(--at-subtle)}.chip-stage::after,#industry-stage::after{content:'© 達比 K-Zone · darvishkzone.com';position:absolute;right:12px;bottom:10px;z-index:1;font-size:11px;letter-spacing:.06em;color:var(--at-faint);pointer-events:none;user-select:none}
+footer{flex-wrap:wrap}footer .copyright{display:block;flex-basis:100%;margin-top:6px;color:var(--at-subtle)}.chip-stage::after,#industry-stage::after{content:'© 達比球探 · darvishkzone.com';position:absolute;right:12px;bottom:10px;z-index:1;font-size:11px;letter-spacing:.06em;color:var(--at-faint);pointer-events:none;user-select:none}
