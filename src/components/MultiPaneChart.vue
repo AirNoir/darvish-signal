@@ -408,8 +408,9 @@ onMounted(() => {
     createPointFigures: ({ overlay, coordinates }) => {
       const c = coordinates[0];
       if (!c) return [];
-      const { type } = (overlay.extendData ?? {}) as { type?: 'buy' | 'sell' | 'custom-long' | 'custom-short' };
-      // D（dip）暫停顯示；custom-long/short = 使用者自訂多方 / 空方訊號
+      const { type, pickType } = (overlay.extendData ?? {}) as { type?: 'buy' | 'sell' | 'custom-long' | 'custom-short'; pickType?: string };
+      // 達比 dip 訊號維持藍底，僅以字母 D 區隔；custom-long/short = 使用者自訂多方 / 空方訊號（無 D）
+      const isDip = type === 'buy' && pickType === 'dip';
       const down = type === 'sell' || type === 'custom-short';
       const color =
         type === 'custom-long' ? themeColor('market-up')
@@ -417,7 +418,7 @@ onMounted(() => {
         : type === 'sell' ? themeColor('chart-sell')
         : themeColor('chart-buy');
       const textColor = themeColor('fg-on-brand');
-      const label = type === 'custom-long' ? '多' : type === 'custom-short' ? '空' : type === 'sell' ? 'S' : 'B';
+      const label = type === 'custom-long' ? '多' : type === 'custom-short' ? '空' : type === 'sell' ? 'S' : isDip ? 'D' : 'B';
       const dir = down ? -1 : 1;
 
       const gap = 14;
